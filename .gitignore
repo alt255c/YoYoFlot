@@ -1,0 +1,50 @@
+# Данные
+/data/
+
+# Виртуальные окружения Python
+venv/
+.venv/
+env/
+ENV/
+
+# Бинарные и скомпилированные файлы
+*so
+*bin
+*exe
+*out
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Пакеты и сборки
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE / редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Переменные окружения и секреты
+.env
+.env.local
+*.key
+*.pem
