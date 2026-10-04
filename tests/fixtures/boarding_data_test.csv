@@ -1,0 +1,4 @@
+PassengerFirstName;PassengerSecondName;PassengerLastName;PassengerSex;PassengerBirthDate;PassengerDocument;BookingCode;TicketNumber;Baggage;FlightDate;FlightTime;FlightNumber;CodeShare;Destination
+IVAN;IVANOVICH;IVANOV;Male;01/01/1990;0012 345678;ABCDEF;000987654321;Registered;2017-01-01;10:00;SU1234;Own;Moscow
+PETR;;PETROV;Male;02/02/1980;Not presented;GHIJKL;Not presented;None;2017-01-02;11:00;SU1235;Operated;Sochi
+ANNA;ANNA;ANNOVA;Female;03/03/1975;"  9988 776655  ";MNOPQR;"  111222333444  ";Delayed;2017-01-03;12:00;SU1236;Own;Kazan
