@@ -39,7 +39,9 @@ if $PYTHON -m gdown --version &>/dev/null; then
     echo "✅ gdown уже установлен."
 else
     echo "📦 gdown не найден. Устанавливаю..."
-    $PYTHON -m pip install --upgrade gdown
+    $PYTHON -m venv venv
+    source venv/bin/activate
+    pip install --upgrade gdown
     if [ $? -ne 0 ]; then
         echo "❌ Не удалось установить gdown. Проверьте подключение к интернету и права доступа."
         exit 1
@@ -49,7 +51,7 @@ fi
 
 # Загружаем папку
 echo "⬇️  Начинаю загрузку файлов из Google Drive в $TARGET_DIR ..."
-$PYTHON -m gdown --folder "$FOLDER_URL" -O "$TARGET_DIR" --remaining-ok
+$PYTHON -m gdown --folder "$FOLDER_URL" -O "$TARGET_DIR"
 
 if [ $? -eq 0 ]; then
     echo "✅ Загрузка завершена успешно! Все файлы находятся в $TARGET_DIR"
