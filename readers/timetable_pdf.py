@@ -301,13 +301,20 @@ if __name__ == "__main__":
     ap.add_argument("--suffix", default="")
     ap.add_argument("--audit", type=int, default=None)
     ap.add_argument("--debug-page", type=int, default=None)
+    ap.add_argument(
+        "-q", "--quiet",
+        action="store_true",
+        help="Не выводить итоговую статистику в консоль",
+    )
     args = ap.parse_args()
+
     if args.audit:
         audit(args.audit)
     elif args.debug_page:
         debug_page(args.debug_page)
     else:
         run(args.limit_pages, args.suffix)
-        out = OUT_DIR if not args.suffix else PROJECT_ROOT / f"data/interim/timetable_pdf{args.suffix}"
-        report = json.loads((out / "source_report.json").read_text(encoding="utf-8"))
-        print(json.dumps(report, ensure_ascii=False, indent=2))
+        if not args.quiet:
+            out = OUT_DIR if not args.suffix else PROJECT_ROOT / f"data/interim/timetable_pdf{args.suffix}"
+            report = json.loads((out / "source_report.json").read_text(encoding="utf-8"))
+            print(json.dumps(report, ensure_ascii=False, indent=2))
