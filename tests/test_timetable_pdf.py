@@ -18,7 +18,9 @@ def build_fixture(path: Path) -> None:
     doc = pymupdf.open()
     p = doc.new_page()
     p.insert_text((72, 72), "SkyTeam Timetable", fontsize=16)
-    p.insert_text((72, 100), "Covers period: 01 Nov 2018 through 31 Jan 2019", fontsize=12)
+    p.insert_text(
+        (72, 100), "Covers period: 01 Nov 2018 through 31 Jan 2019", fontsize=12
+    )
     p = doc.new_page()
     y = 72
     for line in [
@@ -33,14 +35,27 @@ def build_fixture(path: Path) -> None:
     p = doc.new_page()
     y = 72
     for line in [
-        "01 Nov  -  02 Nov", "        56", "15:40", "09:50+1", "DL9311*", "EQV", "10H10M",
+        "01 Nov  -  02 Nov",
+        "        56",
+        "15:40",
+        "09:50+1",
+        "DL9311*",
+        "EQV",
+        "10H10M",
         "Operated by:  KLM Royal Dutch Airlines",
-        "01 Nov  -  03 Nov", "        567 15:40", "09:50+1", "KL606", "EQV", "10H10M",
+        "01 Nov  -  03 Nov",
+        "        567 15:40",
+        "09:50+1",
+        "KL606",
+        "EQV",
+        "10H10M",
     ]:
         p.insert_text((72, y), line, fontsize=10)
         y += 14
     p = doc.new_page()
-    p.insert_text((72, 72), "FROM: Zurich, SwitzerlandZRH TO: Stavanger, NorwaySVG", fontsize=10)
+    p.insert_text(
+        (72, 72), "FROM: Zurich, SwitzerlandZRH TO: Stavanger, NorwaySVG", fontsize=10
+    )
     p.insert_text((72, 100), "Consult your travel agent for details", fontsize=12)
     doc.save(str(path))
     doc.close()
@@ -64,13 +79,19 @@ def test_cover_and_rows():
     rows, cov, _errs, _carry = tp.parse_page(texts[1], 2, cover)
     assert len(rows) == 3
     r0 = rows[0]
-    assert (r0["flight_number"], r0["origin"], r0["destination"]) == ("MU2049", "HFE", "TPE")
+    assert (r0["flight_number"], r0["origin"], r0["destination"]) == (
+        "MU2049",
+        "HFE",
+        "TPE",
+    )
     assert (r0["departure_local"], r0["arrival_local"]) == ("08:40", "11:10")
     assert r0["arrival_day_offset"] is None
     assert r0["days_of_week"] == "1234567"
     assert (r0["valid_from"], r0["valid_to"]) == ("2018-11-01", "2019-01-31")
     assert r0["section_source"] == "page"
-    assert rows[1]["codeshare_mark"] and rows[1]["operated_by"] == "China Eastern Airlines"
+    assert (
+        rows[1]["codeshare_mark"] and rows[1]["operated_by"] == "China Eastern Airlines"
+    )
     assert rows[2]["days_of_week"] == "12456"
     assert cov["type"] == "table"
 
