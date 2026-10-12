@@ -1,0 +1,27 @@
+{
+  "source_id": "sirena_fixed",
+  "input_path": "/workspace/scratch/45cb65ef93ca/YoYoFlot/tests/fixtures/sirena.tab",
+  "sha256": "defaaaf2133ba6bf77580182b6b6eccf88f2a4092d47640e975cabcaaf0dda43",
+  "contract_version": "1.0",
+  "reader_version": "1.0",
+  "options": {
+    "batch_size": 2,
+    "columns": "tests/fixtures/sirena_columns.yaml"
+  },
+  "status": "complete",
+  "configuration_sha256": "b43275e6dfcfd3b279ae3798fba0fa204397358ce00f0032497d3d33167dec27",
+  "counts": {
+    "provenance": 4,
+    "identifiers": 2,
+    "person_observations": 1,
+    "travel_observations": 1,
+    "schedules": 0,
+    "errors": 0
+  },
+  "input_counts": {
+    "input_rows": 1
+  },
+  "error_severities": {},
+  "seconds": 0.012170767000498017,
+  "process_peak_rss_mib": 89.796875
+}

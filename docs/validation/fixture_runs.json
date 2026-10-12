@@ -1,0 +1,227 @@
+{
+  "python": "3.12.14",
+  "scope": "synthetic_fixture_only",
+  "reports": {
+    "boarding_csv": {
+      "source_id": "boarding_csv",
+      "input_path": "tests/fixtures/boarding.csv",
+      "sha256": "30f34db51a5180b218f8395788f26a6163b02ceef86af77fabc15c4d3ee78dbd",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 2,
+        "encoding": "utf-8-sig"
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 4,
+        "identifiers": 2,
+        "person_observations": 1,
+        "travel_observations": 1,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "input_rows": 1
+      },
+      "error_severities": {},
+      "seconds": 0.009600933000911027,
+      "process_peak_rss_mib": 70.13671875,
+      "scope": "synthetic_fixture_only"
+    },
+    "forum_json": {
+      "source_id": "forum_json",
+      "input_path": "tests/fixtures/forum.json",
+      "sha256": "40a94cb314d2160e1e6f0947c7a88cf95d9bc6845931db78c48fb334d298f8a6",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 2
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 9,
+        "identifiers": 4,
+        "travel_observations": 3,
+        "person_observations": 2,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "profiles": 2,
+        "documents": 2,
+        "document_containers": 1,
+        "cards": 2,
+        "flights": 3
+      },
+      "error_severities": {},
+      "seconds": 0.01360400799967465,
+      "process_peak_rss_mib": 87.3984375,
+      "scope": "synthetic_fixture_only"
+    },
+    "pointz_xml": {
+      "source_id": "pointz_xml",
+      "input_path": "tests/fixtures/pointz.xml",
+      "sha256": "82c2ec1ad27f93eac982585842fa49470772a7661beb1103286bd4afea9df11c",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 2
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 5,
+        "identifiers": 2,
+        "person_observations": 2,
+        "travel_observations": 1,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "users": 2,
+        "cards": 2,
+        "activities": 1
+      },
+      "error_severities": {},
+      "seconds": 0.00974374900033581,
+      "process_peak_rss_mib": 87.6484375,
+      "scope": "synthetic_fixture_only"
+    },
+    "sirena_fixed": {
+      "source_id": "sirena_fixed",
+      "input_path": "tests/fixtures/sirena.tab",
+      "sha256": "defaaaf2133ba6bf77580182b6b6eccf88f2a4092d47640e975cabcaaf0dda43",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 2,
+        "columns": "tests/fixtures/sirena_columns.yaml"
+      },
+      "status": "complete",
+      "configuration_sha256": "b43275e6dfcfd3b279ae3798fba0fa204397358ce00f0032497d3d33167dec27",
+      "counts": {
+        "provenance": 4,
+        "identifiers": 2,
+        "person_observations": 1,
+        "travel_observations": 1,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "input_rows": 1
+      },
+      "error_severities": {},
+      "seconds": 0.012170767000498017,
+      "process_peak_rss_mib": 89.796875,
+      "scope": "synthetic_fixture_only"
+    },
+    "skyteam_yaml": {
+      "source_id": "skyteam_yaml",
+      "input_path": "tests/fixtures/skyteam.yaml",
+      "sha256": "a6e32e07d68a15db1f810651bc175c52c3e425b7f927b0367363a1a3d8e129a6",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 2
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 6,
+        "person_observations": 2,
+        "identifiers": 2,
+        "travel_observations": 2,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "flights": 1,
+        "cards": 2
+      },
+      "error_severities": {},
+      "seconds": 0.010463834001711803,
+      "process_peak_rss_mib": 89.796875,
+      "scope": "synthetic_fixture_only"
+    },
+    "boardingpass_xlsx": {
+      "source_id": "boardingpass_xlsx",
+      "input_path": "tests/fixtures/boardingpass.zip",
+      "sha256": "0b771e526ba8489145bc3518d2f7250cb9c801c05daaef0afec6d0eb052aee34",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 2
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 3,
+        "person_observations": 1,
+        "identifiers": 1,
+        "travel_observations": 1,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "workbooks": 1,
+        "sheets": 2,
+        "input_rows": 1
+      },
+      "error_severities": {},
+      "seconds": 0.013058256001386326,
+      "process_peak_rss_mib": 89.796875,
+      "scope": "synthetic_fixture_only"
+    },
+    "timetable_pdf": {
+      "status": "complete",
+      "source_id": "timetable_pdf",
+      "output_path": "/workspace/scratch/45cb65ef93ca/YoYoFlot/data/interim/demo/timetable_pdf",
+      "sha256": "0df448a0135f4853a503b729e29ea4f27ce86cbc7b0342749727fd7f33da0c27",
+      "counts": {
+        "schedules": 5,
+        "provenance": 5,
+        "person_observations": 0,
+        "identifiers": 0,
+        "travel_observations": 0,
+        "errors": 0
+      },
+      "pages": 4,
+      "total_pages": 4,
+      "rows": 5,
+      "rows_ok": 5,
+      "pages_by_type": {
+        "cover": 1,
+        "table": 1,
+        "continuation": 1,
+        "consult": 1
+      },
+      "errors": 0,
+      "excluded_pages": 0,
+      "extraction_errors": 0,
+      "ocr_enabled": false,
+      "ocr_pages": 0,
+      "baseline_comparison": null,
+      "seconds": 0.00874752499976239,
+      "cover_period": [
+        [
+          1,
+          11,
+          2018
+        ],
+        [
+          31,
+          1,
+          2019
+        ]
+      ],
+      "cover_period_raw": "Covers period: 01 Nov 2018 through 31 Jan 2019",
+      "contract_version": "1.0",
+      "limitations": [
+        "Schedule validity must be compared to passenger dates in T11; never extrapolate historic routes.",
+        "Missing +N marker leaves arrival_day_offset null.",
+        "OCR requires separately installed Tesseract; unknown page templates block acceptance."
+      ],
+      "pages_per_min": 27436.33199179415,
+      "process_peak_rss_mib": 106.05859375,
+      "scope": "synthetic_fixture_only"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "source_id": "boardingpass_xlsx",
+  "input_path": "/workspace/scratch/45cb65ef93ca/YoYoFlot/tests/fixtures/boardingpass.zip",
+  "sha256": "0b771e526ba8489145bc3518d2f7250cb9c801c05daaef0afec6d0eb052aee34",
+  "contract_version": "1.0",
+  "reader_version": "1.0",
+  "options": {
+    "batch_size": 2
+  },
+  "status": "complete",
+  "counts": {
+    "provenance": 3,
+    "person_observations": 1,
+    "identifiers": 1,
+    "travel_observations": 1,
+    "schedules": 0,
+    "errors": 0
+  },
+  "input_counts": {
+    "workbooks": 1,
+    "sheets": 2,
+    "input_rows": 1
+  },
+  "error_severities": {},
+  "seconds": 0.013058256001386326,
+  "process_peak_rss_mib": 89.796875
+}

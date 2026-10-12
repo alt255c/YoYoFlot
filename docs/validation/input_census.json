@@ -1,0 +1,96 @@
+{
+  "scope": "real_inputs",
+  "files": {
+    "BoardingData.csv": {
+      "bytes": 19178467,
+      "sha256": "9ba2c4be763f5c51b38f99e84e86b68737ba3dc0cfab00b498a9d3de029b053f"
+    },
+    "PointzAggregator-AirlinesData.xml": {
+      "bytes": 146242307,
+      "sha256": "71559a60837468731f8baa71c1ab9680a2248930ce9f476b6bf13aae6ad9a880"
+    },
+    "Sirena-export-fixed.tab": {
+      "bytes": 56128294,
+      "sha256": "45c56c0f0c1f146468006788b7727dfd77d7222d9b34b3ad15fec208720cb261"
+    },
+    "SkyTeam-Exchange.yaml": {
+      "bytes": 163560839,
+      "sha256": "ce4e47a2ba6f3db6fca0e86f603de032d0b32e5e20f613b638dafee11b6ad2a9"
+    },
+    "YourBoardingPassDotAero.zip": {
+      "bytes": 277220766,
+      "sha256": "b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6"
+    },
+    "FrequentFlyerForum-Profiles.json": {
+      "bytes": 567508577,
+      "sha256": "3370f67664dfb2bf790ec343e971ffac95e42c0dd175c1b27037bac5868b1e8c"
+    }
+  },
+  "boarding_csv": {
+    "header": [
+      "PassengerFirstName",
+      "PassengerSecondName",
+      "PassengerLastName",
+      "PassengerSex",
+      "PassengerBirthDate",
+      "PassengerDocument",
+      "BookingCode",
+      "TicketNumber",
+      "Baggage",
+      "FlightDate",
+      "FlightTime",
+      "FlightNumber",
+      "CodeShare",
+      "Destination"
+    ],
+    "records": 155148,
+    "blank": 1,
+    "valid_width": 155147
+  },
+  "pointz_xml": {
+    "activity": 436090,
+    "card": 88818,
+    "user": 66657,
+    "programmes": {
+      "Flying Blue": 22348,
+      "Korean Air SKYPASS": 22284,
+      "Delta SkyMiles": 22071,
+      "Aeroflot Bonus": 22115
+    }
+  },
+  "sirena_fixed": {
+    "header": "PaxName                                                     PaxBirthDateDepartDate  DepartTime  ArrivalDate ArrivalTime FlightCodeShFrom  Dest  Code  e-Ticket          TravelDoc   Seat  Meal  TrvClsFare  Baggage     PaxAdditionalInfo                                           AgentInfo                                                   ",
+    "lengths": {
+      "336": 155757
+    },
+    "rows": 155757
+  },
+  "boardingpass_xlsx": {
+    "members": 366,
+    "books": 366,
+    "largest_workbook": "YourBoardingPassDotAero-2017-12-17.xlsx",
+    "largest_uncompressed_bytes": 2035031,
+    "sheets": 615771
+  },
+  "forum_json": {
+    "profiles": 66592,
+    "flights": 1308987,
+    "cards": 88827,
+    "document_containers": 66592,
+    "empty_document_containers": 66592
+  },
+  "skyteam_yaml": {
+    "dates": 366,
+    "flights": 1270920,
+    "cards": 1687053,
+    "status_values": {
+      "LANDED": 1270920
+    },
+    "card_programme_codes": {
+      "FB": 423551,
+      "KE": 424467,
+      "SU": 419681,
+      "DT": 419354
+    }
+  }
+}
