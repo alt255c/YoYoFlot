@@ -1,0 +1,10 @@
+# File names verified against the individually uploaded real sources.
+version: 1
+sources:
+  boarding_csv: {file: BoardingData.csv, reader: boarding_csv, encoding: utf-8-sig}
+  forum_json: {file: FrequentFlyerForum-Profiles.json, reader: forum_json}
+  pointz_xml: {file: PointzAggregator-AirlinesData.xml, reader: pointz_xml}
+  sirena_fixed: {file: Sirena-export-fixed.tab, reader: sirena_fixed, columns: configs/sirena_columns.yaml}
+  skyteam_yaml: {file: SkyTeam-Exchange.yaml, reader: skyteam_yaml}
+  boardingpass_xlsx: {file: YourBoardingPassDotAero.zip, reader: boardingpass_xlsx}
+  timetable_pdf: {file: Skyteam_Timetable.pdf, reader: timetable_pdf}
