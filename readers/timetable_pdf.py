@@ -53,10 +53,7 @@ def main(argv=None):
     if not args.quiet:
         print((args.output / "summary.txt").read_text(encoding="utf-8"), end="", flush=True)
     return (
-        0
-        if report["pages"] == report["total_pages"]
-        and (report.get("baseline_comparison") or {}).get("missing_legacy_rows", 0) == 0
-        else 1
+        0 if report.get("status") == "complete" else 1
     )
 
 
