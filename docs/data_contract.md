@@ -114,7 +114,12 @@ process_peak_rss_mib — пик процесса, включая импорт б
 travel_geography, schedule_geography, schedule_links и place_inventory.
 Авторитетные дополнительные Arrow-схемы — `normalize/geography.py` (META,
 EXTRA_FIELDS, LINK_SCHEMA, INVENTORY_SCHEMA); правила — `normalize/airports.py`.
-Metadata этих файлов: geography_contract_version=1.0, rule_version=airports:1.0.
+Metadata этих файлов: geography_contract_version=1.0, rule_version=airports:1.1.
+В правилах 1.1 проверенные варианты страны при явном коде аэропорта имеют
+status=corrected, reason=verified_country_alias. В *_override_json сохраняется
+объект с country_aliases (массив полных правил); при совместном исправлении
+кода исходное правило находится в airport_override. Без country alias формат
+прежнего одиночного правила сохраняется. Базовая Arrow-схема не изменилась.
 
 Все исходные колонки сохраняют типы и значения; дополнительные колонки T12
 пропускаются через pa.unify_schemas при совместимых типах. Неизвестная форма
@@ -135,3 +140,32 @@ UTC остаётся null при недостаточной точности, DS
 и сохраняют признаки качества/происхождение. Для дневного исходного наблюдения
 выведенные расписанием часы нельзя считать фактом посадки или основанием точного
 совместного события. Полные правила, знаменатели покрытия и запуск — geography.md.
+
+## Дополнение T12: canonical 1.0
+
+Авторитетные схемы — `normalize/canonical.py::SCHEMAS`, версии правил — values.py
+и configs/normalization.yaml. Это отдельный контракт canonical_contract_version=1.0;
+таблицы и версия readers T04 остаются неизменными. Наблюдения людей переименованы
+в observations, ключ observation_id сохранён. provenance.entity_table отражает
+канонические имена, исходное имя доступно в source_values_json.
+
+Обязательны строковые PK/source_id/source_record_id/locator и observation_id
+дочернего идентификатора/поездки. Неключевые поля nullable: несовместимое значение
+не удаляет профиль, а становится null с normalization_errors и сохранённым
+оригиналом. Исходные корректно типизированные raw/JSON-колонки остаются без
+изменений. Нормализация имени/идентификатора создаёт дополнительные представления;
+даты и precision проверяются по источнику и сохраняют исходную точность.
+
+source_values_json восстанавливает изменённые базовые поля; дополнительные поля
+входа сохраняются с префиксом extra:. normalization_rules_json указывает правила
+затронутых полей; normalization_version + config_sha256 фиксируют рецепт.
+transformation_log содержит числа принятых затронутых строк и примеры до/после;
+поле exceptions считает ошибки, а не исключённые профили. errors readers и
+normalization_errors разделены. orphan-reference не исчезает без следа.
+
+Повтор PK с полностью одинаковыми значениями удаляется; противоречащие копии
+одного PK — ошибка сборки. Разные исходные PK не объединяются по похожести.
+T13 получает все межисточниковые свидетельства, namespace и качество; новые
+person_id и segment_id в T12 не назначаются. Для каждой сущности и source_id
+сохраняется баланс input_rows=output_rows+duplicates_removed.
+Правила, запуск, namespace и ограничения — transformations.md.

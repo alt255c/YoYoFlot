@@ -8,3 +8,61 @@ version: '1.0'
 #   reason: 'Explicit airport name, not Moscow city'
 #   evidence: 'Reviewed source record / locator and airport reference'
 airport_overrides: []
+
+# Reviewed against the supplied real inventory and the pinned airport reference.
+# Applies ONLY to a named Country field accompanying an explicit reference code.
+# Does not turn a city/country into an airport or suppress a real country conflict.
+# Truncated/ambiguous United, Ko, Mold, Co and Dominican deliberately have no rule.
+# Audit, input hashes and remaining issues: docs/validation/t11_real_inventory_review.md
+country_aliases:
+  - source_id: forum_json
+    original: Russian Federation
+    target_country: Russia
+    reason: Equivalent country name; retain the explicit airport code.
+    evidence: 'UN M49 country 643/RUS, https://unstats.un.org/unsd/methodology/m49/; reviewed inventory and OpenFlights snapshot.'
+  - source_id: forum_json
+    original: Russian
+    target_country: Russia
+    reason: Reviewed truncated Russian Federation label; requires an explicit airport code in Russia.
+    evidence: 'docs/validation/t11_real_inventory_review.md; UN M49 643/RUS, https://unstats.un.org/unsd/methodology/m49/.'
+  - source_id: forum_json
+    original: United States of America
+    target_country: United States
+    reason: Equivalent country name; retain the explicit airport code.
+    evidence: 'UN M49 country 840/USA, https://unstats.un.org/unsd/methodology/m49/; reviewed inventory and OpenFlights snapshot.'
+  - source_id: forum_json
+    original: United States of
+    target_country: United States
+    reason: Reviewed truncated United States of America label; requires an explicit airport code in the United States.
+    evidence: 'docs/validation/t11_real_inventory_review.md; UN M49 840/USA, https://unstats.un.org/unsd/methodology/m49/.'
+  - source_id: forum_json
+    original: Spain and Canary Islands
+    target_country: Spain
+    reason: The source label includes the Canary Islands within Spain; retain the explicit airport code.
+    evidence: 'EU outermost regions, Canary Islands (Spain), https://www.europarl.europa.eu/factsheets/en/sheet/100/outermost-regions-ors-; reviewed inventory.'
+  - source_id: forum_json
+    original: Spain and Canary
+    target_country: Spain
+    reason: Reviewed truncated Spain and Canary Islands label; requires an explicit airport code in Spain.
+    evidence: 'docs/validation/t11_real_inventory_review.md; https://www.europarl.europa.eu/factsheets/en/sheet/100/outermost-regions-ors-.'
+  - source_id: forum_json
+    original: Spain and
+    target_country: Spain
+    reason: Reviewed truncated Spain and Canary Islands label; requires an explicit airport code in Spain.
+    evidence: 'docs/validation/t11_real_inventory_review.md; https://www.europarl.europa.eu/factsheets/en/sheet/100/outermost-regions-ors-.'
+  - source_id: forum_json
+    original: Myanmar
+    target_country: Burma
+    reference_name_variant: true
+    reason: Reference uses the former name of Myanmar; this changes the context label only.
+    evidence: 'UN M49 recent changes, Myanmar previously Burma, country 104, https://unstats.un.org/unsd/methodology/m49/.'
+  - source_id: forum_json
+    original: "Lao People's"
+    target_country: Laos
+    reason: Reviewed truncated Lao People's Democratic Republic label; requires an explicit airport code in Laos.
+    evidence: 'docs/validation/t11_real_inventory_review.md; UN M49 418/LAO, https://unstats.un.org/unsd/methodology/m49/.'
+  - source_id: forum_json
+    original: Turks and Caicos
+    target_country: Turks and Caicos Islands
+    reason: Reviewed abbreviated country label; retain the explicit airport code.
+    evidence: 'UN M49 country 796/TCA, https://unstats.un.org/unsd/methodology/m49/; reviewed inventory.'

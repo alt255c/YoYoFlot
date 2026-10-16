@@ -1,0 +1,48 @@
+{
+  "scope": "synthetic_only_linux_no_windows_timing",
+  "input": {
+    "schedules": 100000,
+    "travels": 40000,
+    "flight_numbers": 5000,
+    "random_sha256_keys": true,
+    "batch_size": 2000
+  },
+  "before_seconds": [
+    14.6126,
+    14.3109
+  ],
+  "after_seconds": [
+    5.5964,
+    5.3912
+  ],
+  "before_median": 14.4618,
+  "after_median": 5.4938,
+  "speedup": 2.632,
+  "equivalence": {
+    "travel_geography.parquet": {
+      "rows": 40000,
+      "all_fields_equal": true
+    },
+    "schedule_geography.parquet": {
+      "rows": 100000,
+      "all_fields_equal": true
+    },
+    "schedule_links.parquet": {
+      "rows": 80000,
+      "all_fields_equal": true
+    },
+    "place_inventory.parquet": {
+      "rows": 35,
+      "all_fields_equal": true
+    }
+  },
+  "pytest": {
+    "tests": 143,
+    "failures": 0
+  },
+  "notes": [
+    "No cProfile in reported timing runs.",
+    "All 4 Parquet tables compared by Arrow values and schema, including order and evidence JSON.",
+    "Full user dataset and native Windows were unavailable."
+  ]
+}

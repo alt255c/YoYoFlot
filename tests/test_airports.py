@@ -83,6 +83,113 @@ def test_overrides_require_auditable_reason(reference,tmp_path):
     with pytest.raises(ValueError):AirportReference(reference.path,path)
 
 
+def country_alias_reference(reference, tmp_path, **changes):
+    rule = dict(source_id='forum_json', original='Country Republic', target_country='Country',
+                reason='Reviewed alternate country label', evidence='review:country-label')
+    rule.update(changes)
+    path = tmp_path/'country_aliases.yaml'
+    path.write_text(yaml.safe_dump(dict(version='1.0', country_aliases=[rule])), encoding='utf-8')
+    return AirportReference(reference.path, path)
+
+
+@pytest.mark.parametrize('field', ['Airport', 'airport', 'IATA', 'ICAO', 'AirportCode'])
+def test_country_alias_keeps_explicit_code_and_records_provenance(reference, tmp_path, field):
+    ref = country_alias_reference(reference, tmp_path)
+    raw = json.dumps({field: 'AAAA' if field == 'ICAO' else 'AAA',
+                      'Country': 'Country Republic'})
+    place = ref.resolve(raw, 'forum_json')
+    assert (place['status'], place['iata'], place['country']) == ('corrected', 'AAA', 'Country')
+    assert place['raw'] == raw and place['reason'] == 'verified_country_alias'
+    rule = json.loads(place['rule_id'])['country_aliases'][0]
+    assert rule['original'] == 'Country Republic' and rule['target_country'] == 'Country'
+    assert rule['reason'] and rule['evidence']
+    assert ref.resolve(raw, 'boarding_csv')['airport_id'] is None
+
+
+def test_country_alias_does_not_guess_or_override_conflicts(reference, tmp_path):
+    ref = country_alias_reference(reference, tmp_path)
+    for obj in [dict(City='Metro', Country='Country Republic'),
+                dict(City='Village', Country='Country Republic'),
+                dict(Airport='DDD', Country='Country Republic'),
+                dict(IATA='AAA', ICAO='CCCC', Country='Country Republic'),
+                dict(IATA='AAA', City='Coast', Country='Country Republic'),
+                dict(Airport='AAA', Country='Country Republic', country='Other')]:
+        assert ref.resolve(json.dumps(obj), 'forum_json')['airport_id'] is None
+
+
+@pytest.mark.parametrize('field', ['Airport', 'IATA'])
+def test_blank_country_is_missing_context(reference, field):
+    for value in ['', '  ', None]:
+        place = reference.resolve(json.dumps({field: 'AAA', 'Country': value}))
+        assert (place['status'], place['iata']) == ('exact', 'AAA')
+
+
+@pytest.mark.parametrize('change', [dict(reason=''), dict(evidence=''),
+                                  dict(target_country='Absent'), dict(original='Other')])
+def test_country_aliases_reject_invalid_or_contradictory_rules(reference, tmp_path, change):
+    with pytest.raises(ValueError):
+        country_alias_reference(reference, tmp_path, **change)
+
+
+def test_country_aliases_reject_duplicates(reference, tmp_path):
+    ref = country_alias_reference(reference, tmp_path)
+    path = tmp_path/'country_aliases.yaml'
+    config = yaml.safe_load(path.read_text())
+    config['country_aliases'] *= 2
+    path.write_text(yaml.safe_dump(config))
+    with pytest.raises(ValueError, match='Duplicate country alias'):
+        AirportReference(ref.path, path)
+
+
+def test_reviewed_reference_country_variant_preserves_literal_match(reference, tmp_path):
+    ref = country_alias_reference(reference, tmp_path, original='Other', reference_name_variant=True)
+    literal = ref.resolve('{"Airport":"DDD","Country":"Other"}', 'forum_json')
+    alternate = ref.resolve('{"Airport":"AAA","Country":"Other"}', 'forum_json')
+    assert (literal['status'], literal['iata'], literal['rule_id']) == ('exact', 'DDD', None)
+    assert (alternate['status'], alternate['iata']) == ('corrected', 'AAA')
+
+
+def test_country_alias_cannot_choose_between_duplicate_reference_codes(reference, tmp_path):
+    records = list(csv.DictReader(reference.path.open(encoding='utf-8')))
+    records[3]['iata'] = 'AAA'
+    path = tmp_path/'duplicate_codes.csv'
+    with path.open('w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=list(records[0]))
+        writer.writeheader(); writer.writerows(records)
+    ref = country_alias_reference(AirportReference(path), tmp_path)
+    place = ref.resolve('{"Airport":"AAA","Country":"Country Republic"}', 'forum_json')
+    assert place['airport_id'] is None
+
+
+@pytest.mark.parametrize('obj,expected', [
+    (dict(City='Moscow', Airport='SVO', Country='Russian Federation'), 'SVO'),
+    (dict(City='Saint Petersburg', Airport='LED', Country='Russian'), 'LED'),
+    (dict(City='Atlanta GA', Airport='ATL', Country='United States of'), 'ATL'),
+    (dict(City='Boise ID', Airport='BOI', Country='United States of America'), 'BOI'),
+    (dict(City='Madrid', Airport='MAD', Country='Spain and Canary Islands'), 'MAD'),
+    (dict(City='Barcelona', Airport='BCN', Country='Spain and Canary'), 'BCN'),
+    (dict(City='Palma De Mallorca', Airport='PMI', Country='Spain and'), 'PMI'),
+    (dict(City='Mandalay', Airport='MDL', Country='Myanmar'), 'MDL'),
+    (dict(City='Vientiane', Airport='VTE', Country="Lao People's"), 'VTE'),
+    (dict(City='Providenciales', Airport='PLS', Country='Turks and Caicos'), 'PLS'),
+    (dict(City='Samarkand International', Airport='SKD', Country=''), 'SKD'),
+    (dict(City='Seoul', Airport='rea', Country='Ko'), None),
+    (dict(City='Chisinau', Airport='ova', Country='Mold'), None),
+    (dict(City='Kinshasa', Airport='ngo', Country='Co'), None),
+    (dict(City='Qinhuangdao', Airport='BPE', Country='China'), None),
+    (dict(City='Debre Tabor', Airport='DTB', Country='Ethiopia'), None),
+    (dict(City='Asheville/Hendersonv. NC', Airport='AVL', Country='United'), None),
+    (dict(City='Moscow', Airport='SVO', Country='United States of'), None),
+])
+def test_reviewed_real_country_context(obj, expected):
+    root = Path(__file__).resolve().parents[1]
+    ref = AirportReference(root/'data/reference/airports.csv', root/'configs/airports_overrides.yaml')
+    place = ref.resolve(json.dumps(obj), 'forum_json')
+    assert place['iata'] == expected
+    if expected and obj['Country']:
+        assert place['status'] == 'corrected' and place['rule_id']
+
+
 @pytest.mark.parametrize('raw,expected', [('AB 00123','AB123'),('AB123*','AB123'),('XY123','XY123'),
                                          ('123',None),('1',None),('*',None),('AB12A','AB12A')])
 def test_flight_numbers(raw,expected):
@@ -212,6 +319,26 @@ def input_tables(path, travels, schedules):
     pq.write_table(pa.Table.from_pylist(travels,schema=SCHEMAS['travel_observations']),path/'travel_observations.parquet')
     pq.write_table(pa.Table.from_pylist(schedules,schema=SCHEMAS['schedules']),path/'schedules.parquet')
     (path/'source_report.json').write_text(json.dumps(dict(status='complete',counts={'schedules':len(schedules)})))
+
+
+def test_country_alias_pipeline_keeps_raw_values_provenance_and_quality(reference, tmp_path):
+    ref = country_alias_reference(reference, tmp_path)
+    inp, out = tmp_path/'input', tmp_path/'output'
+    row = travel()
+    raw = '{"Airport":"AAA","Country":"Country Republic"}'
+    row.update(source_id='forum_json', origin_raw=raw, destination_raw='BBB')
+    input_tables(inp, [row], [])
+    report, _ = run([inp], out, ref.path, overrides=tmp_path/'country_aliases.yaml')
+    derived = pq.read_table(out/'travel_geography.parquet').to_pylist()[0]
+    assert derived['origin_raw'] == raw and derived['origin_iata'] == 'AAA'
+    assert derived['origin_status'] == 'corrected' and derived['geography_complete']
+    assert derived['departure_utc'] is None and derived['departure_utc_status'] == 'incomplete_datetime'
+    assert json.loads(derived['origin_override_json'])['country_aliases'][0]['evidence']
+    counts = report['by_source']['forum_json']['counts']
+    assert counts['places_exact'] == counts['places_corrected'] == 1
+    assert counts['places_total'] == 2
+    inventory = pq.read_table(out/'place_inventory.parquet').to_pylist()
+    assert next(p for p in inventory if p['field'] == 'origin_raw')['status'] == 'corrected'
 
 
 def test_pipeline_balances_lineage_and_preserves_t12(reference,tmp_path):
@@ -409,3 +536,9 @@ def test_arrow_passthrough_keeps_raw_and_t12_columns(reference,tmp_path):
     derived=pq.read_table(out/'travel_geography.parquet')
     for name in source.column_names:
         assert derived[name].equals(source[name]),name
+
+
+def test_invalid_source_arrival_is_not_repaired_as_missing(reference,tmp_path):
+    row=travel(arrival_local=None,arrival_raw='invalid date',arrival_precision='invalid')
+    out,_=enrich(reference,tmp_path,row,[schedule()])
+    assert out['arrival_effective_local'] is None and out['arrival_utc'] is None

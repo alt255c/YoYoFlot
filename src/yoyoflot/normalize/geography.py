@@ -45,7 +45,7 @@ def rows(path, batch_size=2000):
         yield batch.to_pylist()
 
 
-TRAVEL_WORK_FIELDS = ('travel_id','source_id','source_record_id','locator','flight_number','carrier',
+TRAVEL_WORK_FIELDS = ('travel_id','source_id','source_record_id','locator','flight_number','flight_number_normalized','normalization_rules_json','carrier',
     'codeshare','origin_raw','destination_raw','departure_local','departure_precision','departure_timezone',
     'arrival_local','arrival_precision','arrival_timezone')
 SCHEDULE_WORK_FIELDS = ('schedule_id','source_id','source_record_id','locator','flight_number','origin','destination',

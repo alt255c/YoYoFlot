@@ -20,7 +20,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import yaml
 
-RULE_VERSION = 'airports:1.0'
+RULE_VERSION = 'airports:1.1'
 FLIGHT_RE = re.compile(r'([A-Z0-9]{2}|[A-Z]{3})\s*0*(\d{1,5})([A-Z]?)')
 ISO_DATE = re.compile(r'\d{4}-\d{2}-\d{2}')
 ISO_DATETIME = re.compile(r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})?')
@@ -82,6 +82,7 @@ class AirportReference:
                 self.cities[key(row['city'])].add(aid)
                 self.countries.add(key(row['country']))
         self.overrides = {}
+        self.country_aliases = {}
         self.overrides_sha256 = digest(overrides) if overrides else None
         if overrides:
             config = yaml.safe_load(Path(overrides).read_text(encoding='utf-8'))
@@ -101,6 +102,51 @@ class AirportReference:
                 if slot in self.overrides:
                     raise ValueError('Duplicate airport override')
                 self.overrides[slot] = dict(rule, airport_id=target['airport_id'])
+            for rule in config.get('country_aliases', []):
+                if not isinstance(rule, dict) or not all(
+                        isinstance(rule.get(k), str) and rule[k].strip() for k in
+                        ('source_id', 'original', 'target_country', 'reason', 'evidence')):
+                    raise ValueError('Country aliases require source, original, target, reason and evidence')
+                original, target = key(rule['original']), key(rule['target_country'])
+                if target not in self.countries:
+                    raise ValueError('Country alias target must exist in the airport reference')
+                if ('reference_name_variant' in rule and
+                        not isinstance(rule['reference_name_variant'], bool)):
+                    raise ValueError('reference_name_variant must be boolean')
+                if original == target or (original in self.countries and
+                                           not rule.get('reference_name_variant', False)):
+                    raise ValueError('Country alias must not replace an existing reference country')
+                slot = (rule['source_id'], original)
+                if slot in self.country_aliases:
+                    raise ValueError('Duplicate country alias')
+                self.country_aliases[slot] = dict(rule)
+
+    def _country_context(self, ids, obj, source_id, explicit_code=False):
+        """Check context; aliases can validate an explicit code, never choose one."""
+        ids, applied = set(ids), []
+        for field in ('Country', 'country'):
+            value = obj.get(field)
+            if not isinstance(value, str) or not value.strip():
+                continue
+            token = key(value)
+            rule = (self.country_aliases.get((source_id, token)) or
+                    self.country_aliases.get(('*', token))) if explicit_code else None
+            exact = {aid for aid in ids if key(self.airports[aid]['country']) == token}
+            aliased = {aid for aid in ids if key(self.airports[aid]['country']) ==
+                       key(rule['target_country'])} if rule else set()
+            ids = exact | aliased
+            if aliased and rule not in applied:
+                applied.append(rule)
+        return ids, applied if ids else []
+
+    @staticmethod
+    def _record_country_aliases(result, applied):
+        if applied:
+            rules = {'country_aliases': applied}
+            if result['rule_id']:
+                rules['airport_override'] = json.loads(result['rule_id'])
+            result.update(status='corrected', reason='verified_country_alias', rule_id=json_text(rules))
+        return result
 
     def resolve(self, raw, source_id='*'):
         return self._resolve(raw, source_id).copy()
@@ -131,12 +177,17 @@ class AirportReference:
                     result['reason'] = 'conflicting_location_codes'
                     return result
                 resolved = parts[0]
-                for field, aliases in [('city', ('City', 'city')), ('country', ('Country', 'country'))]:
-                    supplied = [obj[k] for k in aliases if isinstance(obj.get(k), str)]
-                    if any(key(v) != key(resolved[field]) for v in supplied):
-                        result['reason'] = 'conflicting_location_context'
-                        return result
-                return dict(resolved, raw=raw)
+                supplied_cities = [obj[k] for k in ('City', 'city')
+                                   if isinstance(obj.get(k), str) and obj[k].strip()]
+                if any(key(v) != key(resolved['city']) for v in supplied_cities):
+                    result['reason'] = 'conflicting_location_context'
+                    return result
+                ids, applied = self._country_context(ids, obj, source_id,
+                    explicit_code=all(len(self.codes.get(key(v), ())) == 1 for v in code_values))
+                if not ids:
+                    result['reason'] = 'conflicting_location_context'
+                    return result
+                return self._record_country_aliases(dict(resolved, raw=raw), applied)
             value = next((obj[k] for k in ('Airport', 'airport', 'City', 'city', 'Country', 'country')
                           if isinstance(obj.get(k), str) and obj[k].strip()), '')
             if not value:
@@ -159,10 +210,10 @@ class AirportReference:
             return result
         else:
             return result
+        applied = []
         if isinstance(obj, dict):
-            countries = [obj[k] for k in ('Country', 'country') if isinstance(obj.get(k), str)]
-            if countries:
-                ids = {a for a in ids if all(key(self.airports[a]['country']) == key(c) for c in countries)}
+            ids, applied = self._country_context(ids, obj, source_id,
+                                                explicit_code=len(self.codes.get(token, ())) == 1)
         result['candidates'] = tuple(sorted(ids))
         if len(ids) != 1:
             result.update(status='ambiguous' if ids else 'unresolved', reason='multiple_airports' if ids else 'context_conflict')
@@ -170,7 +221,7 @@ class AirportReference:
         airport = self.airports[next(iter(ids))]
         result.update({k: airport[k] for k in ('airport_id', 'iata', 'city', 'country', 'latitude', 'longitude', 'timezone')})
         result.update(status=status, kind=result['kind'] if result['kind']=='city' else 'airport', reason=reason)
-        return result
+        return self._record_country_aliases(result, applied)
 
 
 def flight_key(value, carrier=None):
@@ -351,7 +402,7 @@ class ScheduleIndex:
 
 
 def compatible_candidates(row, places, index):
-    primary = flight_key(row.get('flight_number'), row.get('carrier'))
+    primary = flight_key(row.get('flight_number_normalized',row.get('flight_number')), row.get('carrier'))
     alias = flight_key(row.get('codeshare'))  # A boolean/star/number is not an alias.
     day = departure_date(row)
     found = []
@@ -411,6 +462,10 @@ def compatible_candidates(row, places, index):
 def enrich_travel(row, reference, index):
     out = dict(row)
     places = {s: reference.resolve(row.get(s + '_raw'), row['source_id']) for s in ('origin', 'destination')}
+    canonical_rules = json.loads(row.get('normalization_rules_json') or '{}')
+    for side, place in places.items():
+        if canonical_rules.get(side+'_raw') == 'type.incompatible':
+            place.update(kind='unknown',status='unresolved',reason='incompatible_source_location',candidates=(),airport_id=None)
     candidates = compatible_candidates(row, places, index)
     # Unknown-period candidates remain contenders: they can defeat uniqueness.
     contenders = [c for c in candidates if c['coverage'] != 'outside_period']
@@ -429,7 +484,7 @@ def enrich_travel(row, reference, index):
     for label, side in (('departure', 'origin'), ('arrival', 'destination')):
         value, precision = row.get(label + '_local'), row.get(label + '_precision')
         effective, effective_precision, time_origin = value, precision, 'source' if value else 'missing'
-        if chosen and day is not None and (not value or precision == 'date'):
+        if chosen and day is not None and precision != 'invalid' and (not value or precision == 'date'):
             schedule = chosen['schedule']
             clock = schedule.get(label + '_local')
             offset = 0 if label == 'departure' else schedule.get('arrival_day_offset')

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yoyoflot"
-version = "0.4.0"
-description = "Provenance-preserving airline readers and conservative geography"
+version = "0.5.1"
+description = "Provenance-preserving airline readers, canonical normalization and geography"
 requires-python = ">=3.10"
 dependencies = [
     "duckdb>=1.1,<2",

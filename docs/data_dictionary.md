@@ -140,7 +140,7 @@
 | origin_kind, destination_kind | string | airport / city / country / missing / unknown — вид исходного обозначения |
 | origin_reason, destination_reason | string | Причина выбора или отказа |
 | origin_candidates_json, destination_candidates_json | string | JSON-массив возможных airport_id; [] при отсутствии |
-| origin_override_json, destination_override_json | string | Полное применённое правило YAML с evidence/reason либо null |
+| origin_override_json, destination_override_json | string | Полное правило YAML с evidence/reason либо null; для стран объект country_aliases (массив правил), при совместном исправлении кода также airport_override |
 | departure_effective_local, arrival_effective_local | string | Исходная ISO-строка либо явно выведенная полная локальная дата/время |
 | departure_effective_precision, arrival_effective_precision | string | Точность effective-значения; исходная точность хранится отдельно |
 | departure_time_origin, arrival_time_origin | string | source / inferred_from_schedule / missing |
@@ -179,3 +179,45 @@ reason, candidates_json — string; count — int64. Одна строка на 
 исходное значение поля в источнике, включая null. Это инвентарь мест, а не людей.
 Исходные города/страны расписания учитываются отдельными полями и не повышают
 знаменатель airport coverage (он равен двум точкам на строку расписания).
+
+## T12: canonical 1.0
+
+Структура базовых полей наследует readers, а nullable для неключевых значений
+расширен: несовместимое значение может стать null без удаления профиля.
+Схемы — normalize/canonical.py. `observations` соответствует person_observations;
+остальные имена базовых таблиц сохранены. PK и все исходные локальные ссылки
+не перенумеровываются.
+
+| Дополнительные поля | Тип | Значение |
+|---|---|---|
+| input_schema_sha256 | string | SHA-256 исходной Arrow-схемы; её описание сохранено в canonical_report.input_schemas |
+| normalization_version | string | Версия правил canonical:1.0, во всех таблицах |
+| source_values_json | string | Оригиналы изменённых базовых полей и extra:<имя> для новых входных полей |
+| normalization_rules_json | string | Поле → rule_id последнего применённого изменения; полный рецепт задаёт конфигурация |
+| normalization_status | string | ok / invalid_fields; межтабличные ошибки читаются отдельно |
+| observations.name_comparison | string | NFKC + casefold + нормализация пробелов, без замены name_raw |
+| observations.name_latin_comparison | string | Сравнительная ru_ascii_v1, не доказательство личности |
+| identifiers.value_normalized | string | Номер по правилу kind с сохранёнными значимыми нулями/буквами |
+| identifiers.programme_normalized | string | Отдельная программа, NFKC/casefold/пробелы |
+| identifiers.identifier_namespace | string | JSON пространства имён: source или подтверждённый контекст либо programme |
+| identifiers.identifier_match_key | string | JSON namespace + value; null, если контекст неизвестен |
+| identifiers.namespace_status | string | source_scoped / programme_scoped / confirmed_override / unknown_programme / unsupported_identifier_kind / missing_identifier_value |
+| travel_observations.flight_number_normalized | string | Отдельное очищенное представление номера; не объединяет codeshare |
+| travel_observations.ticket_number_normalized | string | Строковый билет без значимых преобразований цифр |
+| travel_observations.booking_code_normalized | string | Отдельное представление кода брони, регистр/внутренние символы сохраняются |
+
+В normalization_errors все поля string: normalization_error_id, source_id,
+entity_table, entity_id, source_record_id, locator, field, reason, value_json,
+rule_id, severity. Идентификатор ошибки детерминирован по объекту/полю/причине.
+value_json позволяет восстановить несовместимый вход, severity=error требует
+проверки. Это не количество удалённых записей.
+
+В transformation_log поля source_id/entity_table/field/rule_id/version и
+examples_json строковые; affected_records и exceptions — int64. Примеры содержат
+entity_id, locator, before, after. Числа относятся к принятым строкам после
+удаления повторного чтения, а не к числу физических копий входных файлов.
+
+В duplicate_reads строковые source_id/entity_table/entity_id/source_record_id/
+locator, целочисленные input_copies и duplicates_removed. Одна строка описывает
+точные копии одного ключа; содержательно похожие события с другими ключами не
+сворачиваются здесь.

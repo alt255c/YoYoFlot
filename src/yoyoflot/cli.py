@@ -20,8 +20,8 @@ READERS = [
 
 
 def parser():
-    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot readers T03–T10 and geography T11")
-    p.add_argument("--version", action="version", version="yoyoflot 0.4.0")
+    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot readers T03–T10, geography T11 and canonical build T12")
+    p.add_argument("--version", action="version", version="yoyoflot 0.5.0")
     sub = p.add_subparsers(dest="command", required=True)
     inv = sub.add_parser(
         "inventory", help="File metadata and hashes (not full T01 acceptance)"
@@ -56,14 +56,30 @@ def parser():
     geo.add_argument("--schedules", type=Path, nargs="+")
     geo.add_argument("--batch-size", type=int, default=2000)
     geo.add_argument("-q", "--quiet", action="store_true")
-    for name in ["build", "features", "train", "evaluate", "run"]:
-        sub.add_parser(name, help="Not implemented: tasks T11 onward")
+    canonical = sub.add_parser("build", help="T12: normalize and assemble canonical reader tables")
+    canonical.add_argument("--input", type=Path, nargs="+", default=[Path("data/interim/real")])
+    canonical.add_argument("--output", type=Path, default=Path("data/processed"))
+    canonical.add_argument("--config", type=Path, default=Path("configs/normalization.yaml"))
+    canonical.add_argument("--batch-size", type=int, default=4000)
+    canonical.add_argument("--memory-limit", default="512MB")
+    canonical.add_argument("--require-all", action="store_true")
+    canonical.add_argument("-q", "--quiet", action="store_true")
+    for name in ["features", "train", "evaluate", "run"]:
+        sub.add_parser(name, help="Not implemented: modeling tasks T13 onward")
     return p
 
 
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "build":
+            from .normalize.canonical import build
+            report, summary = build(args.input, args.output, args.config, args.batch_size,
+                                    args.memory_limit, args.require_all,
+                                    progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0 if report["status"] == "complete" else 1
         if args.command == "airports":
             from .normalize.geography import run
             _, summary = run(args.input, args.output, args.reference, args.overrides,
@@ -99,7 +115,7 @@ def main(argv=None):
             export(args.path, args.output)
             return 0
         if args.command != "ingest":
-            print(f"{args.command}: not implemented (outside T03–T10)", file=sys.stderr)
+            print(f"{args.command}: not implemented (modeling tasks T13 onward)", file=sys.stderr)
             return 2
         if args.source == "all" and args.path:
             raise ValueError("--path only applies to one source")
