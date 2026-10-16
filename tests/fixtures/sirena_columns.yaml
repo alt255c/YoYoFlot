@@ -1,0 +1,34 @@
+columns:
+- end: 24
+  name: PaxName
+  start: 0
+- end: 34
+  name: PaxBirthDate
+  start: 24
+- end: 44
+  name: DepartDate
+  start: 34
+- end: 49
+  name: DepartTime
+  start: 44
+- end: 55
+  name: Flight
+  start: 49
+- end: 58
+  name: From
+  start: 55
+- end: 61
+  name: Dest
+  start: 58
+- end: 67
+  name: e-Ticket
+  start: 61
+- end: 73
+  name: TravelDoc
+  start: 67
+confirmation_scope: synthetic_fixture_only
+confirmed: true
+encoding: utf-8
+header_lines: 1
+indexing: zero-based-half-open
+unit: characters
