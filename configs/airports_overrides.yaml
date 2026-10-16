@@ -1,0 +1,10 @@
+version: '1.0'
+# Only verified mappings belong here. Never map a multi-airport city to one airport.
+# Fields: source_id ('*' for all), original, target_iata, reason, evidence.
+# Example (disabled):
+# - source_id: boarding_csv
+#   original: 'Шереметьево'
+#   target_iata: SVO
+#   reason: 'Explicit airport name, not Moscow city'
+#   evidence: 'Reviewed source record / locator and airport reference'
+airport_overrides: []
