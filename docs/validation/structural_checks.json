@@ -1,0 +1,80 @@
+{
+  "boarding_csv": {
+    "path": "YoYoFlot/data/interim/real/boarding_csv",
+    "structural_status": "passed",
+    "source_status": "complete",
+    "counts": {
+      "person_observations": 155147,
+      "identifiers": 232494,
+      "travel_observations": 155147,
+      "schedules": 0,
+      "provenance": 542789,
+      "errors": 1
+    }
+  },
+  "pointz_xml": {
+    "path": "YoYoFlot/data/interim/real/pointz_xml",
+    "structural_status": "passed",
+    "source_status": "complete",
+    "counts": {
+      "person_observations": 66657,
+      "identifiers": 88818,
+      "travel_observations": 436090,
+      "schedules": 0,
+      "provenance": 591565,
+      "errors": 0
+    }
+  },
+  "sirena_fixed": {
+    "path": "YoYoFlot/data/interim/real/sirena_fixed",
+    "structural_status": "passed",
+    "source_status": "complete",
+    "counts": {
+      "person_observations": 155757,
+      "identifiers": 363431,
+      "travel_observations": 155757,
+      "schedules": 0,
+      "provenance": 674945,
+      "errors": 0
+    }
+  },
+  "skyteam_yaml": {
+    "path": "YoYoFlot/data/interim/real/skyteam_yaml",
+    "structural_status": "passed",
+    "source_status": "complete",
+    "counts": {
+      "person_observations": 1687053,
+      "identifiers": 1687053,
+      "travel_observations": 1687053,
+      "schedules": 0,
+      "provenance": 5061159,
+      "errors": 0
+    }
+  },
+  "forum_json": {
+    "path": "data/interim/real/forum_json",
+    "structural_status": "passed",
+    "source_status": "complete",
+    "counts": {
+      "person_observations": 66592,
+      "identifiers": 88827,
+      "travel_observations": 1308987,
+      "schedules": 0,
+      "provenance": 1464406,
+      "errors": 0
+    }
+  },
+  "boardingpass_xlsx": {
+    "path": "data/interim/real/boardingpass_xlsx",
+    "structural_status": "passed",
+    "source_status": "complete",
+    "counts": {
+      "person_observations": 615771,
+      "identifiers": 746812,
+      "travel_observations": 615771,
+      "schedules": 0,
+      "provenance": 1978354,
+      "errors": 0
+    }
+  }
+}

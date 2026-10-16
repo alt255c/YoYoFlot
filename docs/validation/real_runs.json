@@ -1,0 +1,172 @@
+{
+  "scope": "full_real_sources",
+  "python": "3.12.14",
+  "project_version": "0.3.0",
+  "reports": {
+    "boarding_csv": {
+      "source_id": "boarding_csv",
+      "input_path": "/workspace/scratch/45cb65ef93ca/upload/BoardingData.csv",
+      "sha256": "9ba2c4be763f5c51b38f99e84e86b68737ba3dc0cfab00b498a9d3de029b053f",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 3000,
+        "encoding": "utf-8-sig"
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 542789,
+        "identifiers": 232494,
+        "person_observations": 155147,
+        "travel_observations": 155147,
+        "errors": 1,
+        "schedules": 0
+      },
+      "input_counts": {
+        "input_rows": 155148
+      },
+      "error_severities": {
+        "info": 1
+      },
+      "seconds": 39.67906808099997,
+      "process_peak_rss_mib": 121.16796875
+    },
+    "forum_json": {
+      "source_id": "forum_json",
+      "input_path": "/workspace/scratch/45cb65ef93ca/upload/FrequentFlyerForum-Profiles.json",
+      "sha256": "3370f67664dfb2bf790ec343e971ffac95e42c0dd175c1b27037bac5868b1e8c",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 3000
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 1464406,
+        "travel_observations": 1308987,
+        "person_observations": 66592,
+        "identifiers": 88827,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "profiles": 66592,
+        "documents": 0,
+        "document_containers": 66592,
+        "empty_document_containers": 66592,
+        "cards": 88827,
+        "flights": 1308987
+      },
+      "error_severities": {},
+      "seconds": 115.95242388399947,
+      "process_peak_rss_mib": 154.15234375
+    },
+    "pointz_xml": {
+      "source_id": "pointz_xml",
+      "input_path": "/workspace/scratch/45cb65ef93ca/upload/PointzAggregator-AirlinesData.xml",
+      "sha256": "71559a60837468731f8baa71c1ab9680a2248930ce9f476b6bf13aae6ad9a880",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 3000
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 591565,
+        "travel_observations": 436090,
+        "identifiers": 88818,
+        "person_observations": 66657,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "users": 66657,
+        "cards": 88818,
+        "activities": 436090
+      },
+      "error_severities": {},
+      "seconds": 77.7431033619996,
+      "process_peak_rss_mib": 137.4453125
+    },
+    "sirena_fixed": {
+      "source_id": "sirena_fixed",
+      "input_path": "/workspace/scratch/45cb65ef93ca/upload/Sirena-export-fixed.tab",
+      "sha256": "45c56c0f0c1f146468006788b7727dfd77d7222d9b34b3ad15fec208720cb261",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 3000,
+        "columns": "YoYoFlot/configs/sirena_columns.yaml"
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 674945,
+        "identifiers": 363431,
+        "person_observations": 155757,
+        "travel_observations": 155757,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "input_rows": 155757
+      },
+      "error_severities": {},
+      "seconds": 50.337917285,
+      "process_peak_rss_mib": 147.63671875
+    },
+    "skyteam_yaml": {
+      "source_id": "skyteam_yaml",
+      "input_path": "/workspace/scratch/45cb65ef93ca/upload/SkyTeam-Exchange.yaml",
+      "sha256": "ce4e47a2ba6f3db6fca0e86f603de032d0b32e5e20f613b638dafee11b6ad2a9",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 3000
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 5061159,
+        "person_observations": 1687053,
+        "identifiers": 1687053,
+        "travel_observations": 1687053,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "flights": 1270920,
+        "cards": 1687053
+      },
+      "error_severities": {},
+      "seconds": 316.64268643800006,
+      "process_peak_rss_mib": 154.4375
+    },
+    "boardingpass_xlsx": {
+      "source_id": "boardingpass_xlsx",
+      "input_path": "/workspace/scratch/45cb65ef93ca/upload/YourBoardingPassDotAero.zip",
+      "sha256": "b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6",
+      "contract_version": "1.0",
+      "reader_version": "1.0",
+      "options": {
+        "batch_size": 3000
+      },
+      "status": "complete",
+      "counts": {
+        "provenance": 1978354,
+        "identifiers": 746812,
+        "person_observations": 615771,
+        "travel_observations": 615771,
+        "schedules": 0,
+        "errors": 0
+      },
+      "input_counts": {
+        "workbooks": 366,
+        "sheets": 615771,
+        "input_rows": 615771,
+        "boarding_card_sheets": 615771
+      },
+      "error_severities": {},
+      "seconds": 448.3937538050004,
+      "process_peak_rss_mib": 210.90234375
+    }
+  }
+}

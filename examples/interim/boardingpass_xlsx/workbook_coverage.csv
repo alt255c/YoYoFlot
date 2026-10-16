@@ -1,0 +1,3 @@
+workbook,sheet,header_version,input_rows,accepted_rows,errors,status,reason
+synthetic_2018-01-01.xlsx,Passengers,7a44df1f3070,1,1,0,ok,
+synthetic_2018-01-01.xlsx,Empty,,0,0,0,empty,

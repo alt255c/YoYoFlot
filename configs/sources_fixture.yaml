@@ -1,0 +1,10 @@
+version: 1
+scope: synthetic_only
+sources:
+  boarding_csv: {file: boarding.csv, reader: boarding_csv}
+  forum_json: {file: forum.json, reader: forum_json}
+  pointz_xml: {file: pointz.xml, reader: pointz_xml}
+  sirena_fixed: {file: sirena.tab, reader: sirena_fixed, columns: tests/fixtures/sirena_columns.yaml}
+  skyteam_yaml: {file: skyteam.yaml, reader: skyteam_yaml}
+  boardingpass_xlsx: {file: boardingpass.zip, reader: boardingpass_xlsx}
+  timetable_pdf: {file: timetable.pdf, reader: timetable_pdf}

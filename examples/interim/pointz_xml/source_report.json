@@ -1,0 +1,27 @@
+{
+  "source_id": "pointz_xml",
+  "input_path": "/workspace/scratch/45cb65ef93ca/YoYoFlot/tests/fixtures/pointz.xml",
+  "sha256": "82c2ec1ad27f93eac982585842fa49470772a7661beb1103286bd4afea9df11c",
+  "contract_version": "1.0",
+  "reader_version": "1.0",
+  "options": {
+    "batch_size": 2
+  },
+  "status": "complete",
+  "counts": {
+    "provenance": 5,
+    "identifiers": 2,
+    "person_observations": 2,
+    "travel_observations": 1,
+    "schedules": 0,
+    "errors": 0
+  },
+  "input_counts": {
+    "users": 2,
+    "cards": 2,
+    "activities": 1
+  },
+  "error_severities": {},
+  "seconds": 0.00974374900033581,
+  "process_peak_rss_mib": 87.6484375
+}

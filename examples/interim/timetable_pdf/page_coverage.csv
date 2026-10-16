@@ -1,0 +1,5 @@
+page,type,sections,rows_found,rows_parsed,carry_used,status,reason,extraction_method
+1,cover,0,0,0,0,ok,,text
+2,table,2,3,3,0,ok,,text
+3,continuation,0,2,2,2,ok,,text
+4,consult,1,0,0,0,ok,,text
