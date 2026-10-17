@@ -14,3 +14,13 @@
 
 Проверки: `tests/test_features.py` — 2 passed. Реальный запуск ожидает
 опубликованные `persons.parquet` и `segments.parquet` из принятого T13.
+
+## Реальный прогон 17.10.2026
+
+После появления LFS-объектов T13 выполнен `scripts/run_t15.py` на
+`data/processed/persons.parquet` и `segments.parquet`. Вход: 840606 пассажиров
+и 2979166 сегментов. Выход: 840606 строк `features.parquet` и 7565454 строк
+`feature_coverage.parquet`, статус `complete`. Для 9441 пассажира без
+наблюдённых сегментов поездочные признаки помечены недоступными; это сохранено
+в coverage, нулевые значения не подставлялись. SHA-256 и полный состав
+доступности сохранены в `docs/validation/t15_real_run.json`.
