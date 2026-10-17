@@ -79,6 +79,11 @@ def parser():
     review.add_argument("--input", type=Path, default=Path("data/processed"))
     review.add_argument("--report", type=Path, default=Path("data/review/person_pairs_review_report.json"))
     review.add_argument("-q", "--quiet", action="store_true")
+    quality = sub.add_parser("quality", help="T14: audit canonical data quality and provenance")
+    quality.add_argument("--input", type=Path, default=Path("data/processed"))
+    quality.add_argument("--output", type=Path)
+    quality.add_argument("--sample-size", type=int, default=30)
+    quality.add_argument("--memory-limit", default="512MB")
     for name in ["features", "train", "evaluate", "run"]:
         sub.add_parser(name, help="Not implemented: modeling tasks T13 onward")
     return p
@@ -101,6 +106,11 @@ def main(argv=None):
                 print(f"T13 review: проверено {report['reviewed']} / {report['sampled']}; расхождений {len(report['disagreements'])}")
                 print(f"Отчёт: {args.report}")
             return 0
+        if args.command == "quality":
+            from .quality import audit
+            report = audit(args.input, args.output, args.sample_size, args.memory_limit)
+            print(json.dumps(report, ensure_ascii=False))
+            return 0 if report["status"] != "failed" else 1
         if args.command == "build":
             from .normalize.canonical import build
             report, summary = build(args.input, args.output, args.config, args.batch_size,
