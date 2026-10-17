@@ -1,0 +1,93 @@
+{
+  "status": "complete",
+  "feature_version": "1.0",
+  "input_persons": 840606,
+  "input_segments": 2979166,
+  "output_person_rows": 840606,
+  "coverage_rows": 7565454,
+  "coverage": [
+    {
+      "feature_name": "trip_count",
+      "available": true,
+      "person_id_count": 840606
+    },
+    {
+      "feature_name": "active_months",
+      "available": true,
+      "person_id_count": 840606
+    },
+    {
+      "feature_name": "trips_per_active_month",
+      "available": true,
+      "person_id_count": 831165
+    },
+    {
+      "feature_name": "unique_routes",
+      "available": true,
+      "person_id_count": 831165
+    },
+    {
+      "feature_name": "unique_airports",
+      "available": true,
+      "person_id_count": 831165
+    },
+    {
+      "feature_name": "repeated_route_share",
+      "available": true,
+      "person_id_count": 831165
+    },
+    {
+      "feature_name": "median_gap_days",
+      "available": true,
+      "person_id_count": 831165
+    },
+    {
+      "feature_name": "return_trip_count",
+      "available": true,
+      "person_id_count": 831165
+    },
+    {
+      "feature_name": "short_stay_count",
+      "available": true,
+      "person_id_count": 831165
+    },
+    {
+      "feature_name": "trips_per_active_month",
+      "available": false,
+      "person_id_count": 9441
+    },
+    {
+      "feature_name": "unique_routes",
+      "available": false,
+      "person_id_count": 9441
+    },
+    {
+      "feature_name": "unique_airports",
+      "available": false,
+      "person_id_count": 9441
+    },
+    {
+      "feature_name": "repeated_route_share",
+      "available": false,
+      "person_id_count": 9441
+    },
+    {
+      "feature_name": "median_gap_days",
+      "available": false,
+      "person_id_count": 9441
+    },
+    {
+      "feature_name": "return_trip_count",
+      "available": false,
+      "person_id_count": 9441
+    },
+    {
+      "feature_name": "short_stay_count",
+      "available": false,
+      "person_id_count": 9441
+    }
+  ],
+  "features_sha256": "38bde2ca5a60df7a259f8ad544477d558a0590115c19cfcd86601059b2604054",
+  "coverage_sha256": "a518db5af11271158750ef3bb7df87336719353478f4d5981cbb05aaddca5b06",
+  "independent_review": "pending"
+}\n
