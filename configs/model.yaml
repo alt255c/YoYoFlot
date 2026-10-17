@@ -1,0 +1,33 @@
+# Illustrative teaching thresholds, not calibrated labels or probabilities.
+version: rules-demo-1.0
+data_mode: synthetic_demo
+threshold_status: illustrative_unvalidated
+coverage:
+  min_source_coverage: 0.8
+  min_known_fraction: 0.8
+  min_covered_days: 60
+  min_available_groups: 3
+criteria:
+  - id: M01
+    enabled: true
+    threshold: 6.0
+    weight: 1.0
+    min_observations: 6
+  - id: M02
+    enabled: true
+    threshold: 0.2
+    weight: 1.0
+    min_observations: 3
+  - id: M03
+    enabled: true
+    threshold: 0.8
+    weight: 1.0
+    min_observations: 6
+  - id: M04
+    enabled: false
+  - id: M05
+    enabled: false
+  - id: M06
+    enabled: false
+  - id: M07
+    enabled: false

@@ -21,7 +21,7 @@ READERS = [
 
 
 def parser():
-    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot readers and reproducible data pipeline T16")
+    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot data pipeline and independent fictional rules demo")
     p.add_argument("--version", action="version", version="yoyoflot " + __version__)
     sub = p.add_subparsers(dest="command", required=True)
     inv = sub.add_parser(
@@ -106,7 +106,18 @@ def parser():
     pipeline.add_argument("--require-all", action="store_true", help="Require all seven logical sources")
     pipeline.add_argument("--allow-source-errors", action="store_true", help="Keep documented parser/PDF limitations; never bypass structural blockers")
     pipeline.add_argument("-q", "--quiet", action="store_true")
-    for name in ["features", "train", "evaluate"]:
+    train = sub.add_parser("train", help="T17: rules for independently generated fictional profiles only")
+    training_input = train.add_mutually_exclusive_group()
+    training_input.add_argument("--demo", action="store_true", help="Generate independent fictional profiles")
+    training_input.add_argument("--input", type=Path, help="Previously generated demo, verified by generator replay")
+    train.add_argument("--seed", type=int, default=17)
+    train.add_argument("--profiles", type=int, default=120, help="Fictional profiles, 0–500")
+    train.add_argument("--demo-dir", type=Path, default=Path("data/work/t17"))
+    train.add_argument("--config", type=Path, default=Path("configs/model.yaml"))
+    train.add_argument("--output", type=Path, help="New immutable output directory")
+    train.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t17"))
+    train.add_argument("-q", "--quiet", action="store_true")
+    for name in ["features", "evaluate"]:
         sub.add_parser(name, help="Not implemented by this CLI; see task-specific scripts")
     return p
 
@@ -114,6 +125,18 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "train":
+            if not args.demo and args.input is None:
+                print("T17: укажите --demo или --input с независимым учебным набором", file=sys.stderr)
+                return 2
+            from .models.demo import create_demo
+            from .models.ranking import run
+            directory = create_demo(args.demo_dir, args.seed, args.profiles) if args.demo else args.input
+            _, summary = run(directory, args.config, args.output, args.artifacts_dir,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
         if args.command == "run":
             from .pipeline import run
             _, summary = run(config=args.config, data_dir=args.data_dir, work_dir=args.work_dir,
