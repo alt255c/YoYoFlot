@@ -1,0 +1,18 @@
+version: '1.0'
+name_similarity_threshold: 0.90
+name_conflict_threshold: 0.45
+# Pairwise comparison only in small blocks; larger blocks use a stable star.
+pairwise_block_size: 8
+max_name_block_size: 100
+max_candidates: 20000000
+max_component_size: 10000
+max_name_variants: 32
+max_trip_group_size: 1000
+# A generic source-scoped document needs both name and DOB support.
+source_document_requires_name_and_dob: true
+graph_event_kinds: [boarding_record, boarding_pass_record]
+review_sample: {accepted: 50, ambiguous: 30, rejected: 20}
+review_seed: 'T13-review-v1'
+# Explicit marketing -> operating mappings only; each needs exact route,
+# inclusive ISO period, reason and evidence. Empty means no codeshare inference.
+codeshare_rules: []

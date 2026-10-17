@@ -1,0 +1,43 @@
+{
+  "scope": "same_synthetic_40000_observation_snapshot_before_after_fix",
+  "package": "0.6.1",
+  "installed_wheel": true,
+  "memory_limit": "512MB",
+  "duckdb_threads": 1,
+  "aggregation_batch_groups": 16384,
+  "counts": {
+    "persons": {
+      "rows": 20000,
+      "changed_rows": 0
+    },
+    "person_links": {
+      "rows": 40000,
+      "changed_rows": 0
+    },
+    "person_pairs": {
+      "rows": 20000,
+      "changed_rows": 0
+    },
+    "segments": {
+      "rows": 20000,
+      "changed_rows": 0
+    },
+    "segment_links": {
+      "rows": 60000,
+      "changed_rows": 0
+    },
+    "conflicts": {
+      "rows": 0,
+      "changed_rows": 0
+    },
+    "blocking_issues": {
+      "rows": 0,
+      "changed_rows": 0
+    }
+  },
+  "all_rows_semantically_identical": true,
+  "quiet_stdout_empty": true,
+  "quiet_stderr_empty": true,
+  "resolution_seconds": 10.715,
+  "fresh_process_peak_rss_mib": 439.45
+}

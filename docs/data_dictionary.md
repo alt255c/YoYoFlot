@@ -1,5 +1,8 @@
 # Словарь данных 1.0
 
+Дополнительный контракт resolution 1.0 (T13) описан в конце документа;
+его схемы независимы от reader/canonical/geography.
+
 Сгенерирован из `contracts.SCHEMAS`; смысл null и связи — `data_contract.md`.
 
 ## person_observations
@@ -221,3 +224,36 @@ entity_id, locator, before, after. Числа относятся к принят
 locator, целочисленные input_copies и duplicates_removed. Одна строка описывает
 точные копии одного ключа; содержательно похожие события с другими ключами не
 сворачиваются здесь.
+
+## T13: resolution 1.0
+
+Авторитетные типы — resolve/common.py::SCHEMAS. Строковые JSON-поля содержат
+JSON-текст, nullable-поле означает неизвестность. ID person_/segment_ не содержат
+паспорт/карту и стабильны для того же снимка и правил.
+
+| Таблица | Поля и смысл |
+|---|---|
+| persons | person_id (PK), anchor_observation_id, display_name/birth_date (string, nullable), identity_status, rule_id; observation_count/source_count (int64); graph_eligible (bool) |
+| person_links | observation_id (PK) → persons.person_id, source_id/source_record_id/locator, status (accepted/ambiguous), confidence (strong_identifier/source_only/unresolved), rule_id; node_index (int64, внутренняя диагностическая ссылка); graph_eligible (bool) |
+| person_pairs | pair_id (PK), left/right_observation_id, status (accepted/rejected/ambiguous), rule_id, reason, features_json, evidence_json (string); name_similarity (float64, не вероятность) |
+| segments | segment_id (PK) → persons.person_id, anchor_travel_id, departure_date, flight_number, origin/destination_airport_id/iata; departure/arrival_local/precision/utc; identity_status, resolution_status, participation_status, event_kinds_json, sources_json, rule_id (string); observation_count/source_count (int64); graph_eligible/geography_complete/time_complete (bool) |
+| segment_links | travel_id (PK) → segments.segment_id, person_id, observation_id, source_id/source_record_id/locator, event_kind, status_raw, status, rule_id, reason; departure/arrival_precision, origin/destination_status, departure/arrival_utc_status/time_origin, codeshare_rule_id (string); graph_eligible (bool) |
+| conflicts | conflict_id (PK), entity_kind, left_id, right_id, rule_id, reason, severity, details_json (string); left/right указывают на observation_id, travel_id либо хеш диагностического блока согласно entity_kind |
+| blocking_issues | block_id, kind, reason, key_hash (string); member_count (int64). key_hash — хеш namespace/value либо DOB/name-token, не опубликованный документ |
+
+persons.identity_status: accepted или ambiguous. segments.resolution_status:
+resolved или ambiguous. participation_status: boarding_record_present либо
+reported_only; наличие записи не доказывает физическую посадку. time_complete
+требует двух UTC из наблюдений, а не выведенных расписанием часов.
+
+features_json включает прямое решение, признаки совпадения документа/карты/DOB,
+похожесть имени, блоки и причину компонентного конфликта. evidence_json содержит
+исходные ключи/locator и ссылки на identifier_id; исходные значения остаются в
+канонических таблицах. Конфликт компонента может ссылаться на node_index,
+раскрываемый через person_links. Rejected-пара не означает удалённого профиля.
+
+CSV ревью: run_fingerprint, pair_id, author_decision, rule_id,
+left/right_observation_id/source_id/locator/name/birth_date, name_similarity,
+features_json, evidence_json и четыре пустых reviewer-поля. Редактируемы только
+reviewer_decision/name, reviewed_at и reviewer_notes. Автоматическая выборка
+не является ручной разметкой. Метрики живут отдельно в person_pairs_review_report.

@@ -1,0 +1,17 @@
+{
+  "scope": "synthetic_only",
+  "input_observations": 40000,
+  "input_identifiers": 40000,
+  "input_travels": 60000,
+  "person_pairs": 20000,
+  "persons": 20000,
+  "segments": 20000,
+  "graph_eligible_segments": 20000,
+  "resolution_seconds": 5.781,
+  "fresh_process_wall_seconds": 6.128,
+  "fresh_process_peak_rss_mib": 481.32,
+  "quiet_stdout_empty": true,
+  "quiet_stderr_empty": true,
+  "memory_limit": "512MB",
+  "limitations": "Synthetic sizes/payloads do not predict full real run time or accuracy."
+}
