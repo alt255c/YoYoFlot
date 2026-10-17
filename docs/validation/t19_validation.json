@@ -1,0 +1,408 @@
+{
+  "acceptance": "pending_T20_review",
+  "base_branch": "reape/T18",
+  "base_commit": "4d15d72ef982bad872eb1506b244c01a5d5b5604",
+  "branch": "reape/T19",
+  "checks": [
+    "row_by_row_generator_replay_rejects_real_relabelled_and_forged_inputs",
+    "v1_backwards_compatibility_and_v2_seed_namespace",
+    "disjoint_training_calibration_evaluation_seeds_and_ids",
+    "explicit_feature_allowlist_order_types_finite_ranges_and_availability",
+    "identity_geography_labels_and_quality_counters_not_model_features",
+    "missing_values_excluded_without_zero_or_mean_imputation",
+    "exact_input_hash_window_version_and_parent_manifest_alignment",
+    "as_of_prefix_invariance_no_future_numerical_feature_leakage",
+    "disabled_small_constant_and_float32_collapsed_reference_no_fit",
+    "bad_calibration_contract_rejected_before_fit",
+    "fixed_seed_and_input_permutation_reproduce_trees_and_scores",
+    "higher_score_direction_on_constructed_extreme_scenario",
+    "calibration_changes_do_not_refit_forest",
+    "evaluation_changes_preserve_binary_model_hash",
+    "calibration_only_midrank_counting_oracle_for_IF_and_rules_tuple",
+    "batch_independent_percentiles_and_explicit_50_50_combination",
+    "own_fresh_joblib_reload_matches_persisted_float32_matrix_scores",
+    "primary_rankings_and_top50_byte_identical_to_T17_parent",
+    "top50_empty_1_49_50_61_ties_and_null_exclusions",
+    "graph_opt_in_same_input_window_and_no_extra_M07_vote",
+    "cache_never_unpickles_existing_output",
+    "full_inventory_hash_corruption_unlisted_file_and_unrelated_output_guards",
+    "OS_lock_and_keyboard_interrupt_no_partial_publication",
+    "CLI_scripts_from_other_cwd_and_independent_audit_script"
+  ],
+  "datasets": {
+    "calibration": {
+      "graph_manifest_sha256": null,
+      "graph_run_id": null,
+      "graph_status": "disabled_by_config",
+      "input_logical_sha256": "de961bee3251d4d99feb7782404e07755db7c878aaa00f885daea6b0eafd530f",
+      "recipe": {
+        "generator": "yoyoflot-independent-fiction-v2",
+        "profiles": 200,
+        "seed": 202,
+        "window_end": "2026-03-31",
+        "window_start": "2026-01-01"
+      },
+      "rules_manifest_sha256": "ee7b6c8c62e41a9bcdaa53f389911ea5e7e8cd5fb0a64dfbf16077fc2e86a657",
+      "rules_run_id": "rules-f0f42d7ce2750f3cf2d8"
+    },
+    "evaluation": {
+      "graph_manifest_sha256": null,
+      "graph_run_id": null,
+      "graph_status": "disabled_by_config",
+      "input_logical_sha256": "4504bf64c9ae091fff28636ba7cc57134313af6e722aac9e5fc1311ab74dce69",
+      "recipe": {
+        "generator": "yoyoflot-independent-fiction-v2",
+        "profiles": 120,
+        "seed": 17,
+        "window_end": "2026-03-31",
+        "window_start": "2026-01-01"
+      },
+      "rules_manifest_sha256": "810881ba3b216f5b24338a7891777c7128ab87a06c52e469c4c943e3194522ec",
+      "rules_run_id": "rules-aac81f5e7d8f457432f0"
+    },
+    "training": {
+      "graph_manifest_sha256": null,
+      "graph_run_id": null,
+      "graph_status": "disabled_by_config",
+      "input_logical_sha256": "13667d8f1197130b12e441ded85cde3b9c32c0caca9fb9c9f51cfee5286f30cc",
+      "recipe": {
+        "generator": "yoyoflot-independent-fiction-v2",
+        "profiles": 300,
+        "seed": 101,
+        "window_end": "2026-03-31",
+        "window_start": "2026-01-01"
+      },
+      "rules_manifest_sha256": "db6a230eaac5e67fccebe37ac0ac43bba5993d02d0d52c677bcfb43ecc89674d",
+      "rules_run_id": "rules-7dc3022525f23eca5a37"
+    }
+  },
+  "date": "2026-10-17",
+  "date_timezone": "UTC",
+  "dependency_lock": {
+    "change": "Project 0.9.0 to 0.10.0 only; no dependency versions or requirements changed.",
+    "command": "uv lock --check --offline",
+    "exit_code": 0,
+    "frozen_requirements_export_matches": true
+  },
+  "environment": {
+    "dependency_source": "uv.lock; Python 3.12 versions",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "runtime": {
+      "code_sha256": "f534d712593edd4c7549fdd1ed73971e3725e21a6acefe34e8057d3c0c76ce7d",
+      "libraries": {
+        "joblib": "1.6.0",
+        "numpy": "2.5.4",
+        "pyarrow": "26.0.0",
+        "pyyaml": "6.0.3",
+        "scikit-learn": "1.9.1",
+        "scipy": "1.18.1"
+      },
+      "package_version": "0.10.0",
+      "python": "3.12.14"
+    }
+  },
+  "file_sha256": {
+    "configs/graph.yaml": "f6979745b3023ab0d5a886d746ed0bdd1aaef37aa2a40f6d573c0d9f3355f3f8",
+    "configs/isolation_forest.yaml": "d5f2ce8f37e2e3b0ccabf98f8b072a8c4feb2954f048103371eeeb9a9d53446f",
+    "configs/model.yaml": "2670a974e0f62731f28472f8cd62e2a2bdb38f3a5bd05f01bfb7a12e38b714dc",
+    "requirements.txt": "a6e039627f00e8f82817a8590ded3eae09e35c40dd49ea8fcb1dd09465203c86",
+    "scripts/verify_t19_demo.py": "9d7ea3d42c8f50663f3a4073293c22cde276607060d04c2050e6143fec38ecf3",
+    "uv.lock": "70c39fab784a43bb64571d8c093cb16b64efedb4391ea441d24451548531a6cb"
+  },
+  "graph_default": "disabled",
+  "limitations": [
+    "Fictional scenario and arithmetic checks do not measure efficacy or real-person characteristics.",
+    "All roles use one generator family; independent scenario families, sensitivity and human review remain T20.",
+    "Training is unlabelled, includes varied scenarios and is not verified clean normality.",
+    "Complete-case exclusion can bias the evaluated population; missingness is not an anomaly signal.",
+    "Graph features are opt-in; cohort size and conditional-background assumptions require T20 ablation.",
+    "M07 disabled; no automatic class/probability, no interface or T21 acceptance.",
+    "Same-window novelty experiment, not forecasting; future prediction needs a separate temporal design.",
+    "Joblib is pickle-based; only the freshly created private file is loaded. Integrity hashes are not authentication.",
+    "Model reload is verified in pinned Python 3.12/Linux; no cross-version or Windows timing guarantee.",
+    "Smoke timings exclude Python startup/top-level imports and include imports made inside run; peak RSS includes independent audit."
+  ],
+  "m07_status": "disabled",
+  "package_version": "0.10.0",
+  "reference_links": [
+    "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html",
+    "https://scikit-learn.org/stable/model_persistence.html",
+    "https://scikit-learn.org/stable/common_pitfalls.html"
+  ],
+  "repeated_model_hash": {
+    "default_and_500_equal": true,
+    "interpretation": "Evaluation size changed only; training/calibration/config/runtime stayed fixed. Not a cross-version guarantee.",
+    "sha256": "dadf765cb143596e175911848ba887833d31cc14ce3da3d502a229993bcf3168"
+  },
+  "schema_version": "1.0",
+  "scope": "independent_fictional_IsolationForest_training_and_separate_experimental_rankings",
+  "smoke_runs": [
+    {
+      "audit": {
+        "checks": [
+          "persisted_schemas_hashes_and_inventory",
+          "disjoint_roles",
+          "reloaded_sklearn_scores_from_float32_matrices",
+          "calibration_only_CDF_counting_oracle",
+          "combination_and_tie_order",
+          "top50_projection",
+          "unknown_values_remain_null",
+          "primary_byte_identity"
+        ],
+        "result": "passed"
+      },
+      "audit_seconds": 0.123,
+      "model_sha256": "dadf765cb143596e175911848ba887833d31cc14ce3da3d502a229993bcf3168",
+      "peak_rss_kib": 373724,
+      "peak_rss_scope": "whole_fresh_process_including_audit; Linux only",
+      "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+      "report": {
+        "acceptance": "pending_T20_review",
+        "data_mode": "synthetic_demo",
+        "elapsed_seconds": 1.676,
+        "fit": {
+          "available": true,
+          "calibration_rows": 120,
+          "constant_features": [],
+          "distinct_training_rows": 136,
+          "effective_forest": {
+            "bootstrap": false,
+            "contamination": "auto",
+            "max_features": 1.0,
+            "max_samples": 128,
+            "n_estimators": 200,
+            "n_jobs": 1,
+            "random_state": 1901,
+            "warm_start": false
+          },
+          "feature_names": [
+            "trip_rate_30_days",
+            "quick_return_share",
+            "repeated_route_share"
+          ],
+          "missing_policy": "exclude_incomplete",
+          "preprocessing": "none_float32",
+          "reason": null,
+          "training_rows": 180
+        },
+        "graph_status": "disabled_by_config",
+        "if_scored": 72,
+        "m07_status": "disabled",
+        "primary_ranking": "criteria_count_unchanged",
+        "profiles": 120,
+        "reload_verified": true,
+        "run_id": "if-1c4283dfa0c4a8355c95",
+        "schema_version": "1.0",
+        "status": "complete_demo",
+        "table_rows": {
+          "combined_rankings.parquet": 120,
+          "combined_top50.parquet": 50,
+          "if_rankings.parquet": 120,
+          "if_top50.parquet": 50,
+          "matrices.parquet": 620,
+          "reference_scores.parquet": 500
+        },
+        "top50_overlap": {
+          "rules_combined": {
+            "intersection": 39,
+            "jaccard": 0.639344262295082,
+            "union": 61
+          },
+          "rules_if": {
+            "intersection": 34,
+            "jaccard": 0.5151515151515151,
+            "union": 66
+          }
+        },
+        "training_performed": true,
+        "ui_ready": false
+      },
+      "run_manifest_sha256": "9a780d90f6ef6677e820fd9806c2d49534fe930596ce0ffb5038f994f6b8912a",
+      "snapshot": "data/verification/t19-7m9wu9nc/artifacts/if-1c4283dfa0c4a8355c95",
+      "timing_scope": "generation, parent stages, training and snapshot verification after imports; audit separate",
+      "wall_seconds": 2.129
+    },
+    {
+      "audit": {
+        "checks": [
+          "persisted_schemas_hashes_and_inventory",
+          "disjoint_roles",
+          "reloaded_sklearn_scores_from_float32_matrices",
+          "calibration_only_CDF_counting_oracle",
+          "combination_and_tie_order",
+          "top50_projection",
+          "unknown_values_remain_null",
+          "primary_byte_identity"
+        ],
+        "result": "passed"
+      },
+      "audit_seconds": 0.142,
+      "model_sha256": "dadf765cb143596e175911848ba887833d31cc14ce3da3d502a229993bcf3168",
+      "peak_rss_kib": 389968,
+      "peak_rss_scope": "whole_fresh_process_including_audit; Linux only",
+      "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+      "report": {
+        "acceptance": "pending_T20_review",
+        "data_mode": "synthetic_demo",
+        "elapsed_seconds": 1.855,
+        "fit": {
+          "available": true,
+          "calibration_rows": 120,
+          "constant_features": [],
+          "distinct_training_rows": 136,
+          "effective_forest": {
+            "bootstrap": false,
+            "contamination": "auto",
+            "max_features": 1.0,
+            "max_samples": 128,
+            "n_estimators": 200,
+            "n_jobs": 1,
+            "random_state": 1901,
+            "warm_start": false
+          },
+          "feature_names": [
+            "trip_rate_30_days",
+            "quick_return_share",
+            "repeated_route_share"
+          ],
+          "missing_policy": "exclude_incomplete",
+          "preprocessing": "none_float32",
+          "reason": null,
+          "training_rows": 180
+        },
+        "graph_status": "disabled_by_config",
+        "if_scored": 300,
+        "m07_status": "disabled",
+        "primary_ranking": "criteria_count_unchanged",
+        "profiles": 500,
+        "reload_verified": true,
+        "run_id": "if-6e4eba571c6690d23d46",
+        "schema_version": "1.0",
+        "status": "complete_demo",
+        "table_rows": {
+          "combined_rankings.parquet": 500,
+          "combined_top50.parquet": 50,
+          "if_rankings.parquet": 500,
+          "if_top50.parquet": 50,
+          "matrices.parquet": 1000,
+          "reference_scores.parquet": 500
+        },
+        "top50_overlap": {
+          "rules_combined": {
+            "intersection": 30,
+            "jaccard": 0.42857142857142855,
+            "union": 70
+          },
+          "rules_if": {
+            "intersection": 4,
+            "jaccard": 0.041666666666666664,
+            "union": 96
+          }
+        },
+        "training_performed": true,
+        "ui_ready": false
+      },
+      "run_manifest_sha256": "c31cdba6031dcb54e1518cd04c7e42111dfdd23c3ef11ca5e4d96226b1d62f22",
+      "snapshot": "data/verification/t19-882eosrd/artifacts/if-6e4eba571c6690d23d46",
+      "timing_scope": "generation, parent stages, training and snapshot verification after imports; audit separate",
+      "wall_seconds": 2.305
+    },
+    {
+      "audit": {
+        "checks": [
+          "persisted_schemas_hashes_and_inventory",
+          "disjoint_roles",
+          "reloaded_sklearn_scores_from_float32_matrices",
+          "calibration_only_CDF_counting_oracle",
+          "combination_and_tie_order",
+          "top50_projection",
+          "unknown_values_remain_null",
+          "primary_byte_identity"
+        ],
+        "result": "passed"
+      },
+      "audit_seconds": 0.098,
+      "model_sha256": "9b78ceb0a4aba9abaa704e2affeea1a98b4b5d0fecb188c50b2cccece076fd6b",
+      "peak_rss_kib": 364768,
+      "peak_rss_scope": "whole_fresh_process_including_audit; Linux only",
+      "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+      "report": {
+        "acceptance": "pending_T20_review",
+        "data_mode": "synthetic_demo",
+        "elapsed_seconds": 17.456,
+        "fit": {
+          "available": true,
+          "calibration_rows": 120,
+          "constant_features": [],
+          "distinct_training_rows": 177,
+          "effective_forest": {
+            "bootstrap": false,
+            "contamination": "auto",
+            "max_features": 1.0,
+            "max_samples": 128,
+            "n_estimators": 200,
+            "n_jobs": 1,
+            "random_state": 1901,
+            "warm_start": false
+          },
+          "feature_names": [
+            "trip_rate_30_days",
+            "quick_return_share",
+            "repeated_route_share",
+            "excess_repeated_companions",
+            "max_positive_pair_excess_days"
+          ],
+          "missing_policy": "exclude_incomplete",
+          "preprocessing": "none_float32",
+          "reason": null,
+          "training_rows": 180
+        },
+        "graph_status": "experimental_features",
+        "if_scored": 72,
+        "m07_status": "disabled",
+        "primary_ranking": "criteria_count_unchanged",
+        "profiles": 120,
+        "reload_verified": true,
+        "run_id": "if-184b945fcd2f0377d7f0",
+        "schema_version": "1.0",
+        "status": "complete_demo",
+        "table_rows": {
+          "combined_rankings.parquet": 120,
+          "combined_top50.parquet": 50,
+          "if_rankings.parquet": 120,
+          "if_top50.parquet": 50,
+          "matrices.parquet": 620,
+          "reference_scores.parquet": 500
+        },
+        "top50_overlap": {
+          "rules_combined": {
+            "intersection": 40,
+            "jaccard": 0.6666666666666666,
+            "union": 60
+          },
+          "rules_if": {
+            "intersection": 34,
+            "jaccard": 0.5151515151515151,
+            "union": 66
+          }
+        },
+        "training_performed": true,
+        "ui_ready": false
+      },
+      "run_manifest_sha256": "5bfa759a2effe35cba8b04d8ad9adc09dc73b194c5cb08140ca7b06eefecec35",
+      "snapshot": "data/verification/t19-hdhnpkya/artifacts/if-184b945fcd2f0377d7f0",
+      "timing_scope": "generation, parent stages, training and snapshot verification after imports; audit separate",
+      "wall_seconds": 17.875
+    }
+  ],
+  "task": "T19",
+  "test_suite": {
+    "command": "python -m pytest -q",
+    "elapsed_seconds": 67.5,
+    "exit_code": 0,
+    "passed": 487,
+    "t19_new_tests": 74
+  },
+  "training_performed": true,
+  "ui_ready": false
+}

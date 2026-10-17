@@ -18,6 +18,7 @@ from ..normalize.locking import OutputLock
 from ..provenance import fingerprint
 
 GENERATOR = "yoyoflot-independent-fiction-v1"
+VARIED_GENERATOR = "yoyoflot-independent-fiction-v2"
 START, END = date(2026, 1, 1), date(2026, 3, 31)
 MAX_PROFILES = 500
 PROFILE_SCHEMA = pa.schema([
@@ -42,20 +43,25 @@ def write_json(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
 
 
-def recipe(seed=17, profiles=120):
+def recipe(seed=17, profiles=120, generator=GENERATOR):
     if type(seed) is not int or not 0 <= seed < 2**32:
         raise ValueError("seed должен быть целым числом от 0 до 2**32-1")
     if type(profiles) is not int or not 0 <= profiles <= MAX_PROFILES:
         raise ValueError(f"profiles должен быть от 0 до {MAX_PROFILES}")
-    return dict(generator=GENERATOR, seed=seed, profiles=profiles,
+    if generator not in {GENERATOR, VARIED_GENERATOR}:
+        raise ValueError("Неизвестная версия независимого учебного генератора")
+    return dict(generator=generator, seed=seed, profiles=profiles,
                 window_start=START.isoformat(), window_end=END.isoformat())
 
 
 def generate_rows(spec):
     """Ten explicit scenarios, including missing data and ordinary activity."""
-    expected = recipe(spec.get("seed"), spec.get("profiles"))
+    expected = recipe(spec.get("seed"), spec.get("profiles"), spec.get("generator"))
     if spec != expected:
         raise ValueError("Неизвестная версия или параметры учебного генератора")
+    if spec["generator"] == VARIED_GENERATOR:
+        from .demo_varied import generate
+        return generate(spec)
     rng = random.Random(spec["seed"])
     airports = ["SVO", "LED", "JFK", "CDG", "HND", "LHR", "DXB", "SIN"]
     rng.shuffle(airports)
@@ -116,7 +122,8 @@ def validate_demo(directory):
         if fingerprint(table_path) != manifest["files"][name]:
             raise ValueError(f"Изменён учебный файл: {name}")
         file = pq.ParquetFile(table_path)
-        limit = MAX_PROFILES if name == "profiles.parquet" else MAX_PROFILES * 30
+        per_profile = 60 if manifest["recipe"]["generator"] == VARIED_GENERATOR else 30
+        limit = MAX_PROFILES if name == "profiles.parquet" else MAX_PROFILES * per_profile
         expanded_size = sum(file.metadata.row_group(i).column(j).total_uncompressed_size
                             for i in range(file.metadata.num_row_groups)
                             for j in range(file.metadata.num_columns))
@@ -132,8 +139,8 @@ def validate_demo(directory):
     return manifest, profiles, segments
 
 
-def create_demo(root, seed=17, profiles=120):
-    spec = recipe(seed, profiles)
+def create_demo(root, seed=17, profiles=120, generator=GENERATOR):
+    spec = recipe(seed, profiles, generator)
     root = Path(root).resolve()
     root.mkdir(parents=True, exist_ok=True)
     target = root / ("demo-" + digest(spec)[:20])

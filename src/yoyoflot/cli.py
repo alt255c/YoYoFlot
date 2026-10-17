@@ -128,6 +128,22 @@ def parser():
     graph.add_argument("--output", type=Path)
     graph.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t18"))
     graph.add_argument("-q", "--quiet", action="store_true")
+    forest = sub.add_parser("train-if", help="T19: fit Isolation Forest on independent fictional teaching data")
+    forest_input = forest.add_mutually_exclusive_group()
+    forest_input.add_argument("--demo", action="store_true")
+    forest_input.add_argument("--input", type=Path, help="Replay-verifiable fictional evaluation input")
+    forest.add_argument("--reference", type=Path, help="Separate fictional training input; default generated seed 101")
+    forest.add_argument("--calibration", type=Path, help="Separate fictional calibration input; default generated seed 202")
+    forest.add_argument("--seed", type=int, default=17)
+    forest.add_argument("--profiles", type=int, default=120)
+    forest.add_argument("--demo-dir", type=Path, default=Path("data/work/t19/evaluation"))
+    forest.add_argument("--work-dir", type=Path, default=Path("data/work/t19"))
+    forest.add_argument("--config", type=Path, default=Path("configs/isolation_forest.yaml"))
+    forest.add_argument("--rules-config", type=Path, default=Path("configs/model.yaml"))
+    forest.add_argument("--graph-config", type=Path, default=Path("configs/graph.yaml"))
+    forest.add_argument("--output", type=Path)
+    forest.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t19"))
+    forest.add_argument("-q", "--quiet", action="store_true")
     for name in ["features", "evaluate"]:
         sub.add_parser(name, help="Not implemented by this CLI; see task-specific scripts")
     return p
@@ -136,6 +152,19 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "train-if":
+            if not args.demo and args.input is None:
+                print("T19: укажите --demo или --input с независимым вымышленным набором", file=sys.stderr)
+                return 2
+            from .models.demo import VARIED_GENERATOR, create_demo
+            from .models.if_artifact import run
+            directory = create_demo(args.demo_dir, args.seed, args.profiles, VARIED_GENERATOR) if args.demo else args.input
+            _, summary = run(directory, args.config, args.rules_config, args.graph_config, args.output, args.artifacts_dir,
+                             args.work_dir, args.reference, args.calibration,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
         if args.command == "graph":
             if not args.demo and args.input is None:
                 print("T18: укажите --demo или --input с независимым учебным набором T17", file=sys.stderr)

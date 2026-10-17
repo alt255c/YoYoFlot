@@ -1,9 +1,12 @@
 """Stable criteria-count ranking and immutable, self-contained demo artifacts."""
 import json
 import platform
+import math
 import shutil
 import tempfile
 import time
+from bisect import bisect_left, bisect_right
+from datetime import date
 from pathlib import Path
 
 import pyarrow as pa
@@ -13,7 +16,7 @@ import yaml
 from .. import __version__
 from ..normalize.locking import OutputLock
 from ..provenance import fingerprint
-from .demo import (PROFILE_SCHEMA, SEGMENT_SCHEMA, TABLES, digest, generate_rows,
+from .demo import (END, START, PROFILE_SCHEMA, SEGMENT_SCHEMA, TABLES, digest, generate_rows,
                    validate_demo, write_json)
 from .rule_score import _score_profiles, load_model
 
@@ -67,6 +70,19 @@ def rank_scores(scores, run_id):
     return rows, [r for r in rows if r["rank"] is not None and r["rank"] <= 50]
 
 
+def midrank_percentiles(reference, values):
+    """Frozen-reference empirical mid-CDF; ties share a percentile."""
+    if not reference:
+        raise ValueError("Пустая калибровочная выборка")
+    def valid(value):
+        return all(valid(v) for v in value) and bool(value) if isinstance(value, tuple) else type(value) in {int, float} and math.isfinite(value)
+    if (not all(valid(v) for v in [*reference, *values]) or
+            any(isinstance(v, tuple) != isinstance(reference[0], tuple) for v in [*reference, *values])):
+        raise ValueError("Калибровочные значения должны быть конечными числами или сопоставимыми числовыми ключами")
+    ordered = sorted(reference)
+    return [(bisect_left(ordered, v) + bisect_right(ordered, v)) / (2 * len(ordered)) for v in values]
+
+
 def _runtime():
     package = Path(__file__).parent
     return dict(package_version=__version__, python=platform.python_version(), pyarrow=pa.__version__,
@@ -95,14 +111,17 @@ def _check_snapshot(path, request):
     return json.loads((path / "report.json").read_text(encoding="utf-8"))
 
 
-def run(input_dir, config_path, output=None, artifacts_dir=Path("artifacts/t17"), progress=None):
+def run(input_dir, config_path, output=None, artifacts_dir=Path("artifacts/t17"), progress=None, as_of=None):
     started = time.monotonic()
+    cutoff = END if as_of is None else date.fromisoformat(as_of)
+    if not START <= cutoff <= END or as_of is not None and cutoff.isoformat() != as_of:
+        raise ValueError("as_of должен быть YYYY-MM-DD в известном учебном окне")
     config, config_bytes = load_model(config_path)
     if progress:
         progress("T17: проверка происхождения и воспроизведение независимого учебного набора")
     manifest, _, _ = validate_demo(input_dir)
     request = dict(schema_version="1.0", data_mode="synthetic_demo", input_logical_sha256=manifest["logical_sha256"],
-                   recipe=manifest["recipe"], config_hash=digest(config), runtime=_runtime())
+                   recipe=manifest["recipe"], as_of=cutoff.isoformat(), config_hash=digest(config), runtime=_runtime())
     run_id = "rules-" + digest(request)[:20]
     target = Path(output).resolve() if output is not None else Path(artifacts_dir).resolve() / run_id
     source = Path(input_dir).resolve()
@@ -119,7 +138,8 @@ def run(input_dir, config_path, output=None, artifacts_dir=Path("artifacts/t17")
             people, segments = generate_rows(manifest["recipe"])
             if progress:
                 progress(f"T17: расчёт трёх групп критериев, профилей — {len(people)}")
-            scores, explanations, features, coverage = _score_profiles(people, segments, config)
+            effective_people = [dict(p, window_end=min(p["window_end"], cutoff)) for p in people]
+            scores, explanations, features, coverage = _score_profiles(effective_people, segments, config)
             ranked, top = rank_scores(scores, run_id)
             for rows in [explanations, features, coverage]:
                 for row in rows:
