@@ -1,0 +1,120 @@
+{
+  "version": "0.7.0",
+  "pipeline_version": "1.0",
+  "scope": "synthetic_fixtures_and_automated_regressions_only",
+  "base_develop": "0388546b25efd00533b1e11d3fcc5bb6b8b504bd",
+  "branch": "reape/T16",
+  "python": "3.12.14",
+  "platform": "Linux",
+  "pytest": {
+    "tests": 300,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 48.437
+  },
+  "cli_checks": [
+    {
+      "check": "seven_source_raw",
+      "exit_code": 0,
+      "seconds": 1.924
+    },
+    {
+      "check": "unchanged_snapshot_reuse",
+      "exit_code": 0,
+      "seconds": 0.503
+    },
+    {
+      "check": "processed_adoption",
+      "exit_code": 0,
+      "seconds": 0.747
+    },
+    {
+      "check": "git_checkout_reference_with_autocrlf_disabled",
+      "passed": true,
+      "sha256": "7afcc2b62f26a6ef9b460b566c67effe9a53b8870e1b3c76a4e3e268cffa2bcb",
+      "csv_git_blob_unchanged": true
+    }
+  ],
+  "fixture_counts": {
+    "observations": 9,
+    "identifiers": 13,
+    "travel_observations": 9,
+    "schedules": 5,
+    "provenance": 36,
+    "errors": 0,
+    "persons": 6,
+    "person_links": 9,
+    "person_pairs": 5,
+    "segments": 9,
+    "segment_links": 9,
+    "conflicts": 0,
+    "blocking_issues": 0
+  },
+  "fixture_status": "complete_with_limitations",
+  "fixture_request_sha256": "526b118f16f452fd432db28540884f748262153e58930e82754bc2f08cd0aa3b",
+  "fixture_environment": {
+    "pipeline_version": "1.0",
+    "package_version": "0.7.0",
+    "python": "3.12.14",
+    "platform": "Linux",
+    "dependencies": {
+      "duckdb": "1.5.6",
+      "pyarrow": "26.0.0",
+      "ijson": "3.6.0",
+      "lxml": "6.1.1",
+      "openpyxl": "3.1.5",
+      "pymupdf": "1.26.6",
+      "pyyaml": "6.0.3",
+      "scikit-learn": "1.8.0",
+      "tzdata": "2026.5"
+    },
+    "source_files": {
+      "__init__.py": "0939ef1bef78c6cd7655f32140632dc3cf7ba77ecbc150d84e2db4b9eeb3cc1f",
+      "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+      "cli.py": "c1ef904e0351b35aa8a878ca529237b3edf9cee51d4e8cd5f819aa4114a54aab",
+      "config.py": "a683836061fc6e6d3c871d6a257fdbbc48e83c5786da1f2a1f40aa38182cff6e",
+      "contracts.py": "3b1b7a93a9f6d8b53baaa22b082f38f121bfc96bb9852147f654933628def4eb",
+      "features/__init__.py": "fdf42b0e042e0f9f6948d28d2c8e6140723a43045311c671563af01b23ed5816",
+      "features/travel.py": "76a6ddd1a40927122f2b26bf3618a7f5a4d8ab448074e471cf2aded0e6d567b9",
+      "io.py": "eb5789cd40a09954b25afad8f6a72816abf938b7ea249dabe80d120930e19586",
+      "normalize/__init__.py": "ae3aff03d724d87d4f3ed9c90fe3d9dc6ee6e72a1e9f4b44392552ae0a341229",
+      "normalize/airports.py": "10fe5733e9c514a828a325a86c280c53bd33963b718c95434195ce5aef1009ba",
+      "normalize/canonical.py": "027d9f49e752e601f21aeede086f75182f2246f7dfd735b3527af7740ebc4f95",
+      "normalize/geography.py": "c71e90b5f3692ad5d90f9fcff9416fa63a9926ea8da2a3750d771821d76ea79a",
+      "normalize/locking.py": "0a535489de50c1a2ceb5b3895c0954d3c6e925ad2becd12391c65a24e7418ac8",
+      "normalize/values.py": "cdc8b923ce21210d16ea4e97b9802333e4ce03ef532599b4bc0c7e6981c5ed33",
+      "pipeline.py": "cdc2be529887b887558d820144dc0e6f2a2c49aa0d756693fb3aaa0397b384c3",
+      "provenance.py": "2f0dcc9964e8e06868f206a72b1a3c0a7a12b9df707f5b754a881b374779ac62",
+      "quality.py": "642f86bfab883e5b1767f0af5c6fb6563eb05997a96bf97657cc012e66f52e54",
+      "readers/__init__.py": "2454fd028425b15c6dcbaf96b76ca0f0481ba11f4613de43309948c618aa791a",
+      "readers/boarding_csv.py": "0ef9f458e3bf30dc319643c1010b6c3c29bc863ebe5675a97c6ddcab5a0b296d",
+      "readers/boardingpass_xlsx.py": "6c06aa5b1b83658d50b50c8229471f9fa4ec5e28ce80e46e8d54706282a1cdd4",
+      "readers/common.py": "067282ca4a911a5a44676b6b0b6d160cd3a02b0159acf1dac0a5f83a1838f5e5",
+      "readers/forum_json.py": "2951d9682b3acac97fafee0a7f9c30212fd2031f1de676dd27f3c8908409056f",
+      "readers/pdf_reference.py": "6f9b1d717c855fba7f98c495081c2eebf03596d4f1cc8dfaa240c8063ce68c79",
+      "readers/pointz_xml.py": "d05143c87ae4cf7eb4945de6464992b3d667b58990107cfb9e6159ba804ef329",
+      "readers/sirena_fixed.py": "8f59daf2d048791e122e5936f1e3e07051e84f4c5d2e21b2bc2b978337880988",
+      "readers/skyteam_yaml.py": "99c86ae22684781a65bf0df846906c575e8040c0d5ad0d2139aaf422a02e28ca",
+      "readers/timetable_pdf.py": "f62bca40631a052f13df4bae556decbd7961b67402d84d11098be7c5dda2ba18",
+      "readers/xlsx_stream.py": "47c9d48193324b20cc022def5bdb955295dc4e0a5a9e2577a5cfa59810738738",
+      "resolve/__init__.py": "b4fd6b64eb8f57695a0d116e1b68c433f639f056ffa6677c8b305bf52b6a4a18",
+      "resolve/blocking.py": "18c60128b2a06d611733cb4353269678bb0aa033dd92d261c8ddb6221d4d6ac4",
+      "resolve/common.py": "9ada9b1115b15109b856ac51e02c8e9fe651553e14bd31dc73adfc60ec7bfef5",
+      "resolve/matching.py": "8d5d251fe05c73a04a49841a24f74ebdf95d423dcc8604473b7ff12812349701",
+      "resolve/pipeline.py": "816b42bbef6945b22cb3dd9bb330ac2291e5ac8d2a1ba623066c5c18d90451be",
+      "resolve/review.py": "b22e6450e84b67b9f2e1064b0e4b2863d108f4b561cacba6f995320560f81a29",
+      "resolve/segments.py": "99b298c6e9eb7f88b027057cee0ddcf1965d1a26149ee4cd6a1860ee76793ddc"
+    },
+    "code_sha256": "d801c35f28137215f056ac24b5b10478f3d2198854e10dbad601bd1ad8849068"
+  },
+  "snapshot_file_count": 58,
+  "full_real_run_performed": false,
+  "independent_review_performed": false,
+  "native_windows_run_performed": false,
+  "limitations": [
+    "Full raw/T11/T12/T13 real inputs are unavailable here; T15 outputs cannot substitute for them.",
+    "No total-process RAM or full-real-data runtime claim is made.",
+    "Technical completion does not accept T21, train a model or publish a web UI."
+  ]
+}

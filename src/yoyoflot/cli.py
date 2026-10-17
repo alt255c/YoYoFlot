@@ -21,7 +21,7 @@ READERS = [
 
 
 def parser():
-    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot readers, geography T11, canonical build T12 and resolution T13")
+    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot readers and reproducible data pipeline T16")
     p.add_argument("--version", action="version", version="yoyoflot " + __version__)
     sub = p.add_subparsers(dest="command", required=True)
     inv = sub.add_parser(
@@ -84,14 +84,49 @@ def parser():
     quality.add_argument("--output", type=Path)
     quality.add_argument("--sample-size", type=int, default=30)
     quality.add_argument("--memory-limit", default="512MB")
-    for name in ["features", "train", "evaluate", "run"]:
-        sub.add_parser(name, help="Not implemented: modeling tasks T13 onward")
+    pipeline = sub.add_parser("run", help="T16: reproducible data core, without a model or web UI")
+    pipeline.add_argument("--config", type=Path, default=Path("configs/sources.yaml"))
+    pipeline.add_argument("--data-dir", type=Path, default=Path("data/raw"))
+    pipeline.add_argument("--work-dir", type=Path, default=Path("data/work/t16"))
+    pipeline.add_argument("--artifacts-dir", type=Path, default=Path("artifacts"), help="Parent for automatic snapshot names")
+    pipeline.add_argument("--output", type=Path, help="New immutable snapshot directory; default: artifacts/data-<fingerprint>")
+    start = pipeline.add_mutually_exclusive_group()
+    start.add_argument("--from-interim", type=Path, help="Use completed reader outputs; original raw files are not revalidated")
+    start.add_argument("--from-processed", type=Path, help="Verify/adopt existing T11/T12/T13; do not repeat their calculations")
+    pipeline.add_argument("--until", choices=["build"], default="build", help="build = entire data core through T14, not only T12")
+    pipeline.add_argument("--normalization-config", type=Path, default=Path("configs/normalization.yaml"))
+    pipeline.add_argument("--resolution-config", type=Path, default=Path("configs/resolution.yaml"))
+    pipeline.add_argument("--reference", type=Path, default=Path("data/reference/airports.csv"))
+    pipeline.add_argument("--reference-manifest", type=Path)
+    pipeline.add_argument("--overrides", type=Path, default=Path("configs/airports_overrides.yaml"))
+    pipeline.add_argument("--batch-size", type=int, default=4000)
+    pipeline.add_argument("--chunk-pages", type=int, default=100)
+    pipeline.add_argument("--sample-size", type=int, default=30)
+    pipeline.add_argument("--memory-limit", default="1GB", help="DuckDB limit, not a total Python RAM limit")
+    pipeline.add_argument("--require-all", action="store_true", help="Require all seven logical sources")
+    pipeline.add_argument("--allow-source-errors", action="store_true", help="Keep documented parser/PDF limitations; never bypass structural blockers")
+    pipeline.add_argument("-q", "--quiet", action="store_true")
+    for name in ["features", "train", "evaluate"]:
+        sub.add_parser(name, help="Not implemented by this CLI; see task-specific scripts")
     return p
 
 
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "run":
+            from .pipeline import run
+            _, summary = run(config=args.config, data_dir=args.data_dir, work_dir=args.work_dir,
+                             output=args.output, from_interim=args.from_interim, from_processed=args.from_processed,
+                             artifacts_dir=args.artifacts_dir,
+                             normalization=args.normalization_config, resolution=args.resolution_config,
+                             reference=args.reference, overrides=args.overrides, reference_manifest=args.reference_manifest,
+                             batch_size=args.batch_size, memory_limit=args.memory_limit, chunk_pages=args.chunk_pages,
+                             sample_size=args.sample_size, require_all=args.require_all, allow_source_errors=args.allow_source_errors,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
         if args.command == "resolve":
             from .resolve.pipeline import run
             _, summary = run(args.input,args.output,args.config,args.review_output,args.batch_size,args.memory_limit,
@@ -154,7 +189,7 @@ def main(argv=None):
             export(args.path, args.output)
             return 0
         if args.command != "ingest":
-            print(f"{args.command}: not implemented (modeling tasks T13 onward)", file=sys.stderr)
+            print(f"{args.command}: not implemented by this CLI", file=sys.stderr)
             return 2
         if args.source == "all" and args.path:
             raise ValueError("--path only applies to one source")
@@ -195,7 +230,10 @@ def main(argv=None):
                 failed = True
         return 1 if failed else 0
     except KeyboardInterrupt:
-        print("Выполнение прервано. Блокировка освобождена; повторный запуск начнёт обработку заново.", file=sys.stderr)
+        if args.command == "run":
+            print("T16 прерван. Блокировка освобождена; повторная команда проверит и использует завершённые этапы.", file=sys.stderr)
+        else:
+            print("Выполнение прервано. Блокировка освобождена; повторный запуск начнёт обработку заново.", file=sys.stderr)
         return 130
     except Exception as exc:
         print(f"{type(exc).__name__}: {exc}", file=sys.stderr)

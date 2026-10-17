@@ -6,3 +6,7 @@ __pycache__/
 data/raw/
 data/interim/
 *.partial/
+data/work/
+data/verification/
+/artifacts/
+pytest-of-root/
