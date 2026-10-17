@@ -1,0 +1,535 @@
+{
+  "date": "2026-10-16",
+  "scope": "all_unique_values_in_supplied_inventory_with_original_frequencies; not_a_full_pipeline_run",
+  "rule_version": "airports:1.1",
+  "inventory_rows": 13835,
+  "inputs": {
+    "geography_report_sha256": "c3e6465b978be80030109ec4dc43fb19e8cfe95d9fcc35c236b5d929c2ec0897",
+    "place_inventory_sha256": "4ebad70157b47542f331ceca6b7d1cfd7c4b26ae6e852726b0e35ca139df6183"
+  },
+  "reference_sha256": "7afcc2b62f26a6ef9b460b566c67effe9a53b8870e1b3c76a4e3e268cffa2bcb",
+  "previous_overrides_sha256": "adc99cb9e2ce1ad3ef031b76d2632c41ca38baaf5d289e99ba5faf9f2a2bfba0",
+  "overrides_sha256": "5c2fa9e73325af3f65cbca4656e89a3fdbb626784e4e04ece78a0dca8f4c7b44",
+  "baseline_matches_uploaded_inventory": true,
+  "previous_airport_assignments_changed": 0,
+  "ambiguous_cities_assigned_an_airport": 0,
+  "quality": [
+    {
+      "entity_table": "schedules",
+      "source_id": "timetable_pdf",
+      "before": {
+        "exact": 3034122,
+        "total": 3055166,
+        "unresolved": 21044
+      },
+      "after": {
+        "exact": 3034122,
+        "total": 3055166,
+        "unresolved": 21044
+      },
+      "before_resolved_fraction": 0.9931119945691985,
+      "after_resolved_fraction": 0.9931119945691985
+    },
+    {
+      "entity_table": "travel_observations",
+      "source_id": "boarding_csv",
+      "before": {
+        "exact": 33657,
+        "total": 310294,
+        "unresolved": 276637
+      },
+      "after": {
+        "exact": 33657,
+        "total": 310294,
+        "unresolved": 276637
+      },
+      "before_resolved_fraction": 0.10846809799738313,
+      "after_resolved_fraction": 0.10846809799738313
+    },
+    {
+      "entity_table": "travel_observations",
+      "source_id": "boardingpass_xlsx",
+      "before": {
+        "exact": 1221478,
+        "total": 1231542,
+        "unresolved": 10064
+      },
+      "after": {
+        "exact": 1221478,
+        "total": 1231542,
+        "unresolved": 10064
+      },
+      "before_resolved_fraction": 0.9918281309123035,
+      "after_resolved_fraction": 0.9918281309123035
+    },
+    {
+      "entity_table": "travel_observations",
+      "source_id": "forum_json",
+      "before": {
+        "exact": 1431086,
+        "total": 2617974,
+        "unresolved": 1186888
+      },
+      "after": {
+        "exact": 1434798,
+        "total": 2617974,
+        "corrected": 1062319,
+        "unresolved": 120857
+      },
+      "before_resolved_fraction": 0.5466387366719455,
+      "after_resolved_fraction": 0.9538356759845591
+    },
+    {
+      "entity_table": "travel_observations",
+      "source_id": "pointz_xml",
+      "before": {
+        "exact": 864990,
+        "total": 872180,
+        "unresolved": 7190
+      },
+      "after": {
+        "exact": 864990,
+        "total": 872180,
+        "unresolved": 7190
+      },
+      "before_resolved_fraction": 0.9917562888394598,
+      "after_resolved_fraction": 0.9917562888394598
+    },
+    {
+      "entity_table": "travel_observations",
+      "source_id": "sirena_fixed",
+      "before": {
+        "exact": 308024,
+        "total": 311514,
+        "unresolved": 3490
+      },
+      "after": {
+        "exact": 308024,
+        "total": 311514,
+        "unresolved": 3490
+      },
+      "before_resolved_fraction": 0.9887966511938469,
+      "after_resolved_fraction": 0.9887966511938469
+    },
+    {
+      "entity_table": "travel_observations",
+      "source_id": "skyteam_yaml",
+      "before": {
+        "exact": 3346499,
+        "total": 3374106,
+        "unresolved": 27607
+      },
+      "after": {
+        "exact": 3346499,
+        "total": 3374106,
+        "unresolved": 27607
+      },
+      "before_resolved_fraction": 0.9918179808221793,
+      "after_resolved_fraction": 0.9918179808221793
+    }
+  ],
+  "forum_recovered_by_country": {
+    "Russian Federation": 491220,
+    "United States of": 435008,
+    "Russian": 62439,
+    "Spain and Canary Islands": 41311,
+    "Spain and Canary": 21069,
+    "Spain and": 6834,
+    "": 3712,
+    "United States of America": 2230,
+    "Myanmar": 1288,
+    "Lao People's": 899,
+    "Turks and Caicos": 21
+  },
+  "forum_examples": {
+    "Russian Federation": [
+      {
+        "original": {
+          "City": "Abakan",
+          "Airport": "ABA",
+          "Country": "Russian Federation"
+        },
+        "iata": "ABA",
+        "status": "corrected",
+        "count": 238
+      },
+      {
+        "original": {
+          "City": "Anapa",
+          "Airport": "AAQ",
+          "Country": "Russian Federation"
+        },
+        "iata": "AAQ",
+        "status": "corrected",
+        "count": 748
+      }
+    ],
+    "United States of": [
+      {
+        "original": {
+          "City": "Aberdeen SD",
+          "Airport": "ABR",
+          "Country": "United States of"
+        },
+        "iata": "ABR",
+        "status": "corrected",
+        "count": 41
+      },
+      {
+        "original": {
+          "City": "Akron/Canton OH",
+          "Airport": "CAK",
+          "Country": "United States of"
+        },
+        "iata": "CAK",
+        "status": "corrected",
+        "count": 197
+      }
+    ],
+    "Spain and Canary Islands": [
+      {
+        "original": {
+          "City": "Alicante",
+          "Airport": "ALC",
+          "Country": "Spain and Canary Islands"
+        },
+        "iata": "ALC",
+        "status": "corrected",
+        "count": 1209
+      },
+      {
+        "original": {
+          "City": "Almeria",
+          "Airport": "LEI",
+          "Country": "Spain and Canary Islands"
+        },
+        "iata": "LEI",
+        "status": "corrected",
+        "count": 137
+      }
+    ],
+    "Spain and Canary": [
+      {
+        "original": {
+          "City": "Barcelona",
+          "Airport": "BCN",
+          "Country": "Spain and Canary"
+        },
+        "iata": "BCN",
+        "status": "corrected",
+        "count": 6099
+      },
+      {
+        "original": {
+          "City": "Fuerteventura",
+          "Airport": "FUE",
+          "Country": "Spain and Canary"
+        },
+        "iata": "FUE",
+        "status": "corrected",
+        "count": 312
+      }
+    ],
+    "Russian": [
+      {
+        "original": {
+          "City": "Blagoveshchensk",
+          "Airport": "BQS",
+          "Country": "Russian"
+        },
+        "iata": "BQS",
+        "status": "corrected",
+        "count": 733
+      },
+      {
+        "original": {
+          "City": "Mineralnye Vody",
+          "Airport": "MRV",
+          "Country": "Russian"
+        },
+        "iata": "MRV",
+        "status": "corrected",
+        "count": 1954
+      }
+    ],
+    "United States of America": [
+      {
+        "original": {
+          "City": "Boise ID",
+          "Airport": "BOI",
+          "Country": "United States of America"
+        },
+        "iata": "BOI",
+        "status": "corrected",
+        "count": 553
+      },
+      {
+        "original": {
+          "City": "Elko NV",
+          "Airport": "EKO",
+          "Country": "United States of America"
+        },
+        "iata": "EKO",
+        "status": "corrected",
+        "count": 22
+      }
+    ],
+    "": [
+      {
+        "original": {
+          "City": "Bristol/Johnson/Kingsport TN",
+          "Airport": "TRI",
+          "Country": ""
+        },
+        "iata": "TRI",
+        "status": "exact",
+        "count": 304
+      },
+      {
+        "original": {
+          "City": "MYR",
+          "Airport": "MYR",
+          "Country": ""
+        },
+        "iata": "MYR",
+        "status": "exact",
+        "count": 122
+      }
+    ],
+    "Lao People's": [
+      {
+        "original": {
+          "City": "Luang Prabang",
+          "Airport": "LPQ",
+          "Country": "Lao People's"
+        },
+        "iata": "LPQ",
+        "status": "corrected",
+        "count": 145
+      },
+      {
+        "original": {
+          "City": "Vientiane",
+          "Airport": "VTE",
+          "Country": "Lao People's"
+        },
+        "iata": "VTE",
+        "status": "corrected",
+        "count": 317
+      }
+    ],
+    "Myanmar": [
+      {
+        "original": {
+          "City": "Mandalay",
+          "Airport": "MDL",
+          "Country": "Myanmar"
+        },
+        "iata": "MDL",
+        "status": "corrected",
+        "count": 131
+      },
+      {
+        "original": {
+          "City": "Nay Pyi Taw",
+          "Airport": "NYT",
+          "Country": "Myanmar"
+        },
+        "iata": "NYT",
+        "status": "corrected",
+        "count": 86
+      }
+    ],
+    "Spain and": [
+      {
+        "original": {
+          "City": "Palma De Mallorca",
+          "Airport": "PMI",
+          "Country": "Spain and"
+        },
+        "iata": "PMI",
+        "status": "corrected",
+        "count": 3491
+      },
+      {
+        "original": {
+          "City": "Palma De Mallorca",
+          "Airport": "PMI",
+          "Country": "Spain and"
+        },
+        "iata": "PMI",
+        "status": "corrected",
+        "count": 3343
+      }
+    ],
+    "Turks and Caicos": [
+      {
+        "original": {
+          "City": "Providenciales",
+          "Airport": "PLS",
+          "Country": "Turks and Caicos"
+        },
+        "iata": "PLS",
+        "status": "corrected",
+        "count": 11
+      },
+      {
+        "original": {
+          "City": "Providenciales",
+          "Airport": "PLS",
+          "Country": "Turks and Caicos"
+        },
+        "iata": "PLS",
+        "status": "corrected",
+        "count": 10
+      }
+    ]
+  },
+  "forum_remaining": [
+    {
+      "country": "Ko",
+      "reason": "context_conflict",
+      "count": 52512
+    },
+    {
+      "country": "United",
+      "reason": "context_conflict",
+      "count": 42775
+    },
+    {
+      "country": "",
+      "reason": "unknown_place",
+      "count": 6772
+    },
+    {
+      "country": "China",
+      "reason": "unknown_place",
+      "count": 6051
+    },
+    {
+      "country": "Russian Federation",
+      "reason": "unknown_place",
+      "count": 3488
+    },
+    {
+      "country": "Belgium",
+      "reason": "unknown_place",
+      "count": 2951
+    },
+    {
+      "country": "Tanza",
+      "reason": "unknown_place",
+      "count": 1417
+    },
+    {
+      "country": "Mold",
+      "reason": "context_conflict",
+      "count": 1340
+    },
+    {
+      "country": "Dominican",
+      "reason": "context_conflict",
+      "count": 701
+    },
+    {
+      "country": "Co",
+      "reason": "context_conflict",
+      "count": 445
+    },
+    {
+      "country": "Sint Maarten",
+      "reason": "context_conflict",
+      "count": 412
+    },
+    {
+      "country": "Congo",
+      "reason": "context_conflict",
+      "count": 392
+    },
+    {
+      "country": "Curacao",
+      "reason": "context_conflict",
+      "count": 268
+    },
+    {
+      "country": "Bonaire",
+      "reason": "context_conflict",
+      "count": 258
+    },
+    {
+      "country": "France",
+      "reason": "unknown_place",
+      "count": 243
+    },
+    {
+      "country": "Japan",
+      "reason": "unknown_place",
+      "count": 222
+    },
+    {
+      "country": "Guadeloupe",
+      "reason": "context_conflict",
+      "count": 169
+    },
+    {
+      "country": "China",
+      "reason": "context_conflict",
+      "count": 154
+    },
+    {
+      "country": "Indonesia",
+      "reason": "unknown_place",
+      "count": 134
+    },
+    {
+      "country": "Vietnam",
+      "reason": "unknown_place",
+      "count": 61
+    },
+    {
+      "country": "Ethiopia",
+      "reason": "context_conflict",
+      "count": 39
+    },
+    {
+      "country": "Virgin Isla",
+      "reason": "unknown_place",
+      "count": 37
+    },
+    {
+      "country": "Canada",
+      "reason": "unknown_place",
+      "count": 16
+    }
+  ],
+  "schedule_link_status_totals": {
+    "reference_only": 63403248
+  },
+  "caveats": [
+    "Frequencies are airport/place occurrences, not affected trip counts.",
+    "No real travel/schedule tables supplied; UTC, links, joins and file hashes were not re-run.",
+    "Report says timetable_pdf source incomplete and all existing links reference_only.",
+    "Known reference gaps, ambiguous cities and unreviewed/truncated location objects remain unresolved."
+  ],
+  "regression_tests": {
+    "passed": 226,
+    "failed": 0,
+    "t11_cases": 102,
+    "seconds": 10.55,
+    "python": "3.12.14",
+    "scope": "synthetic fixtures plus reviewed real location examples"
+  },
+  "installed_smoke": {
+    "package": "0.5.1",
+    "wheel": "yoyoflot-0.5.1-py3-none-any.whl",
+    "quiet_stdout_empty": true,
+    "quiet_stderr_empty": true,
+    "normal_summary_matches_file": true,
+    "manifest_checksums_verified": true,
+    "corrected_origins": 2,
+    "damaged_origin_unresolved": true,
+    "raw_values_preserved": true,
+    "date_only_utc_null": true
+  },
+  "native_windows_tested": false
+}
