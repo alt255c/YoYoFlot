@@ -7,6 +7,7 @@ from pathlib import Path
 from .config import load_sources, resolve_path
 from .io import ingest
 from .provenance import fingerprint
+from . import __version__
 
 READERS = [
     "boarding_csv",
@@ -20,8 +21,8 @@ READERS = [
 
 
 def parser():
-    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot readers T03–T10")
-    p.add_argument("--version", action="version", version="yoyoflot 0.3.5")
+    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot readers, geography T11, canonical build T12 and resolution T13")
+    p.add_argument("--version", action="version", version="yoyoflot " + __version__)
     sub = p.add_subparsers(dest="command", required=True)
     inv = sub.add_parser(
         "inventory", help="File metadata and hashes (not full T01 acceptance)"
@@ -47,14 +48,75 @@ def parser():
         "--output", type=Path, default=Path("data/interim/timetable_pdf")
     )
     audit.add_argument("--rows", type=int, default=50)
-    for name in ["build", "features", "train", "evaluate", "run"]:
-        sub.add_parser(name, help="Not implemented: tasks T11 onward")
+    geo = sub.add_parser("airports", help="T11: normalize geography and link compatible schedules")
+    geo.add_argument("--input", type=Path, nargs="+", required=True)
+    geo.add_argument("--output", type=Path, default=Path("data/processed"))
+    geo.add_argument("--reference", type=Path, default=Path("data/reference/airports.csv"))
+    geo.add_argument("--reference-manifest", type=Path)
+    geo.add_argument("--overrides", type=Path, default=Path("configs/airports_overrides.yaml"))
+    geo.add_argument("--schedules", type=Path, nargs="+")
+    geo.add_argument("--batch-size", type=int, default=2000)
+    geo.add_argument("-q", "--quiet", action="store_true")
+    canonical = sub.add_parser("build", help="T12: normalize and assemble canonical reader tables")
+    canonical.add_argument("--input", type=Path, nargs="+", default=[Path("data/interim/real")])
+    canonical.add_argument("--output", type=Path, default=Path("data/processed"))
+    canonical.add_argument("--config", type=Path, default=Path("configs/normalization.yaml"))
+    canonical.add_argument("--batch-size", type=int, default=4000)
+    canonical.add_argument("--memory-limit", default="512MB")
+    canonical.add_argument("--require-all", action="store_true")
+    canonical.add_argument("-q", "--quiet", action="store_true")
+    resolution = sub.add_parser("resolve", help="T13: resolve passenger identities and duplicate journey evidence")
+    resolution.add_argument("--input", type=Path, default=Path("data/processed"))
+    resolution.add_argument("--output", type=Path, default=Path("data/processed"))
+    resolution.add_argument("--config", type=Path, default=Path("configs/resolution.yaml"))
+    resolution.add_argument("--review-output", type=Path, default=Path("data/review"))
+    resolution.add_argument("--batch-size", type=int, default=4000)
+    resolution.add_argument("--memory-limit", default="1GB", help="DuckDB memory limit (not total Python RAM)")
+    resolution.add_argument("--require-all", action="store_true")
+    resolution.add_argument("-q", "--quiet", action="store_true")
+    review = sub.add_parser("resolution-review", help="T13: audit an independently reviewed CSV without rerunning matching")
+    review.add_argument("--sample", type=Path, default=Path("data/review/person_pairs.csv"))
+    review.add_argument("--input", type=Path, default=Path("data/processed"))
+    review.add_argument("--report", type=Path, default=Path("data/review/person_pairs_review_report.json"))
+    review.add_argument("-q", "--quiet", action="store_true")
+    for name in ["features", "train", "evaluate", "run"]:
+        sub.add_parser(name, help="Not implemented: modeling tasks T13 onward")
     return p
 
 
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "resolve":
+            from .resolve.pipeline import run
+            _, summary = run(args.input,args.output,args.config,args.review_output,args.batch_size,args.memory_limit,
+                             args.require_all,progress=None if args.quiet else lambda message: print(message,flush=True))
+            if not args.quiet:
+                print(summary,end="")
+            return 0
+        if args.command == "resolution-review":
+            from .resolve.review import audit_to_file
+            report = audit_to_file(args.sample,args.input,args.report)
+            if not args.quiet:
+                print(f"T13 review: проверено {report['reviewed']} / {report['sampled']}; расхождений {len(report['disagreements'])}")
+                print(f"Отчёт: {args.report}")
+            return 0
+        if args.command == "build":
+            from .normalize.canonical import build
+            report, summary = build(args.input, args.output, args.config, args.batch_size,
+                                    args.memory_limit, args.require_all,
+                                    progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0 if report["status"] == "complete" else 1
+        if args.command == "airports":
+            from .normalize.geography import run
+            _, summary = run(args.input, args.output, args.reference, args.overrides,
+                             args.reference_manifest, args.schedules, args.batch_size,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
         if args.command == "inventory":
             root = Path(args.data_dir)
             if not root.is_dir():
@@ -82,7 +144,7 @@ def main(argv=None):
             export(args.path, args.output)
             return 0
         if args.command != "ingest":
-            print(f"{args.command}: not implemented (outside T03–T10)", file=sys.stderr)
+            print(f"{args.command}: not implemented (modeling tasks T13 onward)", file=sys.stderr)
             return 2
         if args.source == "all" and args.path:
             raise ValueError("--path only applies to one source")
@@ -122,6 +184,9 @@ def main(argv=None):
                 print(f"{name}: {type(exc).__name__}: {exc}", file=sys.stderr)
                 failed = True
         return 1 if failed else 0
+    except KeyboardInterrupt:
+        print("Выполнение прервано. Блокировка освобождена; повторный запуск начнёт обработку заново.", file=sys.stderr)
+        return 130
     except Exception as exc:
         print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
         return 1

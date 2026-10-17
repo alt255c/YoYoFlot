@@ -1,0 +1,79 @@
+{
+  "scope": "author_evidence_and_rule_consistency_check_only",
+  "run_fingerprint": "run_e8cccb3674fa06401e026ddbac4eb4a137749460c459173fdae466701a7e0c81",
+  "inputs_sha256": {
+    "/workspace/scratch/45cb65ef93ca/upload/person_pairs.csv": "d9913e582be5245cd9a7db28f05bb0948e695dcd92fefc6721c71e3897a795a0",
+    "/workspace/scratch/45cb65ef93ca/upload/resolution_report.json": "ac0fa26c816f1bf89895f50ec2bbb04169061acc1af98c7b643cb8dca326ffac",
+    "/workspace/scratch/45cb65ef93ca/project_t11/Project/configs/resolution.yaml": "726ff9022878e77ee8828b41a2cbbd201fe0edc6f75b9618d281c6fa26eb6575"
+  },
+  "sample_rows": 100,
+  "strata": {
+    "accepted": 50,
+    "ambiguous": 30,
+    "rejected": 20
+  },
+  "rule_counts": {
+    "programme_card": 47,
+    "source_document_name_birth_date": 2,
+    "component_support": 1,
+    "name_birth_date_only": 10,
+    "component_name_uncertain": 5,
+    "unconfirmed_document_context": 14,
+    "identifier_with_uncertain_name": 1,
+    "document_context_conflict": 13,
+    "component_document_conflict": 2,
+    "name_conflict": 5
+  },
+  "categories": {
+    "direct_rule_supported": 90,
+    "component_context_required": 8,
+    "document_history_required": 2
+  },
+  "inconsistencies": [],
+  "direct_computation_matches": 100,
+  "accepted_name_presence": {
+    "neither": 25,
+    "one": 20,
+    "both": 5
+  },
+  "component_context_required_rows": [
+    47,
+    52,
+    57,
+    64,
+    75,
+    77,
+    85,
+    86
+  ],
+  "document_history_required_rows": [
+    82,
+    98
+  ],
+  "abbreviation_candidate_rows": [
+    55,
+    60,
+    63,
+    65,
+    67,
+    70,
+    71,
+    73,
+    74,
+    78
+  ],
+  "independently_reviewed_in_uploaded_csv": 0,
+  "independent_acceptance": "pending",
+  "identity_precision": null,
+  "population_accuracy": null,
+  "limitations": [
+    "Agreement with implemented rules is not identity ground truth.",
+    "Shared identifier hashes validate equality in the supplied evidence; original identifier values were not supplied for most sources.",
+    "Full components and the historical merge path are absent from the sample.",
+    "Names were compared under the supplied canonical:1.0 NFKC/casefold/ru_ascii_v1 rules; original documents and raw source files were not read.",
+    "Membership in the exact published deterministic sample cannot be independently verified without the published snapshot or all person_pairs.",
+    "The 50/30/20 stratified sample does not establish population accuracy.",
+    "This author check leaves every independent reviewer field and all source files unchanged."
+  ],
+  "inputs_unchanged": true
+}

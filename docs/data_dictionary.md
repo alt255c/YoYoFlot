@@ -1,5 +1,8 @@
 # Словарь данных 1.0
 
+Дополнительный контракт resolution 1.0 (T13) описан в конце документа;
+его схемы независимы от reader/canonical/geography.
+
 Сгенерирован из `contracts.SCHEMAS`; смысл null и связи — `data_contract.md`.
 
 ## person_observations
@@ -118,3 +121,139 @@
 | error_id | string | нет | PK записи журнала; не итоговое число исключённых исходных объектов. |
 | reason | string | нет | Машинно-читаемая причина ошибки, исключения или ограничения. |
 | severity | string | нет | info (пустые/служебные записи), warning (ограничение), error (потеря/ошибка). |
+
+## T11: дополнительные таблицы geography 1.0
+
+Базовые схемы readers выше не меняются. Метаданные/типы дополнительных полей
+заданы в `src/yoyoflot/normalize/geography.py`; все дополнительные поля nullable,
+булевы quality flags в travel_geography заполняются для каждой строки.
+
+### travel_geography
+
+Содержит все исходные travel_observations и совместимые дополнительные поля T12.
+
+| Дополнительные поля | Тип | Смысл |
+|---|---|---|
+| origin_airport_id, destination_airport_id | string | Ключ аэропорта в снимке справочника, null при нерешённости |
+| origin_iata, destination_iata | string | Подтверждённый справочный код; null допустим даже при известном airport_id |
+| origin_city/country, destination_city/country | string | Справочный город/страна; страна также может быть известна без аэропорта |
+| origin_latitude/longitude, destination_latitude/longitude | float64 | Градусы из снимка справочника, без оценки исторической точности |
+| origin_timezone, destination_timezone | string | IANA timezone известного аэропорта |
+| origin_status, destination_status | string | exact / corrected / inferred_from_schedule / ambiguous / unresolved |
+| origin_kind, destination_kind | string | airport / city / country / missing / unknown — вид исходного обозначения |
+| origin_reason, destination_reason | string | Причина выбора или отказа |
+| origin_candidates_json, destination_candidates_json | string | JSON-массив возможных airport_id; [] при отсутствии |
+| origin_override_json, destination_override_json | string | Полное правило YAML с evidence/reason либо null; для стран объект country_aliases (массив правил), при совместном исправлении кода также airport_override |
+| departure_effective_local, arrival_effective_local | string | Исходная ISO-строка либо явно выведенная полная локальная дата/время |
+| departure_effective_precision, arrival_effective_precision | string | Точность effective-значения; исходная точность хранится отдельно |
+| departure_time_origin, arrival_time_origin | string | source / inferred_from_schedule / missing |
+| departure_utc, arrival_utc | string | Разрешённый ISO timestamp UTC с Z, иначе null |
+| departure_utc_status, arrival_utc_status | string | converted / missing_time / incomplete_datetime / unknown_airport / unknown_timezone / invalid_datetime / ambiguous_local_time / nonexistent_local_time / timezone_conflict |
+| departure_iana_timezone, arrival_iana_timezone | string | Пояс аэропорта, использованный/проверенный при UTC-конверсии |
+| schedule_match_status | string | matched / ambiguous / temporal_unknown / reference_only / unresolved |
+| schedule_id_used | string | Единственная разрешённая строка расписания, иначе null |
+| geography_rule_version, geography_reference_version | string | Версия алгоритма и снимка справочника |
+| inferred_fields_json | string | JSON-объект всех полей, заполненных из расписания; {} если таких нет |
+| geography_complete, geography_inferred | bool | Известны обе точки; есть точка, выведенная по расписанию |
+| time_complete, time_inferred | bool | Разрешены оба UTC; есть время, выведенное по расписанию |
+
+### schedule_geography
+
+Все исходные schedules. Для каждого префикса `origin_geo_`/`destination_geo_`
+добавлены поля airport_id, iata, city, country, timezone, status, kind, reason,
+candidates_json, override_json (string), latitude/longitude (float64). Исходные
+origin/destination и origin_city/origin_country остаются без изменений.
+
+### schedule_links
+
+Все поля string: travel_id, source_id/source_record_id/locator исходной поездки;
+schedule_id, schedule_source_id/schedule_source_record_id/schedule_locator строки
+расписания; status (matched/ambiguous/temporal_unknown/reference_only),
+temporal_coverage (confirmed/unknown/outside_period), rule_id, reason,
+filled_fields_json и evidence_json. Свидетельство содержит маршрут, номер,
+период, дни, локальные часы, +N и locator кандидата. filled_fields_json непустой
+только у единственного разрешённого кандидата, который действительно что-то
+дополнил. У ambiguous кандидатов он всегда {}.
+
+### place_inventory
+
+source_id, entity_table, field, raw, kind, status, airport_id, iata, city, country,
+reason, candidates_json — string; count — int64. Одна строка на уникальное
+исходное значение поля в источнике, включая null. Это инвентарь мест, а не людей.
+Исходные города/страны расписания учитываются отдельными полями и не повышают
+знаменатель airport coverage (он равен двум точкам на строку расписания).
+
+## T12: canonical 1.0
+
+Структура базовых полей наследует readers, а nullable для неключевых значений
+расширен: несовместимое значение может стать null без удаления профиля.
+Схемы — normalize/canonical.py. `observations` соответствует person_observations;
+остальные имена базовых таблиц сохранены. PK и все исходные локальные ссылки
+не перенумеровываются.
+
+| Дополнительные поля | Тип | Значение |
+|---|---|---|
+| input_schema_sha256 | string | SHA-256 исходной Arrow-схемы; её описание сохранено в canonical_report.input_schemas |
+| normalization_version | string | Версия правил canonical:1.0, во всех таблицах |
+| source_values_json | string | Оригиналы изменённых базовых полей и extra:<имя> для новых входных полей |
+| normalization_rules_json | string | Поле → rule_id последнего применённого изменения; полный рецепт задаёт конфигурация |
+| normalization_status | string | ok / invalid_fields; межтабличные ошибки читаются отдельно |
+| observations.name_comparison | string | NFKC + casefold + нормализация пробелов, без замены name_raw |
+| observations.name_latin_comparison | string | Сравнительная ru_ascii_v1, не доказательство личности |
+| identifiers.value_normalized | string | Номер по правилу kind с сохранёнными значимыми нулями/буквами |
+| identifiers.programme_normalized | string | Отдельная программа, NFKC/casefold/пробелы |
+| identifiers.identifier_namespace | string | JSON пространства имён: source или подтверждённый контекст либо programme |
+| identifiers.identifier_match_key | string | JSON namespace + value; null, если контекст неизвестен |
+| identifiers.namespace_status | string | source_scoped / programme_scoped / confirmed_override / unknown_programme / unsupported_identifier_kind / missing_identifier_value |
+| travel_observations.flight_number_normalized | string | Отдельное очищенное представление номера; не объединяет codeshare |
+| travel_observations.ticket_number_normalized | string | Строковый билет без значимых преобразований цифр |
+| travel_observations.booking_code_normalized | string | Отдельное представление кода брони, регистр/внутренние символы сохраняются |
+
+В normalization_errors все поля string: normalization_error_id, source_id,
+entity_table, entity_id, source_record_id, locator, field, reason, value_json,
+rule_id, severity. Идентификатор ошибки детерминирован по объекту/полю/причине.
+value_json позволяет восстановить несовместимый вход, severity=error требует
+проверки. Это не количество удалённых записей.
+
+В transformation_log поля source_id/entity_table/field/rule_id/version и
+examples_json строковые; affected_records и exceptions — int64. Примеры содержат
+entity_id, locator, before, after. Числа относятся к принятым строкам после
+удаления повторного чтения, а не к числу физических копий входных файлов.
+
+В duplicate_reads строковые source_id/entity_table/entity_id/source_record_id/
+locator, целочисленные input_copies и duplicates_removed. Одна строка описывает
+точные копии одного ключа; содержательно похожие события с другими ключами не
+сворачиваются здесь.
+
+## T13: resolution 1.0
+
+Авторитетные типы — resolve/common.py::SCHEMAS. Строковые JSON-поля содержат
+JSON-текст, nullable-поле означает неизвестность. ID person_/segment_ не содержат
+паспорт/карту и стабильны для того же снимка и правил.
+
+| Таблица | Поля и смысл |
+|---|---|
+| persons | person_id (PK), anchor_observation_id, display_name/birth_date (string, nullable), identity_status, rule_id; observation_count/source_count (int64); graph_eligible (bool) |
+| person_links | observation_id (PK) → persons.person_id, source_id/source_record_id/locator, status (accepted/ambiguous), confidence (strong_identifier/source_only/unresolved), rule_id; node_index (int64, внутренняя диагностическая ссылка); graph_eligible (bool) |
+| person_pairs | pair_id (PK), left/right_observation_id, status (accepted/rejected/ambiguous), rule_id, reason, features_json, evidence_json (string); name_similarity (float64, не вероятность) |
+| segments | segment_id (PK) → persons.person_id, anchor_travel_id, departure_date, flight_number, origin/destination_airport_id/iata; departure/arrival_local/precision/utc; identity_status, resolution_status, participation_status, event_kinds_json, sources_json, rule_id (string); observation_count/source_count (int64); graph_eligible/geography_complete/time_complete (bool) |
+| segment_links | travel_id (PK) → segments.segment_id, person_id, observation_id, source_id/source_record_id/locator, event_kind, status_raw, status, rule_id, reason; departure/arrival_precision, origin/destination_status, departure/arrival_utc_status/time_origin, codeshare_rule_id (string); graph_eligible (bool) |
+| conflicts | conflict_id (PK), entity_kind, left_id, right_id, rule_id, reason, severity, details_json (string); left/right указывают на observation_id, travel_id либо хеш диагностического блока согласно entity_kind |
+| blocking_issues | block_id, kind, reason, key_hash (string); member_count (int64). key_hash — хеш namespace/value либо DOB/name-token, не опубликованный документ |
+
+persons.identity_status: accepted или ambiguous. segments.resolution_status:
+resolved или ambiguous. participation_status: boarding_record_present либо
+reported_only; наличие записи не доказывает физическую посадку. time_complete
+требует двух UTC из наблюдений, а не выведенных расписанием часов.
+
+features_json включает прямое решение, признаки совпадения документа/карты/DOB,
+похожесть имени, блоки и причину компонентного конфликта. evidence_json содержит
+исходные ключи/locator и ссылки на identifier_id; исходные значения остаются в
+канонических таблицах. Конфликт компонента может ссылаться на node_index,
+раскрываемый через person_links. Rejected-пара не означает удалённого профиля.
+
+CSV ревью: run_fingerprint, pair_id, author_decision, rule_id,
+left/right_observation_id/source_id/locator/name/birth_date, name_similarity,
+features_json, evidence_json и четыре пустых reviewer-поля. Редактируемы только
+reviewer_decision/name, reviewed_at и reviewer_notes. Автоматическая выборка
+не является ручной разметкой. Метрики живут отдельно в person_pairs_review_report.
