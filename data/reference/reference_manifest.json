@@ -1,0 +1,18 @@
+{
+  "reference_version": "openflights-9387cdb38df5",
+  "source": "OpenFlights",
+  "source_url": "https://openflights.org/data.php",
+  "download_url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat",
+  "retrieved_at": "2026-10-16T19:04:41.000024+00:00",
+  "license": "ODbL-1.0",
+  "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "attribution": "Airport data © OpenFlights contributors; derived airport database shared under ODbL-1.0.",
+  "upstream_snapshot_date": null,
+  "notes": "Retrieval date is not data freshness or historical validity. Airport codes and coordinates may change; not a certified historical register.",
+  "rows": 7698,
+  "files": {
+    "airports.csv": "7afcc2b62f26a6ef9b460b566c67effe9a53b8870e1b3c76a4e3e268cffa2bcb",
+    "openflights_airports.dat": "9387cdb38df5bd664da823f8ccb69fdd9b33a1888f5b7cca09c34a3cd9ff59f9",
+    "LICENSE-OpenFlights.txt": "a221a27af5e4ef5a9cecce097c718c28f1aaf7d368cb57c994aa447c68d9defc"
+  }
+}

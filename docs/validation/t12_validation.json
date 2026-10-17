@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-16",
+  "scope": "synthetic_fixtures_only",
+  "python": "3.12.14",
+  "tests": 192,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 8.43,
+  "package": "yoyoflot 0.5.0",
+  "reader_contract": "1.0",
+  "canonical_contract": "1.0",
+  "installed_smoke": {
+    "personal_sources": 6,
+    "pdf_schedules": 5,
+    "observations": 9,
+    "identifiers": 13,
+    "travels": 9,
+    "normalization_errors": 0,
+    "quiet_stdout_empty": true,
+    "t11_canonical_handoff": true
+  },
+  "regression_scope": [
+    "all existing readers",
+    "all T11 tests including restart and speed regressions",
+    "T12 source-specific dates and retained source values",
+    "typed invalid fields and missing context",
+    "exact source reread and conflicting PK",
+    "manual corrections with evidence",
+    "source/entity balance",
+    "canonical T11 handoff",
+    "same key with different input types",
+    "card programme cannot be erased by namespace override"
+  ],
+  "real_data_acceptance": "pending: full real interim tables unavailable in supplied archive",
+  "native_windows_tested": false
+}

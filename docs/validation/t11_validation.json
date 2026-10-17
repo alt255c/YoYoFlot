@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-16",
+  "scope": "synthetic_fixtures_only",
+  "python": "3.12.14",
+  "tests": 134,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 5.745,
+  "original_regressions": 76,
+  "t11_cases": 58,
+  "installed_wheel": "yoyoflot-0.4.0-py3-none-any.whl",
+  "installed_smoke": {
+    "readers": 7,
+    "travel_observations": 9,
+    "schedules": 5,
+    "quiet_stdout_empty": true
+  },
+  "reference_rebuild": "byte_identical_sha256_verified",
+  "real_data_acceptance": "pending: complete real source outputs and T12 absent in supplied archive"
+}
