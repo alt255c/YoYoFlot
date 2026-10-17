@@ -117,6 +117,17 @@ def parser():
     train.add_argument("--output", type=Path, help="New immutable output directory")
     train.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t17"))
     train.add_argument("-q", "--quiet", action="store_true")
+    graph = sub.add_parser("graph", help="T18: auditable coflight graph of independent fictional profiles")
+    graph_input = graph.add_mutually_exclusive_group()
+    graph_input.add_argument("--demo", action="store_true")
+    graph_input.add_argument("--input", type=Path, help="Replay-verifiable T17 demo, or its snapshot/input directory")
+    graph.add_argument("--seed", type=int, default=17)
+    graph.add_argument("--profiles", type=int, default=120)
+    graph.add_argument("--demo-dir", type=Path, default=Path("data/work/t18"))
+    graph.add_argument("--config", type=Path, default=Path("configs/graph.yaml"))
+    graph.add_argument("--output", type=Path)
+    graph.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t18"))
+    graph.add_argument("-q", "--quiet", action="store_true")
     for name in ["features", "evaluate"]:
         sub.add_parser(name, help="Not implemented by this CLI; see task-specific scripts")
     return p
@@ -125,6 +136,18 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "graph":
+            if not args.demo and args.input is None:
+                print("T18: укажите --demo или --input с независимым учебным набором T17", file=sys.stderr)
+                return 2
+            from .models.demo import create_demo
+            from .features.graph_artifact import run
+            directory = create_demo(args.demo_dir, args.seed, args.profiles) if args.demo else args.input
+            _, summary = run(directory, args.config, args.output, args.artifacts_dir,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
         if args.command == "train":
             if not args.demo and args.input is None:
                 print("T17: укажите --demo или --input с независимым учебным набором", file=sys.stderr)

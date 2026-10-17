@@ -66,6 +66,5 @@ tomli==2.5.0 ; python_full_version < '3.11'
     # via pytest
 typing-extensions==4.16.0 ; python_full_version < '3.11'
     # via exceptiongroup
-
-# T11: versioned IANA timezone rules, including Windows.
 tzdata==2026.5
+    # via yoyoflot
