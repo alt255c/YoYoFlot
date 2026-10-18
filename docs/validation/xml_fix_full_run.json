@@ -1,0 +1,58 @@
+{
+  "project_version": "0.3.2",
+  "native_platform": "Linux",
+  "source_report": {
+    "source_id": "pointz_xml",
+    "input_path": "/workspace/scratch/45cb65ef93ca/upload/PointzAggregator-AirlinesData.xml",
+    "sha256": "71559a60837468731f8baa71c1ab9680a2248930ce9f476b6bf13aae6ad9a880",
+    "contract_version": "1.0",
+    "reader_version": "1.0",
+    "options": {
+      "batch_size": 3000
+    },
+    "status": "complete",
+    "counts": {
+      "provenance": 591565,
+      "travel_observations": 436090,
+      "identifiers": 88818,
+      "person_observations": 66657,
+      "schedules": 0,
+      "errors": 0
+    },
+    "input_counts": {
+      "users": 66657,
+      "cards": 88818,
+      "activities": 436090
+    },
+    "error_severities": {},
+    "seconds": 60.07986669799902,
+    "process_peak_rss_mib": 134.078125
+  },
+  "full_table_comparison": {
+    "errors": {
+      "added": 0,
+      "removed": 0
+    },
+    "identifiers": {
+      "added": 0,
+      "removed": 0
+    },
+    "travel_observations": {
+      "added": 0,
+      "removed": 0
+    },
+    "provenance": {
+      "added": 0,
+      "removed": 0
+    },
+    "schedules": {
+      "added": 0,
+      "removed": 0
+    },
+    "person_observations": {
+      "added": 0,
+      "removed": 0
+    }
+  },
+  "native_windows_tested": false
+}

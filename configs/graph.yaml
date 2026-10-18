@@ -1,0 +1,16 @@
+version: graph-demo-1.0
+data_mode: synthetic_demo
+as_of: '2026-03-31'
+graph_seed: 29
+min_source_coverage: 0.8
+min_graph_fraction: 0.8
+min_covered_days: 60
+min_repeat_days: 2
+null_model:
+  version: daily-route-partition-1.0
+  seed: 1801
+  simulations: 199
+limits:
+  max_event_participants: 128
+  max_pair_visits: 1000000
+  max_null_pair_visits: 20000000

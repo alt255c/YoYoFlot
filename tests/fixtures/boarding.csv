@@ -1,0 +1,2 @@
+PassengerFirstName;PassengerSecondName;PassengerLastName;PassengerSex;PassengerBirthDate;PassengerDocument;BookingCode;TicketNumber;Baggage;FlightDate;FlightTime;FlightNumber;CodeShare;Destination
+SYNTHETIC;;PERSON;;;000123;;000987;;2017-01-01;23:30;AB001;;BBB

@@ -1,0 +1,5 @@
+FROM: Hefei, ChinaHFE TO: Taipei, TaiwanTPE Validity Days DepTime ArrTime Flight Aircraft TravelTime
+01 Nov - 31 Jan 1234567 08:40 11:10 MU2049 320 2H30M
+01 Nov - 31 Jan 1234567 08:40 11:10 CI8028* 320 2H30M Operated by: China Eastern Airlines
+FROM: Taipei, TaiwanTPE TO: Hefei, ChinaHFE Validity Days DepTime ArrTime Flight Aircraft TravelTime
+03 Nov - 29 Jan 12 456 17:25 20:00 MU2050 320 2H35M

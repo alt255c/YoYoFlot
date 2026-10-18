@@ -1,0 +1,22 @@
+{
+  "package": "0.6.1",
+  "imported_from": "/workspace/scratch/45cb65ef93ca/t13_memory_installed/yoyoflot/__init__.py",
+  "personal_sources": 6,
+  "counts": {
+    "persons": 6,
+    "person_links": 9,
+    "person_pairs": 5,
+    "segments": 9,
+    "segment_links": 9,
+    "conflicts": 0,
+    "blocking_issues": 0
+  },
+  "memory_limit": "1GB",
+  "duckdb_threads": 1,
+  "aggregation_batch_groups": 16384,
+  "quiet_stdout_empty": true,
+  "quiet_stderr_empty": true,
+  "normal_summary_matches_file": true,
+  "audit_does_not_rebuild": true,
+  "real_data_run": false
+}

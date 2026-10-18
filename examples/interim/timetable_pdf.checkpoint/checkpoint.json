@@ -1,0 +1,36 @@
+{
+  "signature": {
+    "sha256": "0df448a0135f4853a503b729e29ea4f27ce86cbc7b0342749727fd7f33da0c27",
+    "parser_version": "2.0",
+    "contract_version": "1.0",
+    "source_id": "timetable_pdf",
+    "chunk_pages": 2,
+    "limit_pages": null,
+    "ocr": false,
+    "extraction_mode": "legacy_text"
+  },
+  "next_page": 4,
+  "carry": {
+    "ocity": "Zurich",
+    "ocountry": "Switzerland",
+    "oiata": "ZRH",
+    "dcity": "Stavanger",
+    "dcountry": "Norway",
+    "diata": "SVG",
+    "page": 4
+  },
+  "cover": [
+    [
+      1,
+      11,
+      2018
+    ],
+    [
+      31,
+      1,
+      2019
+    ]
+  ],
+  "cover_raw": "Covers period: 01 Nov 2018 through 31 Jan 2019",
+  "seconds": 0.00874752499976239
+}

@@ -1,0 +1,52 @@
+{
+  "status": "complete",
+  "source_id": "timetable_pdf",
+  "output_path": "/workspace/scratch/45cb65ef93ca/YoYoFlot/data/interim/demo/timetable_pdf",
+  "sha256": "0df448a0135f4853a503b729e29ea4f27ce86cbc7b0342749727fd7f33da0c27",
+  "counts": {
+    "schedules": 5,
+    "provenance": 5,
+    "person_observations": 0,
+    "identifiers": 0,
+    "travel_observations": 0,
+    "errors": 0
+  },
+  "pages": 4,
+  "total_pages": 4,
+  "rows": 5,
+  "rows_ok": 5,
+  "pages_by_type": {
+    "cover": 1,
+    "table": 1,
+    "continuation": 1,
+    "consult": 1
+  },
+  "errors": 0,
+  "excluded_pages": 0,
+  "extraction_errors": 0,
+  "ocr_enabled": false,
+  "ocr_pages": 0,
+  "baseline_comparison": null,
+  "seconds": 0.00874752499976239,
+  "cover_period": [
+    [
+      1,
+      11,
+      2018
+    ],
+    [
+      31,
+      1,
+      2019
+    ]
+  ],
+  "cover_period_raw": "Covers period: 01 Nov 2018 through 31 Jan 2019",
+  "contract_version": "1.0",
+  "limitations": [
+    "Schedule validity must be compared to passenger dates in T11; never extrapolate historic routes.",
+    "Missing +N marker leaves arrival_day_offset null.",
+    "OCR requires separately installed Tesseract; unknown page templates block acceptance."
+  ],
+  "pages_per_min": 27436.33199179415,
+  "process_peak_rss_mib": 106.05859375
+}

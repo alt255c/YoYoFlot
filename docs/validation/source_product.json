@@ -1,0 +1,165 @@
+{
+  "date": "2026-10-18",
+  "branch": "reape/T16-T20-fixes",
+  "base_commit": "d540c9209466c6b3966a263338d1af89ce02b8fa",
+  "workflow": "supplied T13 -> source-dataset factors, graph, IF, sensitivity, read-only web app",
+  "input_source": "Original T13 Parquet objects supplied by develop, downloaded through Git LFS; no regenerated people, journeys or labels",
+  "run_id": "product-2b797a6259784adffa53",
+  "counts": {
+    "persons": 840606,
+    "segments": 2979166,
+    "top50": 50
+  },
+  "eligibility": [
+    {
+      "eligibility_status": "eligible",
+      "profiles": 3863
+    },
+    {
+      "eligibility_status": "insufficient_data",
+      "profiles": 816295
+    },
+    {
+      "eligibility_status": "no_matches",
+      "profiles": 20448
+    }
+  ],
+  "window": {
+    "basis": "global observed dataset dates; source completeness is unknown",
+    "days": 366,
+    "end": "2018-01-01",
+    "start": "2017-01-01"
+  },
+  "code_sha256": "5adfaca29ee5e7113aaa6b9400ac79546fa68d518fca77049f16fed40ec96082",
+  "resources": {
+    "command": "python scripts/run_t17.py",
+    "exit_code": 0,
+    "wall_seconds": 56.083,
+    "peak_rss_mib": 1538.41
+  },
+  "product_bytes": 474782306,
+  "pytest": {
+    "tests": 561,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "pytest_seconds": 71.637,
+  "independent_numeric_audit": {
+    "status": "passed",
+    "run_id": "product-2b797a6259784adffa53",
+    "counts": {
+      "persons": 840606,
+      "segments": 2979166,
+      "top50": 50
+    },
+    "profiles_independently_checked": 50,
+    "segments_checked": 1137,
+    "evidence_links_checked": 2478,
+    "population_scores_consistent": true,
+    "if_roles": {
+      "calibration": 4907,
+      "train": 14473,
+      "holdout": 4931
+    },
+    "input_sha256": {
+      "persons.parquet": "ec5948ba0a6941164c94bd8d8ee05c5a07125b3964aba1a8e91419ee12252a53",
+      "segments.parquet": "f7c2f83f1a99d5fc555f56eb622ed43da74f5d8b0b963dd3513eedfadfe40354"
+    },
+    "raw_reingestion_verified": false,
+    "independent_human_review": "pending"
+  },
+  "browser": {
+    "run_id": "product-2b797a6259784adffa53",
+    "browser": "Chromium / Playwright",
+    "checked_profiles": 50,
+    "checked_segments": 1137,
+    "console_errors": [],
+    "external_requests": [],
+    "mobile_body_overflow": false,
+    "search": true,
+    "date_filter": true,
+    "reset": true,
+    "map_zoom": true,
+    "dateline": true,
+    "visible_date_labels": 28,
+    "rapid_switching": true,
+    "selected_route_focus": true
+  },
+  "rules": [
+    {
+      "criterion_id": "M01",
+      "reference_size": 5742,
+      "reference_value": 2.2131147540983607,
+      "threshold": 2.2131147540983607,
+      "threshold_method": "empirical_quantile",
+      "weight": 1.0
+    },
+    {
+      "criterion_id": "M02",
+      "reference_size": 5308,
+      "reference_value": 0.07142857142857142,
+      "threshold": 0.07142857142857142,
+      "threshold_method": "empirical_quantile",
+      "weight": 1.5
+    },
+    {
+      "criterion_id": "M03",
+      "reference_size": 8454,
+      "reference_value": 0.09999999999999998,
+      "threshold": 0.09999999999999998,
+      "threshold_method": "empirical_quantile",
+      "weight": 1.0
+    }
+  ],
+  "forest": {
+    "calibration_rows": 4907,
+    "combination": "0.5 * IF calibration percentile + 0.5 * rules calibration percentile; separate experimental score",
+    "config": {
+      "enabled": true,
+      "max_samples": 256,
+      "max_training_rows": 100000,
+      "n_estimators": 200,
+      "random_state": 1901
+    },
+    "features": [
+      "trip_rate_30_days",
+      "quick_return_share",
+      "repeated_route_share"
+    ],
+    "scope": "Retrospective unsupervised anomaly detection; scoring all supplied profiles, not future prediction",
+    "split": "sha256(person_id) first 32 bits mod 10: 0–5 train, 6–7 calibration, 8–9 holdout",
+    "status": "complete",
+    "training_rows": 14473,
+    "versions": {
+      "numpy": "2.5.4",
+      "sklearn": "1.9.1"
+    }
+  },
+  "graph": {
+    "events": 50772,
+    "excluded_oversized_events": 0,
+    "limitation": "Repeated observed co-occurrence; not calibrated significance. M07 does not add a ranking vote.",
+    "ranking_contribution": false,
+    "repeated_pairs": 0,
+    "status": "complete"
+  },
+  "repeatability": "Second identical scripts/run_t17.py -q verified and reused the completed snapshot",
+  "packaging": "Wheel built successfully; all six static assets included",
+  "raw_archive": {
+    "name": "Airlines-All.zip",
+    "status": "not_transferred",
+    "reason": "Uploaded file exceeds the download_file executor transfer limit of 32 MiB",
+    "contents_inspected": false,
+    "sha256_verified": false
+  },
+  "raw_reingestion_verified": false,
+  "independent_human_review": "pending",
+  "limitations": [
+    "Original raw files and complete T13 manifests are absent from this checkout; supplied T13 bytes verified against committed LFS SHA-256.",
+    "Source locators unavailable: evidence links resolve to original T13 segment_id and anchor_travel_id only.",
+    "The source observation window is inferred from dataset dates; continuous source coverage is not asserted.",
+    "Rule thresholds and weights require domain review; scores are not class probabilities."
+  ],
+  "next_required_external_input": "Accessible direct URL or archive available on the cloud filesystem for full raw reingestion"
+}

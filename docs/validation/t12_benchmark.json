@@ -1,0 +1,17 @@
+{
+  "scope": "synthetic_only",
+  "people": 20000,
+  "identifiers": 20000,
+  "travels": 40000,
+  "total_input_rows": 160000,
+  "seconds": 4.768,
+  "normalization_errors": 0,
+  "counts": {
+    "observations": 20000,
+    "identifiers": 20000,
+    "travel_observations": 40000,
+    "schedules": 0,
+    "provenance": 80000,
+    "errors": 0
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "version": "0.3.1",
+  "python": "3.12.14",
+  "native_platform": "Linux",
+  "native_windows_tested": false,
+  "tests_passed": 57,
+  "resource_cleanup_scenarios": 7,
+  "strict_encoding_warnings": "passed; openpyxl temporary-file warning excluded",
+  "dependencies_changed": false
+}

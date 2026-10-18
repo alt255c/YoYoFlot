@@ -1,0 +1,7 @@
+{
+  "reference_code_sha256": "73cae9ec5f2b6dc2cce1c744cf1d52a0b2c182df5d4a366a7e9837dafebf0b42",
+  "matches_user_supplied_code": true,
+  "reference_location": "docs/legacy/timetable_pdf_original.py",
+  "real_pdf_available": false,
+  "comparison_excludes_modern_ids_and_quality_flags": true
+}

@@ -1,0 +1,13 @@
+{
+  "scope": "synthetic_only",
+  "travels": 20000,
+  "schedules": 100,
+  "schedule_links": 20000,
+  "seconds": 2.1,
+  "checks": [
+    "20000 origins inferred as LHR",
+    "20000 overnight arrival UTC values verified"
+  ],
+  "batch_size": 2000,
+  "process_peak_rss_mib": 227.32
+}

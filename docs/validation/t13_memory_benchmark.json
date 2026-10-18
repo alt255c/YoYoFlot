@@ -1,0 +1,38 @@
+{
+  "scope": "synthetic_preparation_and_blocking_only",
+  "observations": 2746977,
+  "identifiers": 3207435,
+  "measurements": {
+    "unbounded_control": {
+      "mode": "unbounded_control",
+      "scope": "synthetic_preparation_and_blocking_only",
+      "resolution_version": "resolution:1.0",
+      "memory_limit": "512MB",
+      "threads": 2,
+      "status": "out_of_memory",
+      "exception_type": "OutOfMemoryException",
+      "message": "Out of Memory Error: failed to allocate data of size 16.0 MiB (479.1 MiB/488.2 MiB used)\n\nPossible solutions:\n* Reducing the number of threads (SET threads=X)\n* Disabling insertion-order preservation (SET preserve_insertion_order=false)\n* Increasing the memory limit (SET memory_limit='...GB')\n\nSee also https://duckdb.org/docs/stable/guides/performance/how_to_tune_workloads",
+      "last_phase": "привязка идентификаторов к наблюдениям",
+      "seconds": 22.995,
+      "peak_rss_mib": 895.66
+    },
+    "fixed": {
+      "mode": "fixed",
+      "scope": "synthetic_preparation_and_blocking_only",
+      "resolution_version": "resolution:1.0",
+      "memory_limit": "512MB",
+      "threads": 1,
+      "status": "complete",
+      "observations": 2746977,
+      "identifiers": 3207435,
+      "distinct_document_values": 686745,
+      "candidate_pairs": 686744,
+      "candidate_upper_bound": 686744,
+      "balances_verified": true,
+      "last_phase": "сборка свидетельств пар по порциям",
+      "seconds": 187.598,
+      "peak_rss_mib": 847.12
+    }
+  },
+  "limitations": "Same row counts are not the same real payloads, candidate distribution, full run or identity accuracy."
+}

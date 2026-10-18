@@ -1,0 +1,15 @@
+{
+  "tests": 139,
+  "failures": 0,
+  "platform": "Linux",
+  "python": "3.12",
+  "native_windows_tested": false,
+  "scenarios": [
+    "legacy_empty_lock",
+    "KeyboardInterrupt_cleanup",
+    "separate_process_mutual_exclusion",
+    "forced_process_kill_recovery",
+    "quiet_cli",
+    "throttled_progress"
+  ]
+}

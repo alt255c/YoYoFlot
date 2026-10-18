@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YoYoFlot · Анализ перелётов</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<header><a class="brand" href="/"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M6 5h13v13" fill="none" stroke="currentColor" stroke-width="2.5"/></svg> YoYoFlot <span>FLIGHT INTELLIGENCE</span></a><div class="dataset">● Исходный датасет преподавателя</div></header>
+<main>
+<div class="intro"><div><p class="eyebrow">CATCH THE SPIES / АНАЛИТИЧЕСКИЙ ОБЗОР</p><h1>От рейтинга — к фактам.</h1><p>Подозрительные паттерны перелётов, их значимость и подтверждающие поездки.</p></div><div id="window" class="window"></div></div>
+<div id="error" class="error" role="alert" hidden></div>
+<section id="metrics" class="metrics" aria-label="Сводка датасета"></section>
+<div class="workspace">
+<aside class="panel ranking"><div class="panel-heading"><div><p class="eyebrow">ПРИОРИТЕТ ПРОВЕРКИ</p><h2>Топ-50 <span id="topCount"></span></h2></div><span class="tag">Факторы ↓ · Балл ↓</span></div><label class="search">Поиск в топе<input id="search" type="search" placeholder="Имя или идентификатор"></label><p class="hint">Сначала число независимых факторов, затем их вес и выраженность.</p><div id="top" role="list" aria-label="Рейтинг людей"><p class="loading">Читаем снимок…</p></div></aside>
+<section id="dossier" class="dossier" aria-live="polite"><div class="panel empty">Выберите человека в рейтинге.</div></section>
+</div>
+<details class="panel methodology"><summary>Метод, проверка и ограничения данных</summary><div id="method"></div></details>
+<footer>YoYoFlot · Исследование закономерностей перелётов <span>География: OpenFlights (ODbL) · Natural Earth (public domain)</span></footer>
+</main>
+</body></html>
