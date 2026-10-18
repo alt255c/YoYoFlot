@@ -400,14 +400,12 @@ def test_graph_null_MC_seed_does_not_change_actual_model(tmp_path):
     assert read(path/'review/blind/coflight_context.parquet')
 
 
-def test_script_other_cwd_equals_flags_quiet_and_help(tmp_path,capsys):
-    assert main(['evaluate'])==2;capsys.readouterr()
-    paths=configs(tmp_path/'config')
+def test_script_other_cwd_requires_source_product(tmp_path,capsys):
+    assert main(['evaluate'])==2
     env=dict(os.environ,PYTHONIOENCODING='utf-8')
-    args=[sys.executable,str(ROOT/'scripts/run_t20.py'),f'--config={paths[0]}',f'--if-config={paths[1]}',f'--graph-config={paths[3]}',
-          '--work-dir',str(tmp_path/'work'),'--artifacts-dir',str(tmp_path/'artifacts'),'-q']
-    result=subprocess.run(args,cwd=tmp_path,env=env,capture_output=True,text=True,encoding='utf-8')
-    assert result.returncode==0,result.stderr
-    assert result.stdout==''
-    help_run=subprocess.run([sys.executable,str(ROOT/'scripts/audit_t20.py'),'--help'],cwd=tmp_path,env=env,capture_output=True,text=True,encoding='utf-8')
-    assert help_run.returncode==0 and '--reviews' in help_run.stdout
+    script=ROOT/'scripts/run_t20.py'
+    result=subprocess.run([sys.executable,str(script),'--product='+str(tmp_path/'missing'),'-q'],
+                          cwd=tmp_path,env=env,capture_output=True,text=True,encoding='utf-8')
+    assert result.returncode==1 and not list(tmp_path.iterdir())
+    help_run=subprocess.run([sys.executable,str(script),'--help'],cwd=tmp_path,env=env,capture_output=True,text=True)
+    assert help_run.returncode==0 and '--product' in help_run.stdout

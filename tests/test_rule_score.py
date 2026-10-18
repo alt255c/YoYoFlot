@@ -343,13 +343,12 @@ def test_concurrent_writer_and_interruption_leave_no_partial_snapshot(tmp_path, 
     assert not output.exists() and not list(output.parent.glob("*.partial"))
 
 
-def test_cli_explicit_demo_and_reject_real_input(tmp_path, capsys):
-    args = ["train", "--demo", "--profiles", "6", "--config", str(MODEL),
-            "--demo-dir", str(tmp_path / "demo"), "--artifacts-dir", str(tmp_path / "out"), "-q"]
-    assert main(args) == 0
-    assert capsys.readouterr().out == ""
-    assert main(["train", "--input", str(tmp_path), "--config", str(MODEL), "-q"]) == 1
-    assert "учебный набор" in capsys.readouterr().err
+def test_cli_rejects_removed_generation_options(tmp_path, capsys):
+    with pytest.raises(SystemExit) as error:
+        main(["train", "--demo", "--profiles", "6"])
+    assert error.value.code == 2
+    assert not list(tmp_path.iterdir())
+    assert main(["train", "--input", str(tmp_path), "-q"]) == 1
 
 
 def test_script_help_and_other_working_directory(tmp_path):
@@ -357,9 +356,7 @@ def test_script_help_and_other_working_directory(tmp_path):
     env = dict(os.environ, PYTHONIOENCODING="utf-8")
     help_run = subprocess.run([sys.executable, str(script), "--help"], cwd=tmp_path,
                               env=env, capture_output=True, text=True, encoding="utf-8")
-    assert help_run.returncode == 0 and "--demo" in help_run.stdout and not list(tmp_path.iterdir())
-    result = subprocess.run([sys.executable, str(script), "--profiles", "2", "--demo-dir", str(tmp_path / "demo"),
-                             "--artifacts-dir", str(tmp_path / "out")], cwd=tmp_path,
+    assert help_run.returncode == 0 and "--input" in help_run.stdout and "--demo" not in help_run.stdout
+    result = subprocess.run([sys.executable, str(script), "--input", str(tmp_path / "missing")], cwd=tmp_path,
                             env=env, capture_output=True, text=True, encoding="utf-8")
-    assert result.returncode == 0, result.stderr
-    assert "в топе: 1 / 50" in result.stdout
+    assert result.returncode == 1 and not list(tmp_path.iterdir())

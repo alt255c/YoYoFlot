@@ -291,3 +291,23 @@ def test_default_artifact_root_is_not_inside_installed_package(args, tmp_path, m
     assert destination.parent == tmp_path / "artifacts"
     assert report["run_id"] == destination.name
     assert not (tmp_path / "installed_package").exists()
+
+
+def test_cli_until_product_joins_the_real_contracts(args, tmp_path):
+    """Fixtures verify integration only; production readiness uses supplied LFS data."""
+    from yoyoflot.cli import main
+    from yoyoflot.product.store import ProductStore
+    output = tmp_path / 'product'
+    flags = ['run', '--until', 'product', '--require-all', '--output', str(output),
+             '--config', str(args['config']), '--data-dir', str(args['data_dir']),
+             '--work-dir', str(args['work_dir']), '--artifacts-dir', str(tmp_path / 'artifacts'),
+             '--normalization-config', str(args['normalization']), '--resolution-config', str(args['resolution']),
+             '--reference', str(args['reference']), '--overrides', str(args['overrides']),
+             '--product-config', str(ROOT / 'configs/product.yaml'), '-q']
+    assert main(flags) == 0
+    store = ProductStore(output)
+    assert store.manifest['counts']['persons'] == 6
+    assert store.manifest['counts']['segments'] == 9
+    assert store.manifest['request']['origin'] == 'verified_t13'
+    assert 'tables/segment_links.parquet' in store.manifest['files']
+    assert store.top() == []  # insufficient calibration, never a fabricated top

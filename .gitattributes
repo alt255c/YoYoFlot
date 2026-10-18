@@ -1,3 +1,5 @@
+data/processed/persons.parquet filter=lfs diff=lfs merge=lfs -text
+data/processed/segments.parquet filter=lfs diff=lfs merge=lfs -text
 data/processed/t15_real_20261017/*.parquet filter=lfs diff=lfs merge=lfs -text
 # reference_manifest.json hashes the CRLF working-tree representation on every OS.
 data/reference/airports.csv text eol=crlf

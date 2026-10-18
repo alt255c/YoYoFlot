@@ -11,6 +11,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     defaults = {
         "--config": ROOT / "configs/sources.yaml",
+        "--product-config": ROOT / "configs/product.yaml",
         "--data-dir": ROOT / "data/raw",
         "--work-dir": ROOT / "data/work/t16",
         "--artifacts-dir": ROOT / "artifacts",
