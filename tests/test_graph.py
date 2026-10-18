@@ -403,18 +403,12 @@ def test_t17_snapshot_is_compatible_and_its_rankings_stay_unchanged(tmp_path):
     assert {str(p.relative_to(rules_output)): fingerprint(p) for p in rules_output.rglob("*") if p.is_file()} == before
 
 
-def test_cli_quiet_rejects_missing_input_and_script_works_from_other_cwd(tmp_path, capsys):
+def test_cli_graph_requires_existing_product_and_never_generates(tmp_path, capsys):
     assert main(["graph"]) == 2
-    capsys.readouterr()
-    args = ["graph", "--demo", "--profiles", "6", "--config", str(MODEL), "--demo-dir", str(tmp_path / "demo"),
-            "--artifacts-dir", str(tmp_path / "out"), "-q"]
-    assert main(args) == 0 and capsys.readouterr().out == ""
     env = dict(os.environ, PYTHONIOENCODING="utf-8")
-    result = subprocess.run([sys.executable, str(ROOT / "scripts/run_t18.py"), "--input", str(next((tmp_path / "demo").glob("demo-*"))),
-                             "--artifacts-dir", str(tmp_path / "script")], cwd=tmp_path,
-                            env=env, capture_output=True, text=True, encoding="utf-8")
-    assert result.returncode == 0, result.stderr
-    assert "обучение не выполнялось" in result.stdout
-    help_run = subprocess.run([sys.executable, str(ROOT / "scripts/run_t18.py"), "--help"], cwd=tmp_path,
-                              env=env, capture_output=True, text=True, encoding="utf-8")
-    assert help_run.returncode == 0 and "--input" in help_run.stdout
+    script = ROOT / "scripts/run_t18.py"
+    result = subprocess.run([sys.executable, str(script), "--product", str(tmp_path / "missing")],
+                            cwd=tmp_path, env=env, capture_output=True, text=True, encoding="utf-8")
+    assert result.returncode == 1 and not list(tmp_path.iterdir())
+    help_run = subprocess.run([sys.executable, str(script), "--help"], cwd=tmp_path, env=env, capture_output=True, text=True)
+    assert help_run.returncode == 0 and "--product" in help_run.stdout and "--demo" not in help_run.stdout

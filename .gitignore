@@ -10,3 +10,7 @@ data/work/
 data/verification/
 /artifacts/
 pytest-of-root/
+
+build/
+
+dist/

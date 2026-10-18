@@ -1,0 +1,20 @@
+version: product-1.0
+calibration:
+  mode: empirical_quantile
+  quantile: 0.95
+  min_reference_rows: 100
+# Applied to the supplied dataset, never to a generated replacement.
+# Thresholds are research hypotheses; weights express relative importance.
+criteria:
+  M01: {threshold: 0.1, weight: 1.0, min_observations: 6}
+  M02: {threshold: 0.01, weight: 1.5, min_observations: 3}
+  M03: {threshold: 0.01, weight: 1.0, min_observations: 6}
+coverage:
+  min_known_fraction: 0.8
+  min_window_days: 60
+forest:
+  enabled: true
+  n_estimators: 200
+  max_samples: 256
+  max_training_rows: 100000
+  random_state: 1901

@@ -422,20 +422,15 @@ def test_as_of_features_do_not_use_future_counts(config):
     assert first == second
 
 
-def test_cli_script_help_and_actual_training_from_other_cwd(tmp_path, config, capsys):
+def test_cli_script_requires_source_data_from_other_cwd(tmp_path, capsys):
     assert main(["train-if"]) == 2
-    capsys.readouterr()
-    cfg = config_file(tmp_path, config)
     script = ROOT / "scripts/run_t19.py"
     env = dict(os.environ, PYTHONIOENCODING="utf-8")
-    result = subprocess.run([sys.executable, str(script), "--profiles", "10", "--config", str(cfg),
-                             "--demo-dir", str(tmp_path / "evaluation"), "--work-dir", str(tmp_path / "work"),
-                             "--artifacts-dir", str(tmp_path / "artifacts")], cwd=tmp_path,
-                            env=env, capture_output=True, text=True, encoding="utf-8")
-    assert result.returncode == 0, result.stderr
-    assert "Обучение IF: выполнено" in result.stdout
-    help_run = subprocess.run([sys.executable, str(script), "--help"], cwd=tmp_path, env=env, capture_output=True, text=True, encoding="utf-8")
-    assert help_run.returncode == 0 and "--calibration" in help_run.stdout
+    result = subprocess.run([sys.executable, str(script), "--input", str(tmp_path / "missing")],
+                            cwd=tmp_path, env=env, capture_output=True, text=True, encoding="utf-8")
+    assert result.returncode == 1 and not list(tmp_path.iterdir())
+    help_run = subprocess.run([sys.executable, str(script), "--help"], cwd=tmp_path, env=env, capture_output=True, text=True)
+    assert help_run.returncode == 0 and "--input" in help_run.stdout and "--demo" not in help_run.stdout
 
 
 def test_independent_persisted_audit_script_creates_its_own_model(tmp_path):
