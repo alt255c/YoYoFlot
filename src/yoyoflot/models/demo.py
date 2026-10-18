@@ -19,6 +19,8 @@ from ..provenance import fingerprint
 
 GENERATOR = "yoyoflot-independent-fiction-v1"
 VARIED_GENERATOR = "yoyoflot-independent-fiction-v2"
+HOLDOUT_GENERATOR = "yoyoflot-independent-holdout-v1"
+CENSORED_GENERATOR = "yoyoflot-independent-holdout-censored-v1"
 START, END = date(2026, 1, 1), date(2026, 3, 31)
 MAX_PROFILES = 500
 PROFILE_SCHEMA = pa.schema([
@@ -48,7 +50,7 @@ def recipe(seed=17, profiles=120, generator=GENERATOR):
         raise ValueError("seed должен быть целым числом от 0 до 2**32-1")
     if type(profiles) is not int or not 0 <= profiles <= MAX_PROFILES:
         raise ValueError(f"profiles должен быть от 0 до {MAX_PROFILES}")
-    if generator not in {GENERATOR, VARIED_GENERATOR}:
+    if generator not in {GENERATOR, VARIED_GENERATOR, HOLDOUT_GENERATOR, CENSORED_GENERATOR}:
         raise ValueError("Неизвестная версия независимого учебного генератора")
     return dict(generator=generator, seed=seed, profiles=profiles,
                 window_start=START.isoformat(), window_end=END.isoformat())
@@ -61,6 +63,9 @@ def generate_rows(spec):
         raise ValueError("Неизвестная версия или параметры учебного генератора")
     if spec["generator"] == VARIED_GENERATOR:
         from .demo_varied import generate
+        return generate(spec)
+    if spec["generator"] in {HOLDOUT_GENERATOR, CENSORED_GENERATOR}:
+        from .demo_holdout import generate
         return generate(spec)
     rng = random.Random(spec["seed"])
     airports = ["SVO", "LED", "JFK", "CDG", "HND", "LHR", "DXB", "SIN"]
@@ -122,7 +127,7 @@ def validate_demo(directory):
         if fingerprint(table_path) != manifest["files"][name]:
             raise ValueError(f"Изменён учебный файл: {name}")
         file = pq.ParquetFile(table_path)
-        per_profile = 60 if manifest["recipe"]["generator"] == VARIED_GENERATOR else 30
+        per_profile = 30 if manifest["recipe"]["generator"] == GENERATOR else 60
         limit = MAX_PROFILES if name == "profiles.parquet" else MAX_PROFILES * per_profile
         expanded_size = sum(file.metadata.row_group(i).column(j).total_uncompressed_size
                             for i in range(file.metadata.num_row_groups)

@@ -1,0 +1,190 @@
+method,k,population,available,common_profiles,labelled_common,positives,negatives,positive_prevalence,selected,selected_unlabelled,hits,precision_at_k,precision_tie_lower,precision_tie_upper,recall_at_k,average_precision,roc_auc,quality_reason,boundary_tie_size,scope,experiment
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,baseline
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,baseline
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,baseline
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7385117664432013,0.5889724310776943,,4,common_comparable_profiles; scenario_labels_only,baseline
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,20,0.8,0.8,0.8,0.47619047619047616,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,baseline
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,baseline
+combination,10,120,80,80,80,42,38,0.525,10,0,8,0.8,0.8,0.8,0.19047619047619047,0.6999932648628947,0.6259398496240601,,7,common_comparable_profiles; scenario_labels_only,baseline
+combination,25,120,80,80,80,42,38,0.525,25,0,21,0.84,0.84,0.84,0.5,0.6999932648628947,0.6259398496240601,,1,common_comparable_profiles; scenario_labels_only,baseline
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.54,0.56,0.6666666666666666,0.6999932648628947,0.6259398496240601,,11,common_comparable_profiles; scenario_labels_only,baseline
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7205673758865248,0.6710526315789475,,10,common_comparable_profiles; scenario_labels_only,replicate
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.52,0.6,0.3333333333333333,0.7205673758865248,0.6710526315789475,,37,common_comparable_profiles; scenario_labels_only,replicate
+rules,50,120,80,80,80,42,38,0.525,50,0,37,0.74,0.7,0.76,0.8809523809523809,0.7205673758865248,0.6710526315789475,,23,common_comparable_profiles; scenario_labels_only,replicate
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,8,0.8,0.8,0.8,0.19047619047619047,0.6745834428446346,0.536967418546366,,2,common_comparable_profiles; scenario_labels_only,replicate
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,19,0.76,0.76,0.76,0.4523809523809524,0.6745834428446346,0.536967418546366,,4,common_comparable_profiles; scenario_labels_only,replicate
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,27,0.54,0.54,0.54,0.6428571428571429,0.6745834428446346,0.536967418546366,,1,common_comparable_profiles; scenario_labels_only,replicate
+combination,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7653591696772933,0.6159147869674186,,4,common_comparable_profiles; scenario_labels_only,replicate
+combination,25,120,80,80,80,42,38,0.525,25,0,21,0.84,0.84,0.84,0.5,0.7653591696772933,0.6159147869674186,,2,common_comparable_profiles; scenario_labels_only,replicate
+combination,50,120,80,80,80,42,38,0.525,50,0,27,0.54,0.5,0.54,0.6428571428571429,0.7653591696772933,0.6159147869674186,,12,common_comparable_profiles; scenario_labels_only,replicate
+rules,10,120,72,72,0,0,0,,10,10,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,14,common_comparable_profiles; scenario_labels_only,in_domain
+rules,25,120,72,72,0,0,0,,25,25,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,31,common_comparable_profiles; scenario_labels_only,in_domain
+rules,50,120,72,72,0,0,0,,50,50,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,15,common_comparable_profiles; scenario_labels_only,in_domain
+isolation_forest,10,120,72,72,0,0,0,,10,10,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,1,common_comparable_profiles; scenario_labels_only,in_domain
+isolation_forest,25,120,72,72,0,0,0,,25,25,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,1,common_comparable_profiles; scenario_labels_only,in_domain
+isolation_forest,50,120,72,72,0,0,0,,50,50,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,1,common_comparable_profiles; scenario_labels_only,in_domain
+combination,10,120,72,72,0,0,0,,10,10,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,1,common_comparable_profiles; scenario_labels_only,in_domain
+combination,25,120,72,72,0,0,0,,25,25,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,1,common_comparable_profiles; scenario_labels_only,in_domain
+combination,50,120,72,72,0,0,0,,50,50,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,1,common_comparable_profiles; scenario_labels_only,in_domain
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.8156514604902888,0.6647869674185464,,1,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,25,1.0,1.0,1.0,0.5952380952380952,0.8156514604902888,0.6647869674185464,,1,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.8156514604902888,0.6647869674185464,,3,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+combination,10,120,80,80,80,42,38,0.525,10,0,8,0.8,0.8,0.8,0.19047619047619047,0.7432880024663585,0.6522556390977443,,10,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+combination,25,120,80,80,80,42,38,0.525,25,0,23,0.92,0.92,0.92,0.5476190476190477,0.7432880024663585,0.6522556390977443,,7,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7432880024663585,0.6522556390977443,,3,common_comparable_profiles; scenario_labels_only,if_random_state_1902
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.732129392948272,0.5870927318295739,,4,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,21,0.84,0.84,0.84,0.5,0.732129392948272,0.5870927318295739,,1,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.732129392948272,0.5870927318295739,,2,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+combination,10,120,80,80,80,42,38,0.525,10,0,8,0.8,0.8,0.8,0.19047619047619047,0.7048779597752541,0.6353383458646616,,7,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+combination,25,120,80,80,80,42,38,0.525,25,0,21,0.84,0.84,0.84,0.5,0.7048779597752541,0.6353383458646616,,1,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.52,0.56,0.6666666666666666,0.7048779597752541,0.6353383458646616,,10,common_comparable_profiles; scenario_labels_only,if_random_state_1903
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7526311446088395,0.5989974937343358,,3,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,20,0.8,0.8,0.8,0.47619047619047616,0.7526311446088395,0.5989974937343358,,3,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7526311446088395,0.5989974937343358,,1,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+combination,10,120,80,80,80,42,38,0.525,10,0,8,0.8,0.8,0.8,0.19047619047619047,0.7344790384105325,0.6271929824561403,,4,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+combination,25,120,80,80,80,42,38,0.525,25,0,22,0.88,0.88,0.88,0.5238095238095238,0.7344790384105325,0.6271929824561403,,2,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7344790384105325,0.6271929824561403,,10,common_comparable_profiles; scenario_labels_only,if_n_estimators_100
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,9,0.9,0.9,0.9,0.21428571428571427,0.703945130406901,0.5664160401002506,,4,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,21,0.84,0.8,0.84,0.5,0.703945130406901,0.5664160401002506,,10,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.703945130406901,0.5664160401002506,,3,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+combination,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7723997017044913,0.6522556390977444,,7,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+combination,25,120,80,80,80,42,38,0.525,25,0,22,0.88,0.88,0.88,0.5238095238095238,0.7723997017044913,0.6522556390977444,,1,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7723997017044913,0.6522556390977444,,10,common_comparable_profiles; scenario_labels_only,if_n_estimators_400
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.6987908125422417,0.5651629072681703,,4,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,18,0.72,0.72,0.72,0.42857142857142855,0.6987908125422417,0.5651629072681703,,1,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.6987908125422417,0.5651629072681703,,10,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+combination,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7822551145037845,0.6278195488721805,,7,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+combination,25,120,80,80,80,42,38,0.525,25,0,22,0.88,0.88,0.88,0.5238095238095238,0.7822551145037845,0.6278195488721805,,1,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+combination,50,120,80,80,80,42,38,0.525,50,0,27,0.54,0.54,0.54,0.6428571428571429,0.7822551145037845,0.6278195488721805,,3,common_comparable_profiles; scenario_labels_only,if_max_samples_64
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,9,0.9,0.9,0.9,0.21428571428571427,0.690839775881669,0.556390977443609,,2,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,16,0.64,0.56,0.64,0.38095238095238093,0.690839775881669,0.556390977443609,,10,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.690839775881669,0.556390977443609,,1,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+combination,10,120,80,80,80,42,38,0.525,10,0,6,0.6,0.6,0.6,0.14285714285714285,0.6443303819440742,0.593984962406015,,5,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+combination,25,120,80,80,80,42,38,0.525,25,0,19,0.76,0.76,0.76,0.4523809523809524,0.6443303819440742,0.593984962406015,,7,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.6443303819440742,0.593984962406015,,10,common_comparable_profiles; scenario_labels_only,if_max_samples_256
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.6864330637915542,0.6296992481203008,,10,common_comparable_profiles; scenario_labels_only,threshold_0p9
+rules,25,120,80,80,80,42,38,0.525,25,0,12,0.48,0.36,0.6,0.2857142857142857,0.6864330637915542,0.6296992481203008,,43,common_comparable_profiles; scenario_labels_only,threshold_0p9
+rules,50,120,80,80,80,42,38,0.525,50,0,34,0.68,0.68,0.74,0.8095238095238095,0.6864330637915542,0.6296992481203008,,43,common_comparable_profiles; scenario_labels_only,threshold_0p9
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7385117664432013,0.5889724310776943,,4,common_comparable_profiles; scenario_labels_only,threshold_0p9
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,20,0.8,0.8,0.8,0.47619047619047616,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,threshold_0p9
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,threshold_0p9
+combination,10,120,80,80,80,42,38,0.525,10,0,8,0.8,0.8,0.8,0.19047619047619047,0.6827873475297648,0.6005639097744362,,7,common_comparable_profiles; scenario_labels_only,threshold_0p9
+combination,25,120,80,80,80,42,38,0.525,25,0,21,0.84,0.84,0.84,0.5,0.6827873475297648,0.6005639097744362,,1,common_comparable_profiles; scenario_labels_only,threshold_0p9
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.52,0.56,0.6666666666666666,0.6827873475297648,0.6005639097744362,,10,common_comparable_profiles; scenario_labels_only,threshold_0p9
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.6083755584613708,0.6021303258145364,,10,common_comparable_profiles; scenario_labels_only,threshold_1p1
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.52,0.6,0.3333333333333333,0.6083755584613708,0.6021303258145364,,34,common_comparable_profiles; scenario_labels_only,threshold_1p1
+rules,50,120,80,80,80,42,38,0.525,50,0,32,0.64,0.6,0.74,0.7619047619047619,0.6083755584613708,0.6021303258145364,,34,common_comparable_profiles; scenario_labels_only,threshold_1p1
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7385117664432013,0.5889724310776943,,4,common_comparable_profiles; scenario_labels_only,threshold_1p1
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,20,0.8,0.8,0.8,0.47619047619047616,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,threshold_1p1
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,threshold_1p1
+combination,10,120,80,80,80,42,38,0.525,10,0,6,0.6,0.6,0.6,0.14285714285714285,0.6468947948908311,0.5664160401002507,,1,common_comparable_profiles; scenario_labels_only,threshold_1p1
+combination,25,120,80,80,80,42,38,0.525,25,0,18,0.72,0.68,0.72,0.42857142857142855,0.6468947948908311,0.5664160401002507,,6,common_comparable_profiles; scenario_labels_only,threshold_1p1
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.54,0.56,0.6666666666666666,0.6468947948908311,0.5664160401002507,,10,common_comparable_profiles; scenario_labels_only,threshold_1p1
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,weight_0p25
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,weight_0p25
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,weight_0p25
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7385117664432013,0.5889724310776943,,4,common_comparable_profiles; scenario_labels_only,weight_0p25
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,20,0.8,0.8,0.8,0.47619047619047616,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,weight_0p25
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,weight_0p25
+combination,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.802853197824657,0.6466165413533834,,7,common_comparable_profiles; scenario_labels_only,weight_0p25
+combination,25,120,80,80,80,42,38,0.525,25,0,24,0.96,0.96,0.96,0.5714285714285714,0.802853197824657,0.6466165413533834,,3,common_comparable_profiles; scenario_labels_only,weight_0p25
+combination,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.802853197824657,0.6466165413533834,,1,common_comparable_profiles; scenario_labels_only,weight_0p25
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,weight_0p75
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,weight_0p75
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,weight_0p75
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7385117664432013,0.5889724310776943,,4,common_comparable_profiles; scenario_labels_only,weight_0p75
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,20,0.8,0.8,0.8,0.47619047619047616,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,weight_0p75
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.56,0.56,0.6666666666666666,0.7385117664432013,0.5889724310776943,,3,common_comparable_profiles; scenario_labels_only,weight_0p75
+combination,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.6021167919247606,0.6553884711779449,,1,common_comparable_profiles; scenario_labels_only,weight_0p75
+combination,25,120,80,80,80,42,38,0.525,25,0,15,0.6,0.6,0.6,0.35714285714285715,0.6021167919247606,0.6553884711779449,,4,common_comparable_profiles; scenario_labels_only,weight_0p75
+combination,50,120,80,80,80,42,38,0.525,50,0,36,0.72,0.72,0.72,0.8571428571428571,0.6021167919247606,0.6553884711779449,,3,common_comparable_profiles; scenario_labels_only,weight_0p75
+rules,10,120,80,80,80,42,38,0.525,10,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,15,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+rules,25,120,80,80,80,42,38,0.525,25,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,35,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+rules,50,120,80,80,80,42,38,0.525,50,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,35,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,3,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,10,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,10,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+combination,10,120,80,80,80,42,38,0.525,10,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,6,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+combination,25,120,80,80,80,42,38,0.525,25,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,2,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+combination,50,120,80,80,80,42,38,0.525,50,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,10,common_comparable_profiles; scenario_labels_only,window_2026-03-01
+rules,10,120,80,80,80,42,38,0.525,10,0,4,0.4,0.0,1.0,0.09523809523809523,0.6145691609977324,0.6378446115288221,,21,common_comparable_profiles; scenario_labels_only,without_M01
+rules,25,120,80,80,80,42,38,0.525,25,0,13,0.52,0.4,0.56,0.30952380952380953,0.6145691609977324,0.6378446115288221,,39,common_comparable_profiles; scenario_labels_only,without_M01
+rules,50,120,80,80,80,42,38,0.525,50,0,32,0.64,0.6,0.78,0.7619047619047619,0.6145691609977324,0.6378446115288221,,39,common_comparable_profiles; scenario_labels_only,without_M01
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,2,0.2,0.2,0.2,0.047619047619047616,0.432954503575786,0.2681704260651629,,10,common_comparable_profiles; scenario_labels_only,without_M01
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,12,0.48,0.48,0.48,0.2857142857142857,0.432954503575786,0.2681704260651629,,3,common_comparable_profiles; scenario_labels_only,without_M01
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,18,0.36,0.36,0.36,0.42857142857142855,0.432954503575786,0.2681704260651629,,10,common_comparable_profiles; scenario_labels_only,without_M01
+combination,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.5787234590202465,0.36215538847117795,,4,common_comparable_profiles; scenario_labels_only,without_M01
+combination,25,120,80,80,80,42,38,0.525,25,0,10,0.4,0.4,0.4,0.23809523809523808,0.5787234590202465,0.36215538847117795,,4,common_comparable_profiles; scenario_labels_only,without_M01
+combination,50,120,80,80,80,42,38,0.525,50,0,22,0.44,0.44,0.44,0.5238095238095238,0.5787234590202465,0.36215538847117795,,1,common_comparable_profiles; scenario_labels_only,without_M01
+rules,10,120,80,80,80,42,38,0.525,10,0,7,0.7,0.0,1.0,0.16666666666666666,0.7093850290571602,0.7731829573934837,,36,common_comparable_profiles; scenario_labels_only,without_M02
+rules,25,120,80,80,80,42,38,0.525,25,0,18,0.72,0.6,1.0,0.42857142857142855,0.7093850290571602,0.7731829573934837,,36,common_comparable_profiles; scenario_labels_only,without_M02
+rules,50,120,80,80,80,42,38,0.525,50,0,36,0.72,0.62,0.8,0.8571428571428571,0.7093850290571602,0.7731829573934837,,25,common_comparable_profiles; scenario_labels_only,without_M02
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,6,0.6,0.6,0.6,0.14285714285714285,0.5321834717214542,0.3912907268170426,,2,common_comparable_profiles; scenario_labels_only,without_M02
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,12,0.48,0.4,0.48,0.2857142857142857,0.5321834717214542,0.3912907268170426,,10,common_comparable_profiles; scenario_labels_only,without_M02
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,22,0.44,0.44,0.44,0.5238095238095238,0.5321834717214542,0.3912907268170426,,5,common_comparable_profiles; scenario_labels_only,without_M02
+combination,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7104174343301161,0.5278822055137844,,1,common_comparable_profiles; scenario_labels_only,without_M02
+combination,25,120,80,80,80,42,38,0.525,25,0,18,0.72,0.68,0.72,0.42857142857142855,0.7104174343301161,0.5278822055137844,,10,common_comparable_profiles; scenario_labels_only,without_M02
+combination,50,120,80,80,80,42,38,0.525,50,0,22,0.44,0.44,0.44,0.5238095238095238,0.7104174343301161,0.5278822055137844,,1,common_comparable_profiles; scenario_labels_only,without_M02
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.570923520923521,0.4649122807017544,,10,common_comparable_profiles; scenario_labels_only,without_M03
+rules,25,120,80,80,80,42,38,0.525,25,0,12,0.48,0.0,0.6,0.2857142857142857,0.570923520923521,0.4649122807017544,,56,common_comparable_profiles; scenario_labels_only,without_M03
+rules,50,120,80,80,80,42,38,0.525,50,0,28,0.56,0.44,0.76,0.6666666666666666,0.570923520923521,0.4649122807017544,,56,common_comparable_profiles; scenario_labels_only,without_M03
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.8031403270940174,0.6823308270676692,,1,common_comparable_profiles; scenario_labels_only,without_M03
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,23,0.92,0.92,0.92,0.5476190476190477,0.8031403270940174,0.6823308270676692,,3,common_comparable_profiles; scenario_labels_only,without_M03
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,27,0.54,0.54,0.54,0.6428571428571429,0.8031403270940174,0.6823308270676692,,3,common_comparable_profiles; scenario_labels_only,without_M03
+combination,10,120,80,80,80,42,38,0.525,10,0,10,1.0,1.0,1.0,0.23809523809523808,0.7856228719319851,0.6500626566416041,,9,common_comparable_profiles; scenario_labels_only,without_M03
+combination,25,120,80,80,80,42,38,0.525,25,0,23,0.92,0.88,0.92,0.5476190476190477,0.7856228719319851,0.6500626566416041,,4,common_comparable_profiles; scenario_labels_only,without_M03
+combination,50,120,80,80,80,42,38,0.525,50,0,27,0.54,0.54,0.54,0.6428571428571429,0.7856228719319851,0.6500626566416041,,1,common_comparable_profiles; scenario_labels_only,without_M03
+rules,10,120,64,64,64,34,30,0.53125,10,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,29,common_comparable_profiles; scenario_labels_only,missing_routes
+rules,25,120,64,64,64,34,30,0.53125,25,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,29,common_comparable_profiles; scenario_labels_only,missing_routes
+rules,50,120,64,64,64,34,30,0.53125,50,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,19,common_comparable_profiles; scenario_labels_only,missing_routes
+isolation_forest,10,120,64,64,64,34,30,0.53125,10,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,1,common_comparable_profiles; scenario_labels_only,missing_routes
+isolation_forest,25,120,64,64,64,34,30,0.53125,25,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,8,common_comparable_profiles; scenario_labels_only,missing_routes
+isolation_forest,50,120,64,64,64,34,30,0.53125,50,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,2,common_comparable_profiles; scenario_labels_only,missing_routes
+combination,10,120,64,64,64,34,30,0.53125,10,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,4,common_comparable_profiles; scenario_labels_only,missing_routes
+combination,25,120,64,64,64,34,30,0.53125,25,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,2,common_comparable_profiles; scenario_labels_only,missing_routes
+combination,50,120,64,64,64,34,30,0.53125,50,0,,,,,,,,Изменение окна/пропусков или неразмеченный набор: качество не измеряется.,4,common_comparable_profiles; scenario_labels_only,missing_routes
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,graph
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,graph
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,graph
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,5,0.5,0.5,0.5,0.11904761904761904,0.5063436140649422,0.3941102756892231,,3,common_comparable_profiles; scenario_labels_only,graph
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,12,0.48,0.48,0.48,0.2857142857142857,0.5063436140649422,0.3941102756892231,,3,common_comparable_profiles; scenario_labels_only,graph
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,20,0.4,0.4,0.4,0.47619047619047616,0.5063436140649422,0.3941102756892231,,1,common_comparable_profiles; scenario_labels_only,graph
+combination,10,120,80,80,80,42,38,0.525,10,0,3,0.3,0.3,0.3,0.07142857142857142,0.5949935605886046,0.5651629072681704,,7,common_comparable_profiles; scenario_labels_only,graph
+combination,25,120,80,80,80,42,38,0.525,25,0,17,0.68,0.68,0.68,0.40476190476190477,0.5949935605886046,0.5651629072681704,,1,common_comparable_profiles; scenario_labels_only,graph
+combination,50,120,80,80,80,42,38,0.525,50,0,29,0.58,0.58,0.58,0.6904761904761905,0.5949935605886046,0.5651629072681704,,1,common_comparable_profiles; scenario_labels_only,graph
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,graph_seed_30
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,graph_seed_30
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,graph_seed_30
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,4,0.4,0.4,0.4,0.09523809523809523,0.4673033155190288,0.37092731829573933,,2,common_comparable_profiles; scenario_labels_only,graph_seed_30
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,10,0.4,0.4,0.4,0.23809523809523808,0.4673033155190288,0.37092731829573933,,3,common_comparable_profiles; scenario_labels_only,graph_seed_30
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,23,0.46,0.46,0.46,0.5476190476190477,0.4673033155190288,0.37092731829573933,,1,common_comparable_profiles; scenario_labels_only,graph_seed_30
+combination,10,120,80,80,80,42,38,0.525,10,0,3,0.3,0.3,0.3,0.07142857142857142,0.5829672005532885,0.5902255639097744,,3,common_comparable_profiles; scenario_labels_only,graph_seed_30
+combination,25,120,80,80,80,42,38,0.525,25,0,18,0.72,0.72,0.72,0.42857142857142855,0.5829672005532885,0.5902255639097744,,3,common_comparable_profiles; scenario_labels_only,graph_seed_30
+combination,50,120,80,80,80,42,38,0.525,50,0,30,0.6,0.6,0.6,0.7142857142857143,0.5829672005532885,0.5902255639097744,,1,common_comparable_profiles; scenario_labels_only,graph_seed_30
+rules,10,120,80,80,80,42,38,0.525,10,0,0,0.0,0.0,0.0,0.0,0.7422492401215806,0.6898496240601504,,10,common_comparable_profiles; scenario_labels_only,graph_mc_seed
+rules,25,120,80,80,80,42,38,0.525,25,0,14,0.56,0.56,0.6,0.3333333333333333,0.7422492401215806,0.6898496240601504,,37,common_comparable_profiles; scenario_labels_only,graph_mc_seed
+rules,50,120,80,80,80,42,38,0.525,50,0,38,0.76,0.72,0.78,0.9047619047619048,0.7422492401215806,0.6898496240601504,,23,common_comparable_profiles; scenario_labels_only,graph_mc_seed
+isolation_forest,10,120,80,80,80,42,38,0.525,10,0,5,0.5,0.5,0.5,0.11904761904761904,0.5063436140649422,0.3941102756892231,,3,common_comparable_profiles; scenario_labels_only,graph_mc_seed
+isolation_forest,25,120,80,80,80,42,38,0.525,25,0,12,0.48,0.48,0.48,0.2857142857142857,0.5063436140649422,0.3941102756892231,,3,common_comparable_profiles; scenario_labels_only,graph_mc_seed
+isolation_forest,50,120,80,80,80,42,38,0.525,50,0,20,0.4,0.4,0.4,0.47619047619047616,0.5063436140649422,0.3941102756892231,,1,common_comparable_profiles; scenario_labels_only,graph_mc_seed
+combination,10,120,80,80,80,42,38,0.525,10,0,3,0.3,0.3,0.3,0.07142857142857142,0.5949935605886046,0.5651629072681704,,7,common_comparable_profiles; scenario_labels_only,graph_mc_seed
+combination,25,120,80,80,80,42,38,0.525,25,0,17,0.68,0.68,0.68,0.40476190476190477,0.5949935605886046,0.5651629072681704,,1,common_comparable_profiles; scenario_labels_only,graph_mc_seed
+combination,50,120,80,80,80,42,38,0.525,50,0,29,0.58,0.58,0.58,0.6904761904761905,0.5949935605886046,0.5651629072681704,,1,common_comparable_profiles; scenario_labels_only,graph_mc_seed

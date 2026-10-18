@@ -144,7 +144,23 @@ def parser():
     forest.add_argument("--output", type=Path)
     forest.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t19"))
     forest.add_argument("-q", "--quiet", action="store_true")
-    for name in ["features", "evaluate"]:
+    evaluation = sub.add_parser("evaluate", help="T20: compare fictional models and prepare independent review")
+    evaluation.add_argument("--demo", action="store_true")
+    evaluation.add_argument("--config", type=Path, default=Path("configs/evaluation.yaml"))
+    evaluation.add_argument("--if-config", type=Path, default=Path("configs/isolation_forest.yaml"))
+    evaluation.add_argument("--rules-config", type=Path, default=Path("configs/model.yaml"))
+    evaluation.add_argument("--graph-config", type=Path, default=Path("configs/graph.yaml"))
+    evaluation.add_argument("--output", type=Path)
+    evaluation.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t20"))
+    evaluation.add_argument("--work-dir", type=Path, default=Path("data/work/t20"))
+    evaluation.add_argument("-q", "--quiet", action="store_true")
+    review = sub.add_parser("audit-ranking", help="T20: validate and summarize independent fictional review CSV")
+    review.add_argument("--input", type=Path, required=True)
+    review.add_argument("--reviews", type=Path, required=True)
+    review.add_argument("--output", type=Path)
+    review.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t20-review"))
+    review.add_argument("-q", "--quiet", action="store_true")
+    for name in ["features"]:
         sub.add_parser(name, help="Not implemented by this CLI; see task-specific scripts")
     return p
 
@@ -152,6 +168,22 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "evaluate":
+            if not args.demo:
+                print("T20: укажите --demo; индивидуальные реальные входы не поддерживаются", file=sys.stderr)
+                return 2
+            from .evaluation.artifact import run
+            _, summary = run(args.config, args.if_config, args.rules_config, args.graph_config, args.output,
+                             args.artifacts_dir, args.work_dir,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:print(summary, end="")
+            return 0
+        if args.command == "audit-ranking":
+            from .evaluation.audit import import_reviews
+            report, path = import_reviews(args.input, args.reviews, args.output, args.artifacts_dir)
+            if not args.quiet:
+                print(f"T20 ревью: {report['completed']} / {report['selected']}; статус {report['status']}; результаты: {path}")
+            return 0
         if args.command == "train-if":
             if not args.demo and args.input is None:
                 print("T19: укажите --demo или --input с независимым вымышленным набором", file=sys.stderr)

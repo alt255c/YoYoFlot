@@ -1,0 +1,32 @@
+{
+  "case_contribution_derivation": "Group persisted scores/annotations by experiment, method and case_id; count available and actual non-null rank <= 50.",
+  "data_mode": "synthetic_demo",
+  "files": {
+    "README.md": "b769bb9e299b4003e81649cdaa469911ec45f90f6984f5717c0e8049d7aee8d6",
+    "case_contribution.csv": "35f456ff51da7fd625d951bec61897c950a26e680fa9f137ae870225e6bd3fa4",
+    "case_summary.csv": "e0b6227e8814c8a5e0b312f5a3031bc4436c7f47c008680fa07d5be7604593a1",
+    "comparison.csv": "1c8a1f6cb22824ed5395c98426f07e0f37ea4b268eec6c800bc7886b2c0d3600",
+    "conclusions.md": "f727b479de7266153da5d1e4494835741ada721f6e7afdcff9d6a30d8afc43b1",
+    "evaluation.md": "4331e5e35d9e6afef4a21269d1a2f8b4e3aa96d1652eca75e4d94530bdcd82f2",
+    "method_agreement.csv": "1cdf4c3b7e9200e2f867768b2f21c7dd1d7f71a7ff5ba2ec2bf72f66a3f177a0",
+    "paired_comparison.csv": "f479b5aba7ec072cd4564fe9c281782991de554e45868e8cbfd99b4b299641c7",
+    "report.json": "a628b37ab1a653b46074ac800ca0bf65a57119a11d57db34cc3ccd1474a61144",
+    "stability.csv": "32a522c9bbf4720ee96e007c26b861850dd7b398dff9c57f788233d5639dee6b"
+  },
+  "full_snapshot_included": false,
+  "models_included": false,
+  "private_audit_key_included": false,
+  "published_csv_newlines": "LF; logical CSV values verified against source snapshot",
+  "schema_version": "1.0",
+  "scope": "short_report_publication_only",
+  "source_csv_sha256": {
+    "case_summary.csv": "1805a7d6a608bb4b3e6c50c0bfac330029f50b5b6b023c8eaa5bacb0bf434f21",
+    "comparison.csv": "f94109ce886c8e72bf0524e07ba8b4521ada3f063612fd5c75a5c485855ec592",
+    "method_agreement.csv": "d64b74228f9499d4428f74ea8adeb932248bc796de79c564e957a97b44d4183a",
+    "paired_comparison.csv": "ee5702a09ce6a9c228e0c170d93dbf9e4a487e934e5d3ab9e7ea187003e9f955",
+    "stability.csv": "5cd5f00c0529c6bcbbfd0aa78f43b53e466658bac7e3b32ca88dd7a66602c516"
+  },
+  "source_manifest_sha256": "474e3bf179a382ca5eb562556b1229e2f6ad5ed0937cd7167d9af55f35e0a0d1",
+  "source_run_id": "evaluation-f4a420b562d1349f76b4",
+  "source_snapshot": "data/verification/t20-5pxbh49o/artifacts/evaluation-f4a420b562d1349f76b4"
+}
