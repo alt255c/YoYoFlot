@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import csv
 import json
+import tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -68,9 +69,12 @@ def audit(input_dir, output_dir=None, sample_size=30, memory_limit="512MB"):
     counts = {}
     duplicate_counts = {}
     schemas = {}
-    with duckdb.connect() as db:
+    with tempfile.TemporaryDirectory(prefix=".quality-", dir=destination) as temp, \
+            duckdb.connect(str(Path(temp) / "audit.duckdb")) as db:
         db.execute("SET memory_limit=?", [memory_limit])
         db.execute("SET threads=2")
+        db.execute("SET preserve_insertion_order=false")
+        db.execute("SET temp_directory=?", [str(Path(temp) / "spill")])
         for name, path in files.items():
             actual = pq.read_schema(path)
             expected = SCHEMAS[name]
@@ -79,9 +83,10 @@ def audit(input_dir, output_dir=None, sample_size=30, memory_limit="512MB"):
                 blockers.append(f"schema_mismatch:{name}")
             db.from_parquet(str(path)).create_view(name)
             counts[name] = _count(db, name)
-            key = KEYS[name][0]
+            keys = ", ".join(_q(key) for key in KEYS[name])
+            null_key = " OR ".join(f"{_q(key)} IS NULL" for key in KEYS[name])
             duplicate_counts[name] = int(db.execute(
-                f"SELECT count(*) FROM (SELECT {_q(key)} FROM {_q(name)} GROUP BY {_q(key)} HAVING {_q(key)} IS NULL OR count(*) > 1)"
+                f"SELECT count(*) FROM (SELECT {keys} FROM {_q(name)} GROUP BY {keys} HAVING {null_key} OR count(*) > 1)"
             ).fetchone()[0])
             if duplicate_counts[name]:
                 blockers.append(f"duplicate_or_null_key:{name}")

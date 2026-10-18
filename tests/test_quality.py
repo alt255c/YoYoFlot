@@ -49,3 +49,31 @@ def test_quality_blocks_missing_provenance(tmp_path):
     report = audit(tmp_path)
     assert report["status"] == "failed"
     assert "missing_provenance:observations" in report["blockers"]
+
+
+def test_provenance_uses_the_whole_composite_key(tmp_path):
+    _write_dataset(tmp_path)
+    people = pq.read_table(tmp_path / "observations.parquet").to_pylist()
+    people.append({**people[0], "observation_id": "observations-2", "source_record_id": "source-2"})
+    links = pq.read_table(tmp_path / "provenance.parquet").to_pylist()
+    links.append(_row("provenance", entity_table="observations", entity_id="observations-2", source_record_id="source-2"))
+    for name, rows in (("observations", people), ("provenance", links)):
+        pq.write_table(pa.Table.from_pylist(rows, schema=SCHEMAS[name]), tmp_path / f"{name}.parquet")
+    report_path = tmp_path / "canonical_report.json"
+    upstream = json.loads(report_path.read_text())
+    upstream["counts"].update(observations=2, provenance=4)
+    report_path.write_text(json.dumps(upstream))
+    report = audit(tmp_path)
+    assert report["status"] == "passed"
+    assert report["duplicate_or_null_keys"]["provenance"] == 0
+
+
+def test_duplicate_full_provenance_key_is_still_a_blocker(tmp_path):
+    _write_dataset(tmp_path)
+    links = pq.read_table(tmp_path / "provenance.parquet").to_pylist()
+    links.append(dict(links[0]))
+    pq.write_table(pa.Table.from_pylist(links, schema=SCHEMAS["provenance"]), tmp_path / "provenance.parquet")
+    report = audit(tmp_path)
+    assert report["status"] == "failed"
+    assert report["duplicate_or_null_keys"]["provenance"] == 1
+    assert "duplicate_provenance_link" in report["blockers"]

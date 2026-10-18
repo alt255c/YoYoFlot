@@ -1,0 +1,22 @@
+version: evaluation-demo-1.0
+data_mode: synthetic_demo
+profiles: 120
+seed: 303
+replicate_seed: 404
+in_domain_seed: 505
+top_k: [10, 25, 50]
+audit:
+  size: 50
+  seed: 2020
+experiments:
+  if_seeds: [1902, 1903]
+  trees: [100, 400]
+  max_samples: [64, 256]
+  threshold_factors: [0.9, 1.1]
+  rules_weights: [0.25, 0.75]
+  as_of: ['2026-03-01']
+  group_ablations: true
+  missingness_check: true
+  include_graph: true
+  graph_seeds: [30]
+  mc_seed: 1802

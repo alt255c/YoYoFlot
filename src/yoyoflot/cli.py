@@ -21,7 +21,7 @@ READERS = [
 
 
 def parser():
-    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot readers, geography T11, canonical build T12 and resolution T13")
+    p = argparse.ArgumentParser(prog="yoyoflot", description="YoYoFlot data pipeline and independent fictional rules demo")
     p.add_argument("--version", action="version", version="yoyoflot " + __version__)
     sub = p.add_subparsers(dest="command", required=True)
     inv = sub.add_parser(
@@ -84,14 +84,156 @@ def parser():
     quality.add_argument("--output", type=Path)
     quality.add_argument("--sample-size", type=int, default=30)
     quality.add_argument("--memory-limit", default="512MB")
-    for name in ["features", "train", "evaluate", "run"]:
-        sub.add_parser(name, help="Not implemented: modeling tasks T13 onward")
+    pipeline = sub.add_parser("run", help="T16: reproducible data core, without a model or web UI")
+    pipeline.add_argument("--config", type=Path, default=Path("configs/sources.yaml"))
+    pipeline.add_argument("--data-dir", type=Path, default=Path("data/raw"))
+    pipeline.add_argument("--work-dir", type=Path, default=Path("data/work/t16"))
+    pipeline.add_argument("--artifacts-dir", type=Path, default=Path("artifacts"), help="Parent for automatic snapshot names")
+    pipeline.add_argument("--output", type=Path, help="New immutable snapshot directory; default: artifacts/data-<fingerprint>")
+    start = pipeline.add_mutually_exclusive_group()
+    start.add_argument("--from-interim", type=Path, help="Use completed reader outputs; original raw files are not revalidated")
+    start.add_argument("--from-processed", type=Path, help="Verify/adopt existing T11/T12/T13; do not repeat their calculations")
+    pipeline.add_argument("--until", choices=["build"], default="build", help="build = entire data core through T14, not only T12")
+    pipeline.add_argument("--normalization-config", type=Path, default=Path("configs/normalization.yaml"))
+    pipeline.add_argument("--resolution-config", type=Path, default=Path("configs/resolution.yaml"))
+    pipeline.add_argument("--reference", type=Path, default=Path("data/reference/airports.csv"))
+    pipeline.add_argument("--reference-manifest", type=Path)
+    pipeline.add_argument("--overrides", type=Path, default=Path("configs/airports_overrides.yaml"))
+    pipeline.add_argument("--batch-size", type=int, default=4000)
+    pipeline.add_argument("--chunk-pages", type=int, default=100)
+    pipeline.add_argument("--sample-size", type=int, default=30)
+    pipeline.add_argument("--memory-limit", default="1GB", help="DuckDB limit, not a total Python RAM limit")
+    pipeline.add_argument("--require-all", action="store_true", help="Require all seven logical sources")
+    pipeline.add_argument("--allow-source-errors", action="store_true", help="Keep documented parser/PDF limitations; never bypass structural blockers")
+    pipeline.add_argument("-q", "--quiet", action="store_true")
+    train = sub.add_parser("train", help="T17: rules for independently generated fictional profiles only")
+    training_input = train.add_mutually_exclusive_group()
+    training_input.add_argument("--demo", action="store_true", help="Generate independent fictional profiles")
+    training_input.add_argument("--input", type=Path, help="Previously generated demo, verified by generator replay")
+    train.add_argument("--seed", type=int, default=17)
+    train.add_argument("--profiles", type=int, default=120, help="Fictional profiles, 0–500")
+    train.add_argument("--demo-dir", type=Path, default=Path("data/work/t17"))
+    train.add_argument("--config", type=Path, default=Path("configs/model.yaml"))
+    train.add_argument("--output", type=Path, help="New immutable output directory")
+    train.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t17"))
+    train.add_argument("-q", "--quiet", action="store_true")
+    graph = sub.add_parser("graph", help="T18: auditable coflight graph of independent fictional profiles")
+    graph_input = graph.add_mutually_exclusive_group()
+    graph_input.add_argument("--demo", action="store_true")
+    graph_input.add_argument("--input", type=Path, help="Replay-verifiable T17 demo, or its snapshot/input directory")
+    graph.add_argument("--seed", type=int, default=17)
+    graph.add_argument("--profiles", type=int, default=120)
+    graph.add_argument("--demo-dir", type=Path, default=Path("data/work/t18"))
+    graph.add_argument("--config", type=Path, default=Path("configs/graph.yaml"))
+    graph.add_argument("--output", type=Path)
+    graph.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t18"))
+    graph.add_argument("-q", "--quiet", action="store_true")
+    forest = sub.add_parser("train-if", help="T19: fit Isolation Forest on independent fictional teaching data")
+    forest_input = forest.add_mutually_exclusive_group()
+    forest_input.add_argument("--demo", action="store_true")
+    forest_input.add_argument("--input", type=Path, help="Replay-verifiable fictional evaluation input")
+    forest.add_argument("--reference", type=Path, help="Separate fictional training input; default generated seed 101")
+    forest.add_argument("--calibration", type=Path, help="Separate fictional calibration input; default generated seed 202")
+    forest.add_argument("--seed", type=int, default=17)
+    forest.add_argument("--profiles", type=int, default=120)
+    forest.add_argument("--demo-dir", type=Path, default=Path("data/work/t19/evaluation"))
+    forest.add_argument("--work-dir", type=Path, default=Path("data/work/t19"))
+    forest.add_argument("--config", type=Path, default=Path("configs/isolation_forest.yaml"))
+    forest.add_argument("--rules-config", type=Path, default=Path("configs/model.yaml"))
+    forest.add_argument("--graph-config", type=Path, default=Path("configs/graph.yaml"))
+    forest.add_argument("--output", type=Path)
+    forest.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t19"))
+    forest.add_argument("-q", "--quiet", action="store_true")
+    evaluation = sub.add_parser("evaluate", help="T20: compare fictional models and prepare independent review")
+    evaluation.add_argument("--demo", action="store_true")
+    evaluation.add_argument("--config", type=Path, default=Path("configs/evaluation.yaml"))
+    evaluation.add_argument("--if-config", type=Path, default=Path("configs/isolation_forest.yaml"))
+    evaluation.add_argument("--rules-config", type=Path, default=Path("configs/model.yaml"))
+    evaluation.add_argument("--graph-config", type=Path, default=Path("configs/graph.yaml"))
+    evaluation.add_argument("--output", type=Path)
+    evaluation.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t20"))
+    evaluation.add_argument("--work-dir", type=Path, default=Path("data/work/t20"))
+    evaluation.add_argument("-q", "--quiet", action="store_true")
+    review = sub.add_parser("audit-ranking", help="T20: validate and summarize independent fictional review CSV")
+    review.add_argument("--input", type=Path, required=True)
+    review.add_argument("--reviews", type=Path, required=True)
+    review.add_argument("--output", type=Path)
+    review.add_argument("--artifacts-dir", type=Path, default=Path("artifacts/t20-review"))
+    review.add_argument("-q", "--quiet", action="store_true")
+    for name in ["features"]:
+        sub.add_parser(name, help="Not implemented by this CLI; see task-specific scripts")
     return p
 
 
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "evaluate":
+            if not args.demo:
+                print("T20: укажите --demo; индивидуальные реальные входы не поддерживаются", file=sys.stderr)
+                return 2
+            from .evaluation.artifact import run
+            _, summary = run(args.config, args.if_config, args.rules_config, args.graph_config, args.output,
+                             args.artifacts_dir, args.work_dir,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:print(summary, end="")
+            return 0
+        if args.command == "audit-ranking":
+            from .evaluation.audit import import_reviews
+            report, path = import_reviews(args.input, args.reviews, args.output, args.artifacts_dir)
+            if not args.quiet:
+                print(f"T20 ревью: {report['completed']} / {report['selected']}; статус {report['status']}; результаты: {path}")
+            return 0
+        if args.command == "train-if":
+            if not args.demo and args.input is None:
+                print("T19: укажите --demo или --input с независимым вымышленным набором", file=sys.stderr)
+                return 2
+            from .models.demo import VARIED_GENERATOR, create_demo
+            from .models.if_artifact import run
+            directory = create_demo(args.demo_dir, args.seed, args.profiles, VARIED_GENERATOR) if args.demo else args.input
+            _, summary = run(directory, args.config, args.rules_config, args.graph_config, args.output, args.artifacts_dir,
+                             args.work_dir, args.reference, args.calibration,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
+        if args.command == "graph":
+            if not args.demo and args.input is None:
+                print("T18: укажите --demo или --input с независимым учебным набором T17", file=sys.stderr)
+                return 2
+            from .models.demo import create_demo
+            from .features.graph_artifact import run
+            directory = create_demo(args.demo_dir, args.seed, args.profiles) if args.demo else args.input
+            _, summary = run(directory, args.config, args.output, args.artifacts_dir,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
+        if args.command == "train":
+            if not args.demo and args.input is None:
+                print("T17: укажите --demo или --input с независимым учебным набором", file=sys.stderr)
+                return 2
+            from .models.demo import create_demo
+            from .models.ranking import run
+            directory = create_demo(args.demo_dir, args.seed, args.profiles) if args.demo else args.input
+            _, summary = run(directory, args.config, args.output, args.artifacts_dir,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
+        if args.command == "run":
+            from .pipeline import run
+            _, summary = run(config=args.config, data_dir=args.data_dir, work_dir=args.work_dir,
+                             output=args.output, from_interim=args.from_interim, from_processed=args.from_processed,
+                             artifacts_dir=args.artifacts_dir,
+                             normalization=args.normalization_config, resolution=args.resolution_config,
+                             reference=args.reference, overrides=args.overrides, reference_manifest=args.reference_manifest,
+                             batch_size=args.batch_size, memory_limit=args.memory_limit, chunk_pages=args.chunk_pages,
+                             sample_size=args.sample_size, require_all=args.require_all, allow_source_errors=args.allow_source_errors,
+                             progress=None if args.quiet else lambda message: print(message, flush=True))
+            if not args.quiet:
+                print(summary, end="")
+            return 0
         if args.command == "resolve":
             from .resolve.pipeline import run
             _, summary = run(args.input,args.output,args.config,args.review_output,args.batch_size,args.memory_limit,
@@ -154,7 +296,7 @@ def main(argv=None):
             export(args.path, args.output)
             return 0
         if args.command != "ingest":
-            print(f"{args.command}: not implemented (modeling tasks T13 onward)", file=sys.stderr)
+            print(f"{args.command}: not implemented by this CLI", file=sys.stderr)
             return 2
         if args.source == "all" and args.path:
             raise ValueError("--path only applies to one source")
@@ -195,7 +337,10 @@ def main(argv=None):
                 failed = True
         return 1 if failed else 0
     except KeyboardInterrupt:
-        print("Выполнение прервано. Блокировка освобождена; повторный запуск начнёт обработку заново.", file=sys.stderr)
+        if args.command == "run":
+            print("T16 прерван. Блокировка освобождена; повторная команда проверит и использует завершённые этапы.", file=sys.stderr)
+        else:
+            print("Выполнение прервано. Блокировка освобождена; повторный запуск начнёт обработку заново.", file=sys.stderr)
         return 130
     except Exception as exc:
         print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
