@@ -44,9 +44,6 @@ function renderMetadata() {
   $('#metricEligible').textContent = number(eligibleCount());
   $('#metricMode').textContent = m.data_mode === 'demo_subset' ? 'DEMO' : 'SOURCE';
   $('#metricModeHint').textContent = m.data_mode === 'demo_subset' ? 'реальный набор · демо-подмножество' : 'проверенный snapshot';
-  $('#sourceBadge').textContent = m.data_mode === 'demo_subset' ? 'ДЕМО · РЕАЛЬНЫЕ ПРОФИЛИ' : 'SOURCE DATASET · VERIFIED';
-  $('#windowLabel').textContent = `Окно наблюдений · ${m.window?.start || '—'} — ${m.window?.end || '—'}`;
-  $('#runLabel').textContent = `run_id · ${m.run_id || '—'}`;
   $('#agentMode').textContent = m.data_mode === 'demo_subset' ? 'ДЕМО-КОНТУР МОНИТОРИНГА' : 'КОНТУР МОНИТОРИНГА';
   $('#resetButton').hidden = m.data_mode !== 'demo_subset';
 }
