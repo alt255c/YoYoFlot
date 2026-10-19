@@ -13,3 +13,5 @@ html{background:var(--bg)}body{background:linear-gradient(180deg,#f9fcff 0%,#eaf
 @media(max-width:780px){.mosquito-mascot{bottom:-8px}.mosquito-mascot img{width:88px;height:76px}.mosquito-mascot span{font-size:8px;margin-bottom:11px}.hero-note{bottom:28px}}
 .hero{display:block;min-height:350px;padding-bottom:112px}.mosquito-mascot{bottom:14px}
 @media(max-width:780px){.hero{min-height:360px;padding-bottom:100px}.mosquito-mascot{bottom:14px}}
+.agent-name{color:var(--muted);letter-spacing:.11em}.agent-cap{color:#1268d4;font-weight:800}.mosquito-mascot{left:auto;right:clamp(24px,6vw,88px);bottom:64px;flex-direction:column;align-items:center;gap:2px}.mosquito-mascot span{margin-bottom:0}
+@media(max-width:780px){.mosquito-mascot{left:0;right:auto;bottom:14px;flex-direction:row;align-items:flex-end;gap:9px}.mosquito-mascot span{margin-bottom:11px}}
