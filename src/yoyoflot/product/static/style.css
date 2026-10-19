@@ -119,6 +119,11 @@ html[data-theme='dark'] .mosquito-mascot span {
   color:#8fc5ff;
   box-shadow:0 4px 14px rgba(0,0,0,.28);
 }
+html[data-theme='dark'] .chip.eligible {
+  background:#173a3d;
+  border-color:#3a8e8b;
+  color:#8ae1d3;
+}
 html[data-theme='dark'] .hero-visual {
   border-color:#294b6c;
   background:linear-gradient(145deg,#132b45,#0e2034);

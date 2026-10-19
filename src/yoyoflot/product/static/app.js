@@ -280,7 +280,17 @@ function pointInView(point, margin = 18) {
 }
 function animateMosquito(mosquito, from, to, control, size, segmentId) {
   const started = performance.now();
-  const duration = 3800;
+  const speed = 8; // map units per second: deliberately calm and distance-independent
+  let routeLength = 0;
+  let previous = from;
+  for (let step = 1; step <= 32; step += 1) {
+    const t = step / 32;
+    const u = 1 - t;
+    const point = [u*u*from[0] + 2*u*t*control[0] + t*t*to[0], u*u*from[1] + 2*u*t*control[1] + t*t*to[1]];
+    routeLength += Math.hypot(point[0] - previous[0], point[1] - previous[1]);
+    previous = point;
+  }
+  const duration = Math.max(1, routeLength / speed * 1000);
   const rawAngle = Math.atan2(to[1] - from[1], to[0] - from[0]) * 180 / Math.PI;
   const mirrored = to[0] < from[0];
   // The supplied GIF faces right. For westbound routes mirror it and keep
