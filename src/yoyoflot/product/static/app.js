@@ -131,6 +131,7 @@ function renderProfile() {
   const unknown = node('label', undefined, 'check-label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = state.showUndated; checkbox.addEventListener('change', () => { state.showUndated = checkbox.checked; renderTimeline(); }); unknown.append(checkbox, node('span', 'Без даты')); controls.append(unknown);
   const reset = node('button', 'Сбросить период', 'button subtle'); reset.type = 'button'; reset.addEventListener('click', () => { state.routeFrom = ''; state.routeTo = ''; state.showUndated = true; renderProfile(); }); controls.append(reset); mapPanel.append(controls);
   const balance = node('div', undefined, 'route-balance'); balance.id = 'routeBalance'; mapPanel.append(balance);
+  const focusSummary = node('div', 'Выберите строку истории, чтобы сфокусировать перелёт.', 'route-focus'); focusSummary.id = 'routeFocus'; mapPanel.append(focusSummary);
   const mapWrap = node('div', undefined, 'map-wrap'); const map = svg('svg', {class:'map', viewBox:'-180 -90 360 180', role:'img', 'aria-label':'Карта маршрутов'}); map.id = 'map';
   let mapDrag = null;
   map.addEventListener('pointerdown', event => {
@@ -173,6 +174,8 @@ function renderTimeline() {
   if (!state.profile) return;
   const rows = visibleSegments(); const balance = $('#routeBalance'); if (balance) balance.textContent = `Показано ${rows.length} из ${state.profile.route_balance.total} · с координатами ${state.profile.route_balance.plottable} · без координат ${state.profile.route_balance.unplottable}`;
   if (rows.length && !rows.some(row => row.segment_id === state.focus)) state.focus = rows[0].segment_id;
+  if (state.view[0] === -180 && state.view[1] === -90 && state.view[2] === 360 && state.view[3] === 180) state.view = fitMapView(rows);
+  const focused = rows.find(row => row.segment_id === state.focus); const focusSummary = $('#routeFocus'); if (focusSummary) { const origin = focused?.origin?.airport_id || focused?.origin_airport_id || '???'; const destination = focused?.destination?.airport_id || focused?.destination_airport_id || '???'; focusSummary.textContent = focused ? `Выбранный перелёт · ${dateLabel(focused.departure_date)} · ${origin.replace(/^openflights:/,'')} → ${destination.replace(/^openflights:/,'')} · ${focused.flight_number || 'рейс не указан'}` : 'Выберите строку истории, чтобы сфокусировать перелёт.'; }
   const table = document.querySelector('.timeline-table'); if (!table) return; table.replaceChildren(); const header = node('div', undefined, 'timeline-row timeline-header'); ['Дата', 'Маршрут', 'Рейс', 'Статус'].forEach(text => header.append(node('span', text))); table.append(header);
   if (!rows.length) table.append(node('div', 'В выбранном периоде записей нет.', 'empty-list'));
   for (const segment of rows) { const row=node('button', undefined, `timeline-row ${state.focus === segment.segment_id ? 'focused' : ''}`); row.type='button'; const origin=segment.origin?.airport_id || segment.origin_airport_id || '???'; const destination=segment.destination?.airport_id || segment.destination_airport_id || '???'; row.append(node('span', dateLabel(segment.departure_date), 'date-cell'), node('span', `${origin} → ${destination}`, 'route-cell'), node('span', segment.flight_number || '—', 'flight-cell'), node('span', segment.resolution_status || '—', 'state-cell')); row.addEventListener('click', () => { state.focus=segment.segment_id; drawMap(visibleSegments()); renderTimeline(); }); table.append(row); }
@@ -182,6 +185,15 @@ function routeParts(a, b) { let [x1,y1]=a, [x2,y2]=b; if (Math.abs(x2-x1)<=180) 
 function shortDate(value) { if (!value) return 'без даты'; const parts=String(value).split('-'); return parts.length===3 ? `${parts[2]}.${parts[1]}` : String(value); }
 function routeKey(segment) { const from=segment.origin?.airport_id || segment.origin_airport_id || '???'; const to=segment.destination?.airport_id || segment.destination_airport_id || '???'; return `${from}→${to}`; }
 function curvedRoute(from, to, bend) { const [x1,y1]=from, [x2,y2]=to; const dx=x2-x1, dy=y2-y1, length=Math.hypot(dx,dy) || 1; const nx=-dy/length, ny=dx/length; const mx=(x1+x2)/2+nx*bend, my=(y1+y2)/2+ny*bend; return {path:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`, label:[mx,my]}; }
+function fitMapView(rows) {
+  const points = rows.filter(segment => segment.is_plottable && segment.origin && segment.destination).flatMap(segment => [segment.origin, segment.destination]).map(point => [Number(point.longitude), -Number(point.latitude)]).filter(([x,y]) => Number.isFinite(x) && Number.isFinite(y));
+  if (!points.length) return [-180, -90, 360, 180];
+  const xs = points.map(point => point[0]), ys = points.map(point => point[1]);
+  const spanX = Math.max(10, Math.max(...xs) - Math.min(...xs)), spanY = Math.max(10, Math.max(...ys) - Math.min(...ys));
+  const width = Math.min(360, spanX + Math.max(8, spanX * .18)); const height = Math.min(180, spanY + Math.max(8, spanY * .22));
+  const centerX = (Math.min(...xs) + Math.max(...xs)) / 2; const centerY = (Math.min(...ys) + Math.max(...ys)) / 2;
+  return [centerX - width / 2, centerY - height / 2, width, height];
+}
 function drawMap(rows) {
   const map=$('#map'); if (!map) return; map.replaceChildren();
   const defs=svg('defs'); const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:5,markerHeight:5,orient:'auto',markerUnits:'strokeWidth'}); marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#0b57b7'})); defs.append(marker); map.append(defs);
