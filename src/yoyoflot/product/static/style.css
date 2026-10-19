@@ -13,3 +13,5 @@ body{overflow-x:hidden}
 .route-focus{margin:8px 0 12px;padding:9px 11px;border-left:3px solid var(--blue);border-radius:5px;background:#f0f7ff;color:var(--navy);font:10px var(--mono);line-height:1.45}
 @media(max-width:1100px){.hero-visual{width:250px;height:205px;flex-basis:250px}.mosquito-mascot img{width:165px;height:140px}}
 @media(max-width:780px){.hero-visual{width:100%;height:160px}.mosquito-mascot img{width:128px;height:108px}}
+.agent-name{font-size:16px;line-height:1.35;letter-spacing:.08em}.agent-cap{font-size:1.2em}.map-date-label{pointer-events:none}.map-date{font-size:3.8px;paint-order:stroke;stroke:#edf5fb;stroke-width:.8px;stroke-linejoin:round}.map-date-label.active .map-date{font-size:4.6px;font-weight:800;stroke-width:1px}.route{stroke-dasharray:none}.airport-dot{r:.55}.airport-dot.active{r:.85}
+@media(max-width:780px){.agent-name{font-size:13px}}
