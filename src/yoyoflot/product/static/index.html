@@ -64,11 +64,14 @@
 
     <div id="error" class="error" role="alert" hidden></div>
     <section class="workspace">
-      <aside class="directory panel">
+      <aside class="directory-stack">
+        <section class="directory panel">
         <div class="directory-head"><div><p class="eyebrow">СПИСОК ПРОФИЛЕЙ</p><h2 id="listTitle">Топ-50</h2></div><span id="listCount" class="count-pill">—</span></div>
         <p id="listDescription" class="hint">Сначала профили с наибольшим числом сработавших групп.</p>
         <div id="peopleList" class="people-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
         <div class="pagination"><button id="prevPage" class="page-button" type="button" disabled aria-label="Предыдущая страница">←</button><span id="pageLabel">—</span><button id="nextPage" class="page-button" type="button" disabled aria-label="Следующая страница">→</button></div>
+        </section>
+        <div id="sidebarTimeline"></div>
       </aside>
       <section id="profilePanel" class="profile-column" aria-live="polite"><div class="panel empty-state"><span class="empty-icon">◎</span><h2>Выберите профиль</h2><p>Карточка покажет, какие критерии сработали, на каких сегментах они основаны и куда летал человек.</p></div></section>
     </section>
