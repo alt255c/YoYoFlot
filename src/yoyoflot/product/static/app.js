@@ -191,9 +191,9 @@ function mapElementScale() {
   const width = Number(state.view[2]) || 360;
   const level = Math.pow(Math.min(1, Math.max(.02, width / 360)), 1.2);
   return {
-    arrow: Math.min(4.4, Math.max(.05, .05 + level * 4.35)),
+    arrow: Math.min(5.2, Math.max(.06, .06 + level * 5.14)),
     dot: Math.min(1.1, Math.max(.04, .04 + level * 1)),
-    date: Math.min(1.5, Math.max(.05, .05 + level * 1.45)),
+    date: Math.min(1.1, Math.max(.04, .04 + level * 1.06)),
   };
 }
 function fitMapView(rows) {
@@ -209,7 +209,7 @@ function drawMap(rows) {
   const map=$('#map'); if (!map) return; map.replaceChildren();
   const scale = mapElementScale(); const defs=svg('defs');
   const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:scale.arrow,markerHeight:scale.arrow,orient:'auto',markerUnits:'userSpaceOnUse'}); marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#0b57b7'}));
-  const activeMarker=svg('marker',{id:'arrow-active',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:scale.arrow*1.18,markerHeight:scale.arrow*1.18,orient:'auto',markerUnits:'userSpaceOnUse'}); activeMarker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#d47d24'})); defs.append(marker, activeMarker); map.append(defs);
+  const activeMarker=svg('marker',{id:'arrow-active',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:scale.arrow*1.3,markerHeight:scale.arrow*1.3,orient:'auto',markerUnits:'userSpaceOnUse'}); activeMarker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#d47d24'})); defs.append(marker, activeMarker); map.append(defs);
   for (let x=-180;x<=180;x+=30) map.append(svg('line',{x1:x,x2:x,y1:-90,y2:90,class:'gridline'})); for (let y=-60;y<=60;y+=30) map.append(svg('line',{x1:-180,x2:180,y1:y,y2:y,class:'gridline'}));
   for (const feature of state.geo?.features || []) if (['Polygon','MultiPolygon'].includes(feature.geometry?.type)) map.append(svg('path',{d:countryPath(feature.geometry),class:'country'}));
   const plottable=rows.filter(segment => segment.is_plottable && segment.origin && segment.destination); const groups=new Map(); const airports=new Map();
