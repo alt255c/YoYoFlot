@@ -16,13 +16,15 @@ def _json_file(path):
 
 
 class ProductStore:
-    def __init__(self, path):
+    def __init__(self, path, allow_demo=False):
         self.path = Path(path).resolve()
         self.manifest = _json_file(self.path/'run_manifest.json')
         m = self.manifest
-        if (m.get('schema_version') != VERSION or m.get('status') != 'complete' or m.get('data_mode') != 'source_dataset'
+        self.data_mode = m.get('data_mode')
+        valid_mode = self.data_mode == 'source_dataset' or (allow_demo and self.data_mode == 'demo')
+        if (m.get('schema_version') != VERSION or m.get('status') != 'complete' or not valid_mode
                 or m.get('run_id') != 'product-'+_digest(m.get('request'))[:20]):
-            raise ValueError('Not a completed source-dataset product')
+            raise ValueError('Not a completed supported product')
         files=m.get('files',{})
         required={'tables/top50.parquet','tables/rankings.parquet','tables/explanations.parquet',
                   'tables/segments.parquet','tables/persons.parquet','tables/features.parquet',
@@ -56,13 +58,47 @@ class ProductStore:
             yield db
 
     def metadata(self):
-        return dict(self.manifest,evaluation=_json_file(self.path/'evaluation.json'),
+        return dict(self.manifest, data_mode=self.data_mode, evaluation=_json_file(self.path/'evaluation.json'),
                     forest=_json_file(self.path/'forest.json'),graph=_json_file(self.path/'graph.json'),rules=_json_file(self.path/'rules.json'))
 
     def top(self, limit=50):
-        if type(limit) is not int or not 1<=limit<=50:raise ValueError('Limit must be 1–50')
+        if type(limit) is not int or not 1<=limit<=1000:raise ValueError('Limit must be 1–1000')
         with self.connection() as db:
-            return _rows(db,'SELECT * FROM top50 ORDER BY rank LIMIT ?',[limit])
+            return _rows(db,'''SELECT * FROM rankings
+                WHERE eligibility_status='eligible' AND rank IS NOT NULL
+                ORDER BY rank LIMIT ?''',[limit])
+
+    def users(self, limit=50, offset=0, query='', eligibility='all', sort='rank'):
+        """Return a bounded, searchable page of every profile in the model."""
+        if type(limit) is not int or not 1 <= limit <= 1000:
+            raise ValueError('Limit must be 1–1000')
+        if type(offset) is not int or not 0 <= offset <= 10_000_000:
+            raise ValueError('Offset must be between 0 and 10000000')
+        if not isinstance(query, str) or len(query) > 120:
+            raise ValueError('Search query is too long')
+        if eligibility not in {'all', 'eligible', 'no_matches', 'insufficient_data'}:
+            raise ValueError('Unknown eligibility filter')
+        if sort not in {'rank', 'score', 'name'}:
+            raise ValueError('Unknown sort order')
+        order = {
+            'rank': "CASE WHEN eligibility_status='eligible' THEN 0 ELSE 1 END, rank NULLS LAST, matched_criteria_count DESC, rule_score DESC, person_id",
+            'score': 'rule_score DESC NULLS LAST, matched_criteria_count DESC, person_id',
+            'name': 'lower(coalesce(display_name, \'\')), person_id',
+        }[sort]
+        clauses=[]
+        params=[]
+        if eligibility != 'all':
+            clauses.append('eligibility_status=?')
+            params.append(eligibility)
+        if query.strip():
+            needle=f'%{query.strip().lower()}%'
+            clauses.append("(lower(coalesce(display_name,'')) LIKE ? OR lower(person_id) LIKE ?)")
+            params.extend([needle, needle])
+        where=' WHERE '+ ' AND '.join(clauses) if clauses else ''
+        with self.connection() as db:
+            total=db.execute(f'SELECT count(*) FROM rankings{where}', params).fetchone()[0]
+            rows=_rows(db, f'SELECT * FROM rankings{where} ORDER BY {order} LIMIT ? OFFSET ?', params+[limit,offset])
+        return {'items':rows, 'pagination':{'offset':offset,'limit':limit,'total':total,'has_next':offset+len(rows)<total}}
 
     def profile(self, person_id):
         if not isinstance(person_id,str) or not person_id or len(person_id)>256:raise ValueError('Invalid person ID')

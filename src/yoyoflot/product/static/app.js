@@ -1,134 +1,199 @@
 'use strict';
-const $ = s => document.querySelector(s);
-const number = n => new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 2}).format(n);
+
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+const number = value => value === null || value === undefined || value === '' ? '—' : new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 2}).format(Number(value));
+const dateLabel = value => value || 'Дата неизвестна';
 const NS = 'http://www.w3.org/2000/svg';
-const state = {top: [], selected: null, data: null, geo: null, request: 0, view: [-180, -90, 360, 180], focus: null};
-function node(tag, text, className) {const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (className) e.className = className; return e;}
-function svg(tag, attrs, text) {const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v); if (text !== undefined) e.textContent = text; return e;}
-async function api(path) {const r = await fetch(path); const j = await r.json(); if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`); return j;}
-function error(message) {$('#error').hidden = !message; $('#error').textContent = message || '';}
-function renderTop() {
-  const query = $('#search').value.toLocaleLowerCase('ru'); const list = $('#top'); list.replaceChildren();
-  const rows = state.top.filter(r => `${r.display_name || ''} ${r.person_id}`.toLocaleLowerCase('ru').includes(query));
-  for (const r of rows) {
-    const b = node('button', undefined, 'person-button'); b.type = 'button'; b.setAttribute('role', 'listitem'); b.setAttribute('aria-pressed', String(r.person_id === state.selected));
-    b.append(node('span', String(r.rank).padStart(2, '0'), 'place'));
-    const label = node('span'); label.append(node('span', r.display_name || 'Имя не указано', 'person-name'), node('span', r.person_id, 'person-id')); b.append(label);
-    const count = node('span', r.matched_criteria_count, 'factor-count'); count.append(node('small', `${number(r.rule_score)} балла`)); b.append(count);
-    b.addEventListener('click', () => select(r.person_id)); list.append(b);
+const state = {
+  metadata: null, geo: null, list: [], profile: null, selected: null,
+  view: [-180, -90, 360, 180], focus: null, viewMode: 'ranking', limit: 50,
+  page: 0, pageSize: 60, query: '', eligibility: 'all', sort: 'rank',
+  request: 0, routeFrom: '', routeTo: '', showUndated: true,
+};
+
+function node(tag, text, className) {
+  const element = document.createElement(tag);
+  if (text !== undefined && text !== null) element.textContent = String(text);
+  if (className) element.className = className;
+  return element;
+}
+function svg(tag, attrs, text) {
+  const element = document.createElementNS(NS, tag);
+  for (const [key, value] of Object.entries(attrs || {})) element.setAttribute(key, value);
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+async function api(path, options) {
+  const response = await fetch(path, options);
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+  return payload;
+}
+async function post(path, body) { return api(path, {method: 'POST', body}); }
+function showError(message) { $('#error').hidden = !message; $('#error').textContent = message || ''; }
+function statusLabel(status) { return {eligible: 'СИГНАЛЫ', no_matches: 'БЕЗ СОВПАДЕНИЙ', insufficient_data: 'МАЛО ДАННЫХ'}[status] || status || '—'; }
+function statusClass(status) { return ({eligible: 'eligible', no_matches: 'quiet', insufficient_data: 'muted'}[status] || 'muted'); }
+function eligibleCount() { return state.metadata?.eligibility?.find(row => row.eligibility_status === 'eligible')?.profiles || 0; }
+
+function renderMetadata() {
+  const m = state.metadata || {};
+  const counts = m.counts || {};
+  $('#metricPersons').textContent = number(counts.persons);
+  $('#metricSegments').textContent = number(counts.segments);
+  $('#metricEligible').textContent = number(eligibleCount());
+  $('#metricMode').textContent = m.data_mode === 'demo_subset' ? 'DEMO' : 'SOURCE';
+  $('#metricModeHint').textContent = m.data_mode === 'demo_subset' ? 'реальный набор · демо-подмножество' : 'проверенный snapshot';
+  $('#sourceBadge').textContent = m.data_mode === 'demo_subset' ? 'ДЕМО · РЕАЛЬНЫЕ ПРОФИЛИ' : 'SOURCE DATASET · VERIFIED';
+  $('#windowLabel').textContent = `Окно наблюдений · ${m.window?.start || '—'} — ${m.window?.end || '—'}`;
+  $('#runLabel').textContent = `run_id · ${m.run_id || '—'}`;
+  $('#agentMode').textContent = m.data_mode === 'demo_subset' ? 'ДЕМО-КОНТУР МОНИТОРИНГА' : 'КОНТУР МОНИТОРИНГА';
+  $('#resetButton').hidden = m.data_mode !== 'demo_subset';
+  const method = $('#methodText');
+  method.replaceChildren();
+  const intro = node('p', 'Сигнал строится на исходных обработанных таблицах. Демо-режим показывает подмножество реального рейтинга и не добавляет людей, перелёты или разметку.');
+  method.append(intro);
+  if (Array.isArray(m.limitations) && m.limitations.length) {
+    const ul = node('ul');
+    m.limitations.slice(0, 5).forEach(item => ul.append(node('li', item)));
+    method.append(ul);
   }
-  if (!rows.length) list.append(node('p', state.top.length ? 'В топе нет совпадений.' : 'Нет профилей с достаточными данными и срабатываниями. Список не дополняется.', 'empty'));
 }
-async function select(id) {
-  state.selected = id; state.data = null; state.focus = null; state.view = [-180, -90, 360, 180]; const request = ++state.request;
-  renderTop(); $('#dossier').replaceChildren(node('div', 'Загружаем историю…', 'panel empty')); error(null);
-  try {const data = await api(`/api/profile?id=${encodeURIComponent(id)}`); if (request !== state.request) return; state.data = data; renderDossier();}
-  catch (e) {if (request === state.request) {$('#dossier').replaceChildren(node('div', 'Карточка недоступна.', 'panel empty')); error(e.message);}}
-}
-function renderDossier() {
-  const d = state.data, p = d.person, root = $('#dossier'); root.replaceChildren();
-  const head = node('section', undefined, 'panel'); const info = node('div', undefined, 'profile-head'); const identity = node('div');
-  identity.append(node('p', `МЕСТО ${p.rank || '—'} / КАРТОЧКА ПРОФИЛЯ`, 'eyebrow'), node('h2', p.display_name || 'Имя не указано'), node('p', p.person_id, 'identity'));
-  const score = node('div', undefined, 'profile-score'); score.append(node('strong', number(p.rule_score)), node('small', `${p.matched_criteria_count} из 3 независимых факторов`)); info.append(identity, score); head.append(info);
-  const factors = node('div', undefined, 'factors');
-  for (const f of d.factors) {const card = node('article', undefined, `factor ${f.status}`); card.append(node('span', {matched:'СРАБОТАЛ', not_matched:'НЕ СРАБОТАЛ', unavailable:'НЕДОСТУПЕН'}[f.status], 'status'), node('h3', f.title_ru), node('p', f.explanation_ru));
-    if (f.evidence_segment_ids.length) {const a = node('a', `Подтверждения: ${f.evidence_segment_ids.length}`); a.href = '#timeline'; a.addEventListener('click', () => {focusSegment(f.evidence_segment_ids[0]);}); card.append(a);} factors.append(card);}
-  head.append(factors);
-  const f = d.forest; head.append(node('div', f ? `Isolation Forest: ${number(f.if_percentile * 100)}-й процентиль. Экспериментальная оценка; основной порядок не меняет.` : 'Isolation Forest: оценка недоступна для этого профиля.', 'forest')); root.append(head);
-  const mapPanel = node('section', undefined, 'panel'); const heading = node('div', undefined, 'panel-heading'); heading.append(node('h3', 'География перелётов'), node('span', 'Вся история исходного профиля', 'tag')); mapPanel.append(heading);
-  const controls = node('div', undefined, 'map-controls');
-  for (const [id, label] of [['from','С'], ['to','По']]) {const l = node('label', label+' '); const input = node('input'); input.type = 'date'; input.id = id; input.addEventListener('change', updateRoutes); l.append(input); controls.append(l);}
-  const unknown = node('label'); const checkbox = node('input'); checkbox.type='checkbox'; checkbox.id='undated'; checkbox.checked=true; checkbox.addEventListener('change',updateRoutes); unknown.append(checkbox, document.createTextNode(' Без даты')); controls.append(unknown);
-  const reset = node('button','Вся история','secondary'); reset.type='button'; reset.addEventListener('click',() => {$('#from').value=''; $('#to').value=''; $('#undated').checked=true; state.focus=null; updateRoutes();}); controls.append(reset); mapPanel.append(controls);
-  const balance=node('div'); balance.id='route-balance'; mapPanel.append(balance);
-  const mapWrap=node('div',undefined,'map-wrap'); const map=svg('svg',{class:'map',viewBox:'-180 -90 360 180',role:'img','aria-label':'Карта направлений перелётов. Стрелки указывают аэропорт назначения; подписи содержат дату вылета.'}); map.id='map'; mapWrap.append(map);
-  const tools=node('div',undefined,'map-tools');
-  for (const [label,factor] of [['+',.7],['−',1.4],['Обзор',0]]) {const b=node('button',label); b.type='button'; b.setAttribute('aria-label',factor === 0 ? 'Сбросить масштаб' : factor<1 ? 'Увеличить карту' : 'Уменьшить карту'); b.addEventListener('click',() => {zoom(factor);}); tools.append(b);} mapWrap.append(tools,node('div','→ Направление · Дата вылета · Колесо: масштаб · Перетаскивание: обзор','legend')); mapPanel.append(mapWrap,node('div','Стрелки связывают аэропорты и не изображают фактический трек самолёта. Неполные маршруты остаются в таблице.','map-caption')); root.append(mapPanel);
-  const timeline=node('section',undefined,'panel'); timeline.id='timeline'; const th=node('div',undefined,'panel-heading'); th.append(node('h3','Хронология и источники')); timeline.append(th);
-  const wrap=node('div',undefined,'timeline-wrap'); const table=node('table'); const row=node('tr'); for (const title of ['Вылет','Маршрут','Рейс / свидетельство','География']) row.append(node('th',title)); const thead=node('thead'); thead.append(row); table.append(thead); const tbody=node('tbody'); tbody.id='flights'; table.append(tbody); wrap.append(table); timeline.append(wrap); root.append(timeline);
-  if (d.companions.length) {const c=node('section',undefined,'panel'); const h=node('div',undefined,'panel-heading'); h.append(node('h3',`Повторные совместные события: ${d.companions.length}`)); c.append(h); for (const companion of d.companions) c.append(node('p',`${companion.person_id} · ${companion.shared_days} дней · ${companion.shared_events} событий`,'hint')); c.append(node('p','M07 не добавляет балл: статистическая значимость совместных событий ещё не откалибрована.','hint')); root.append(c);}
-  let drag=null;
-  map.addEventListener('wheel',e => {e.preventDefault(); zoom(e.deltaY>0?1.15:.85);},{passive:false});
-  map.addEventListener('pointerdown',e => {drag={x:e.clientX,y:e.clientY,view:[...state.view]}; map.setPointerCapture(e.pointerId);});
-  map.addEventListener('pointermove',e => {if (!drag) return; const r=map.getBoundingClientRect(); state.view=[drag.view[0]-(e.clientX-drag.x)*drag.view[2]/r.width,drag.view[1]-(e.clientY-drag.y)*drag.view[3]/r.height,drag.view[2],drag.view[3]]; applyView();});
-  map.addEventListener('pointerup',() => {drag=null;}); map.addEventListener('pointercancel',() => {drag=null;}); updateRoutes();
-}
-function focusSegment(id) {
-  state.focus=id; const s=state.data.segments.find(r=>r.segment_id===id);
-  if (s?.is_plottable && Math.abs(s.origin.longitude-s.destination.longitude)<180) {
-    const centerX=(s.origin.longitude+s.destination.longitude)/2, centerY=-(s.origin.latitude+s.destination.latitude)/2;
-    const width=Math.max(18,Math.abs(s.origin.longitude-s.destination.longitude)*1.7,Math.abs(s.origin.latitude-s.destination.latitude)*3.4);
-    state.view=[centerX-width/2,centerY-width/4,width,width/2];
+
+function renderList() {
+  const root = $('#peopleList'); root.replaceChildren();
+  let rows = state.list;
+  if (state.viewMode === 'ranking' && state.query.trim()) {
+    const query = state.query.trim().toLocaleLowerCase('ru');
+    rows = rows.filter(row => `${row.display_name || ''} ${row.person_id}`.toLocaleLowerCase('ru').includes(query));
   }
-  updateRoutes();
-}
-function zoom(factor) {const [x,y,w,h]=state.view; if (!factor) state.view=[-180,-90,360,180]; else {const nw=Math.min(720,Math.max(10,w*factor)); state.view=[x+(w-nw)/2,y+(h-nw/2)/2,nw,nw/2];} drawMap(visibleSegments());}
-function applyView() {$('#map').setAttribute('viewBox',state.view.join(' '));}
-function visibleSegments() {const from=$('#from').value,to=$('#to').value; if (from && to && from>to) throw new Error('Начало периода позже окончания.'); return state.data.segments.filter(s => s.departure_date ? (!from || s.departure_date>=from) && (!to || s.departure_date<=to) : $('#undated').checked);}
-function updateRoutes() {
-  let rows; try {rows=visibleSegments(); error(null);} catch(e) {error(e.message); return;}
-  const d=state.data; $('#route-balance').textContent=`Всего: ${d.route_balance.total} · С координатами: ${d.route_balance.plottable} · Без координат: ${d.route_balance.unplottable} · Показано: ${rows.length} · Скрыто фильтром: ${d.route_balance.total-rows.length}`;
-  const tbody=$('#flights'); tbody.replaceChildren();
-  for (const s of rows) {const tr=node('tr',undefined,state.focus===s.segment_id?'selected':''); tr.tabIndex=0;
-    tr.append(node('td',s.departure_label_ru),node('td',`${s.origin_iata || '?'} → ${s.destination_iata || '?'}`));
-    const td=node('td'); td.append(node('span',s.flight_number || 'Номер неизвестен'),node('div',`${s.participation_status==='boarding_record_present'?'Запись о посадке':'Сообщение / бронирование'} · ${s.identity_status==='accepted'?'Связь принята':'Связь неоднозначна'}`,'source-tag'));
-    const details=node('details'); details.append(node('summary','Происхождение')); details.append(node('div',`Сегмент: ${s.segment_id}`),node('div',`Исходная поездка: ${s.anchor_travel_id || 'неизвестна'}`),node('div',`Источники: ${s.sources_json || 'неизвестны'}`),node('div',`Точность вылета: ${s.departure_precision || 'неизвестна'}`));
-    for (const ref of d.source_evidence.filter(r => r.segment_id===s.segment_id)) details.append(node('div',`${ref.source_id}: ${ref.locator}`)); td.append(details); tr.append(td,node('td',s.is_plottable?'На карте':s.unplottable_reason_ru));
-    const focus=()=>focusSegment(s.segment_id); tr.addEventListener('click',e=>{if (!e.target.closest('details')) focus();}); tr.addEventListener('keydown',e=>{if(e.target===tr && (e.key==='Enter'||e.key===' ')){e.preventDefault();focus();}}); tbody.append(tr);
+  $('#listTitle').textContent = state.viewMode === 'ranking' ? `Топ-${state.limit}` : 'Все профили';
+  $('#listDescription').textContent = state.viewMode === 'ranking' ? 'Сначала число сработавших групп, затем сумма вкладов и стабильный ID.' : 'Поиск и фильтры работают по всей популяции, а не только по рейтингу.';
+  const total = state.viewMode === 'ranking' ? state.list.length : (state.list.pagination?.total || 0);
+  $('#listCount').textContent = number(total);
+  if (state.viewMode === 'all') {
+    const page = state.list.pagination || {offset: 0, limit: state.pageSize, total: 0, has_next: false};
+    $('#pageLabel').textContent = `${page.total ? page.offset + 1 : 0}–${Math.min(page.offset + state.list.items.length, page.total)} из ${number(page.total)}`;
+    $('#prevPage').disabled = page.offset <= 0;
+    $('#nextPage').disabled = !page.has_next;
+  } else {
+    $('#pageLabel').textContent = `${rows.length} профилей`;
+    $('#prevPage').disabled = true; $('#nextPage').disabled = true;
   }
-  if (!rows.length) {const tr=node('tr'); const td=node('td','В выбранном периоде поездок нет.'); td.colSpan=4;tr.append(td);tbody.append(tr);} drawMap(rows);
-}
-function countryPath(geometry) {const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates; return polygons.map(p=>p.map(r=>r.map((v,i)=>`${i?'L':'M'}${v[0]},${-v[1]}`).join(' ')+'Z').join(' ')).join(' ');}
-// Split at ±180° so a Pacific route never becomes a line across the map.
-function routeParts(a,b) {let [x1,y1]=a,[x2,y2]=b;if (Math.abs(x2-x1)<=180) return [[a,b]]; const direction=x1>0?180:-180; x2+=x1>0?360:-360; const t=(direction-x1)/(x2-x1); const y=y1+t*(y2-y1); return [[[x1,y1],[direction,y]],[[-direction,y],[b[0],y2]]];}
-function drawMap(rows) {
-  const map=$('#map');map.replaceChildren(); const defs=svg('defs'); const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse',markerUnits:'strokeWidth'});marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#74d5ce'}));defs.append(marker);map.append(defs);
-  for(let x=-180;x<=180;x+=30) map.append(svg('line',{x1:x,x2:x,y1:-90,y2:90,class:'gridline'}));for(let y=-60;y<=60;y+=30) map.append(svg('line',{x1:-180,x2:180,y1:y,y2:y,class:'gridline'}));
-  for(const f of state.geo.features) if (['Polygon','MultiPolygon'].includes(f.geometry.type)) map.append(svg('path',{d:countryPath(f.geometry),class:'country'}));
-  const repeats=new Map(), labels=[];
-  for(const s of rows.filter(s=>s.is_plottable)) {const a=[s.origin.longitude,-s.origin.latitude],b=[s.destination.longitude,-s.destination.latitude]; const key=`${a}|${b}`,i=repeats.get(key)||0; repeats.set(key,i+1);
-    const parts=routeParts(a,b); for(let j=0;j<parts.length;j++) {const [start,end]=parts[j];const path=svg('path',{d:`M${start} L${end}`,class:`route ${state.focus===s.segment_id?'active':''}`});if (j===parts.length-1) path.setAttribute('marker-end','url(#arrow)');path.append(svg('title',{},`${s.origin_iata} → ${s.destination_iata} · ${s.departure_label_ru}`)); map.append(path);}
-    map.append(svg('circle',{cx:a[0],cy:a[1],r:.65,class:'airport-dot'}),svg('circle',{cx:b[0],cy:b[1],r:.65,class:'airport-dot'}));
-    const [start,end]=parts[parts.length-1],x=(start[0]+end[0])/2,y=(start[1]+end[1])/2-1-i*3.5;
-    labels.push({x,y,text:s.departure_label_ru,active:state.focus===s.segment_id,title:`${s.origin_iata} → ${s.destination_iata}`});
+  if (!rows.length) { root.append(node('div', 'Ничего не найдено по текущему фильтру.', 'empty-list')); return; }
+  for (const row of rows) {
+    const button = node('button', undefined, `person-row ${row.person_id === state.selected ? 'selected' : ''}`); button.type = 'button';
+    const place = node('span', row.rank ? String(row.rank).padStart(2, '0') : '··', 'person-place');
+    const identity = node('span', undefined, 'person-identity'); identity.append(node('strong', row.display_name || 'Имя не указано'), node('small', row.person_id));
+    const score = node('span', undefined, 'person-score'); score.append(node('strong', number(row.rule_score)), node('small', `${row.matched_criteria_count || 0} / 3 факторов`));
+    const badge = node('span', statusLabel(row.eligibility_status), `person-status ${statusClass(row.eligibility_status)}`);
+    button.append(place, identity, score, badge); button.addEventListener('click', () => selectProfile(row.person_id)); root.append(button);
   }
-  const fontSize=state.view[2]/Math.max(map.clientWidth,300)*11, boxes=[];
-  labels.sort((a,b)=>Number(b.active)-Number(a.active));
-  for(const l of labels) {
-    const width=fontSize*l.text.length*.65,height=fontSize*1.45;
-    let x=l.x,y=l.y;
-    for(let attempt=0;attempt<160;attempt++) {
-      const ring=Math.ceil(attempt/8), angle=(attempt%8)*Math.PI/4;
-      x=l.x+Math.cos(angle)*ring*width*.58;y=l.y+Math.sin(angle)*ring*height;
-      if(!boxes.some(b=>Math.abs(b.x-x)<(b.width+width)/2+fontSize*.5 && Math.abs(b.y-y)<height))break;
+}
+
+async function loadList(selectFirst = false) {
+  const request = ++state.request;
+  showError(null); $('#peopleList').innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+  try {
+    if (state.viewMode === 'ranking') {
+      state.list = await api(`/api/top?limit=${state.limit}`);
+    } else {
+      const params = new URLSearchParams({limit: String(state.pageSize), offset: String(state.page * state.pageSize), q: state.query, eligibility: state.eligibility, sort: state.sort});
+      state.list = await api(`/api/users?${params}`);
     }
-    boxes.push({x,y,width});
-    if(Math.abs(x-l.x)+Math.abs(y-l.y)>fontSize)map.append(svg('line',{x1:l.x,y1:l.y,x2:x,y2:y,class:'label-leader'}));
-    map.append(svg('rect',{x:x-width/2-fontSize*.2,y:y-fontSize,width:width+fontSize*.4,height,class:'route-date-box',rx:fontSize*.2}));
-    const label=svg('text',{x,y,class:`route-date ${l.active?'active':''}`,'font-size':fontSize,'text-anchor':'middle'},l.text);
-    label.append(svg('title',{},l.title));map.append(label);
+    if (request !== state.request) return;
+    renderList();
+    const rows = state.viewMode === 'ranking' ? state.list : state.list.items;
+    if (selectFirst && rows.length) await selectProfile(rows[0].person_id);
+  } catch (error) {
+    if (request !== state.request) return;
+    $('#peopleList').replaceChildren(node('div', 'Список недоступен.', 'empty-list')); showError(error.message);
   }
-  applyView();
 }
-async function init() {
-  try {const [m,top,geo]=await Promise.all([api('/api/metadata'),api('/api/top'),api('/world.geojson')]);state.top=top;state.geo=geo;
-    $('#window').append(node('div','ОКНО НАБЛЮДЕНИЙ'),node('strong',`${m.window.start || 'нет дат'} — ${m.window.end || 'нет дат'}`),node('div',m.run_id));
-    const eligible=m.eligibility.find(s=>s.eligibility_status==='eligible')?.profiles||0;
-    const metrics=[['Профилей в исходных таблицах',m.counts.persons],['Сегментов перелётов',m.counts.segments],['С факторами и достаточными данными',eligible],['В текущем топе',top.length]];
-    for (const [label,value] of metrics) {const e=node('div',undefined,'metric');e.append(node('strong',number(value)),node('span',label));$('#metrics').append(e);}
-    $('#topCount').textContent=`/ ${top.length}`;const method=$('#method');method.append(node('p','Используются исходные обработанные таблицы преподавательского датасета. Дополнительная генерация людей, перелётов и разметки отсутствует.'));
-    method.append(node('p','Порядок: число сработавших групп ↓, сумма вкладов ↓, стабильный ID ↑. Вклад группы = вес × min(3, значение / порог). Пороги и веса сохранены в снимке. Балл — основание для проверки паттернов, а не вероятность шпионажа.'));
-    method.append(node('p','Общее окно определено по датам всего датасета; непрерывность наблюдения источников не установлена. Неоднозначные профили и недостаточные данные не получают искусственных срабатываний.'));
-    const list=node('ul');for (const r of m.eligibility) list.append(node('li',`${{eligible:'В рейтинге',no_matches:'Без срабатываний',insufficient_data:'Недостаточно данных'}[r.eligibility_status]}: ${number(r.profiles)}`));method.append(list);
-    const limitationLabels = {
-      'Original raw files and complete T13 manifests are absent from this checkout; supplied T13 bytes verified against committed LFS SHA-256.':'В этой поставке нет raw-файлов и полной цепочки манифестов T13. Используются поставленные таблицы; их SHA-256 совпадают с закреплёнными Git LFS объектами.',
-      'Source locators unavailable: evidence links resolve to original T13 segment_id and anchor_travel_id only.':'Исходные locators недоступны. Подтверждения раскрываются до оригинальных идентификаторов сегмента и исходной поездки T13.',
-      'The source observation window is inferred from dataset dates; continuous source coverage is not asserted.':'Окно определено по представленным датам. Полное непрерывное покрытие каждого источника не установлено.',
-      'Rule thresholds and weights require domain review; scores are not class probabilities.':'Пороги и веса требуют предметной проверки. Баллы не являются вероятностями класса.'
-    };
-    for (const limitation of m.limitations) method.append(node('p',limitationLabels[limitation] || limitation));method.append(node('p',`IF: ${m.forest_status}; граф: ${m.graph_status}; независимое ревью: ожидается. Достоверных меток для precision/recall нет. Устойчивость рассчитана на исходных профилях при изменении порогов ±20% и отключении групп.`));
-    const check=node('details');check.append(node('summary','Результаты проверки устойчивости'));const pre=node('pre',JSON.stringify(m.evaluation,null,2));check.append(pre);method.append(check);
-    $('#search').addEventListener('input',renderTop);renderTop();if(top.length) await select(top[0].person_id);else $('#dossier').replaceChildren(node('div','Топ пуст: проверьте покрытие и результаты критериев. Данные не подставляются.','panel empty'));
-  } catch(e) {error(`Не удалось загрузить продукт: ${e.message}`);$('#top').replaceChildren(node('p','Снимок недоступен.','empty'));}
+
+async function selectProfile(id) {
+  const request = ++state.request; state.selected = id; state.profile = null; state.focus = null; state.view = [-180, -90, 360, 180];
+  renderList(); $('#profilePanel').replaceChildren(node('div', 'Загружаем карточку и историю…', 'panel empty-state')); showError(null);
+  try { const data = await api(`/api/profile?id=${encodeURIComponent(id)}`); if (request !== state.request) return; state.profile = data; renderProfile(); }
+  catch (error) { if (request === state.request) { $('#profilePanel').replaceChildren(node('div', 'Карточка недоступна.', 'panel empty-state')); showError(error.message); } }
 }
-init();
+
+function renderProfile() {
+  const data = state.profile; const person = data.person; const root = $('#profilePanel'); root.replaceChildren();
+  const identity = node('div', undefined, 'profile-identity');
+  identity.append(node('p', person.rank ? `ПРИОРИТЕТ №${person.rank}` : 'ПРОФИЛЬ МОДЕЛИ', 'eyebrow'), node('h2', person.display_name || 'Имя не указано'), node('p', person.person_id, 'profile-id'));
+  const score = node('div', undefined, 'score-block'); score.append(node('span', 'RULE SCORE', 'score-label'), node('strong', number(person.rule_score)), node('small', `${person.matched_criteria_count || 0} сработавших групп`));
+  const head = node('section', undefined, 'profile-head panel'); head.append(identity, score);
+  const chips = node('div', undefined, 'profile-chips'); chips.append(node('span', `${statusLabel(person.eligibility_status)}`, `chip ${statusClass(person.eligibility_status)}`), node('span', `${number(person.total_segments || data.segments.length)} сегментов`, 'chip'), node('span', `${number(data.route_balance.total)} маршрутов`, 'chip')); head.append(chips); root.append(head);
+
+  const factorPanel = node('section', undefined, 'panel factor-panel'); const factorTitle = node('div', undefined, 'section-heading'); factorTitle.append(node('div', undefined)); factorTitle.firstChild.append(node('p', 'ДОКАЗАТЕЛЬСТВА СИГНАЛА', 'eyebrow'), node('h3', 'Что сработало')); factorPanel.append(factorTitle);
+  const factors = node('div', undefined, 'factor-grid');
+  for (const factor of data.factors || []) {
+    const article = node('article', undefined, `factor-card ${factor.status}`); const top = node('div', undefined, 'factor-top'); top.append(node('span', factor.status === 'matched' ? 'СРАБОТАЛО' : factor.status === 'unavailable' ? 'НЕДОСТУПНО' : 'НЕ СРАБОТАЛО', 'factor-status'), node('span', factor.criterion_id, 'factor-id')); article.append(top, node('h4', factor.title_ru), node('p', factor.explanation_ru || 'Нет пояснения.'));
+    const meter = node('div', undefined, 'factor-meter'); const value = Number(factor.value); const threshold = Number(factor.threshold); const ratio = Number.isFinite(value) && threshold > 0 ? Math.min(100, Math.max(5, value / threshold * 55)) : 4; meter.append(node('i')); meter.firstChild.style.width = `${ratio}%`; article.append(meter);
+    if (factor.evidence_segment_ids?.length) { const link = node('button', `↳ ${factor.evidence_segment_ids.length} подтверждений`, 'evidence-link'); link.type = 'button'; link.addEventListener('click', () => { state.focus = factor.evidence_segment_ids[0]; document.querySelector('#timeline')?.scrollIntoView({behavior: 'smooth', block: 'center'}); renderTimeline(); }); article.append(link); }
+    factors.append(article);
+  }
+  factorPanel.append(factors); root.append(factorPanel);
+
+  const mapPanel = node('section', undefined, 'panel map-panel'); const mapHeading = node('div', undefined, 'section-heading'); const headingCopy = node('div'); headingCopy.append(node('p', 'ГЕОГРАФИЯ И ХРОНОЛОГИЯ', 'eyebrow'), node('h3', 'След маршрута')); mapHeading.append(headingCopy, node('span', 'координаты только из справочника', 'micro-tag')); mapPanel.append(mapHeading);
+  const controls = node('div', undefined, 'route-controls');
+  for (const [id, label] of [['routeFrom', 'С'], ['routeTo', 'По']]) { const wrap = node('label', label); const input = node('input'); input.type = 'date'; input.id = id; input.value = id === 'routeFrom' ? state.routeFrom : state.routeTo; input.addEventListener('change', () => { state.routeFrom = $('#routeFrom').value; state.routeTo = $('#routeTo').value; renderTimeline(); }); wrap.append(input); controls.append(wrap); }
+  const unknown = node('label', undefined, 'check-label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = state.showUndated; checkbox.addEventListener('change', () => { state.showUndated = checkbox.checked; renderTimeline(); }); unknown.append(checkbox, node('span', 'Без даты')); controls.append(unknown);
+  const reset = node('button', 'Сбросить период', 'button subtle'); reset.type = 'button'; reset.addEventListener('click', () => { state.routeFrom = ''; state.routeTo = ''; state.showUndated = true; renderProfile(); }); controls.append(reset); mapPanel.append(controls);
+  const balance = node('div', undefined, 'route-balance'); balance.id = 'routeBalance'; mapPanel.append(balance);
+  const mapWrap = node('div', undefined, 'map-wrap'); const map = svg('svg', {class:'map', viewBox:'-180 -90 360 180', role:'img', 'aria-label':'Карта маршрутов'}); map.id = 'map'; mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Стрелки показывают направление между аэропортами. Неполные записи остаются в таблице и не превращаются в догадки.', 'map-note')); root.append(mapPanel);
+  const timeline = node('section', undefined, 'panel timeline-panel'); timeline.id = 'timeline'; const timelineHeading = node('div', undefined, 'section-heading'); timelineHeading.append(node('div', undefined), node('span', `${data.segments.length} записей`, 'micro-tag')); timelineHeading.firstChild.append(node('p', 'ПЕРВИЧНЫЕ СВИДЕТЕЛЬСТВА', 'eyebrow'), node('h3', 'Перелёты профиля')); timeline.append(timelineHeading, node('div', undefined, 'timeline-table')); root.append(timeline);
+  const secondary = node('div', undefined, 'secondary-grid'); const evidence = node('section', undefined, 'panel mini-panel'); evidence.append(node('p', 'PROVENANCE', 'eyebrow'), node('h3', 'Источники и ссылки')); evidence.append(node('p', data.source_evidence?.length ? `${data.source_evidence.length} строк evidence привязаны к исходным сегментам.` : 'Отдельные source-evidence строки отсутствуют.', 'muted-copy')); const forest = node('section', undefined, 'panel mini-panel'); forest.append(node('p', 'ISOLATION FOREST', 'eyebrow'), node('h3', data.forest?.status === 'demo_only' ? 'Не отдельный вердикт' : 'Экспериментальный score'), node('p', data.forest?.status === 'demo_only' ? 'Для демо показывается только правило. Данные не переобучаются в браузере.' : 'IF хранится отдельно и не добавляет скрытый голос основному рейтингу.', 'muted-copy')); secondary.append(evidence, forest); root.append(secondary);
+  renderTimeline();
+}
+
+function visibleSegments() {
+  const rows = state.profile?.segments || [];
+  return rows.filter(segment => {
+    const date = segment.departure_date;
+    if (!date && !state.showUndated) return false;
+    if (date && state.routeFrom && date < state.routeFrom) return false;
+    if (date && state.routeTo && date > state.routeTo) return false;
+    return true;
+  });
+}
+function renderTimeline() {
+  if (!state.profile) return;
+  const rows = visibleSegments(); const balance = $('#routeBalance'); if (balance) balance.textContent = `Показано ${rows.length} из ${state.profile.route_balance.total} · с координатами ${state.profile.route_balance.plottable} · без координат ${state.profile.route_balance.unplottable}`;
+  const table = document.querySelector('.timeline-table'); if (!table) return; table.replaceChildren(); const header = node('div', undefined, 'timeline-row timeline-header'); ['Дата', 'Маршрут', 'Рейс', 'Статус'].forEach(text => header.append(node('span', text))); table.append(header);
+  if (!rows.length) table.append(node('div', 'В выбранном периоде записей нет.', 'empty-list'));
+  for (const segment of rows) { const row=node('button', undefined, `timeline-row ${state.focus === segment.segment_id ? 'focused' : ''}`); row.type='button'; const origin=segment.origin?.airport_id || segment.origin_airport_id || '???'; const destination=segment.destination?.airport_id || segment.destination_airport_id || '???'; row.append(node('span', dateLabel(segment.departure_date), 'date-cell'), node('span', `${origin} → ${destination}`, 'route-cell'), node('span', segment.flight_number || '—', 'flight-cell'), node('span', segment.resolution_status || '—', 'state-cell')); row.addEventListener('click', () => { state.focus=segment.segment_id; drawMap(visibleSegments()); renderTimeline(); }); table.append(row); }
+  drawMap(rows);
+}
+function routeParts(a, b) { let [x1,y1]=a, [x2,y2]=b; if (Math.abs(x2-x1)<=180) return [[a,b]]; const direction=x1>0?180:-180; x2+=x1>0?360:-360; const ratio=(direction-x1)/(x2-x1); const y=y1+ratio*(y2-y1); return [[[x1,y1],[direction,y]],[[-direction,y],[b[0],y2]]]; }
+function drawMap(rows) {
+  const map=$('#map'); if (!map) return; map.replaceChildren(); const defs=svg('defs'); const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto',markerUnits:'strokeWidth'}); marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#80e3d2'})); defs.append(marker); map.append(defs);
+  for (let x=-180;x<=180;x+=30) map.append(svg('line',{x1:x,x2:x,y1:-90,y2:90,class:'gridline'})); for (let y=-60;y<=60;y+=30) map.append(svg('line',{x1:-180,x2:180,y1:y,y2:y,class:'gridline'}));
+  for (const feature of state.geo?.features || []) if (['Polygon','MultiPolygon'].includes(feature.geometry?.type)) map.append(svg('path',{d:countryPath(feature.geometry),class:'country'}));
+  for (const segment of rows) { const a=segment.origin, b=segment.destination; if (!segment.is_plottable || !a || !b) continue; const start=[Number(a.longitude),-Number(a.latitude)], end=[Number(b.longitude),-Number(b.latitude)]; const active=state.focus===segment.segment_id; for (const [from,to] of routeParts(start,end)) { const line=svg('path',{d:`M${from} L${to}`,class:`route ${active?'active':''}`}); if (to[0]===end[0] && to[1]===end[1]) line.setAttribute('marker-end','url(#arrow)'); line.append(svg('title',{},`${a.airport_id} → ${b.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line); } map.append(svg('circle',{cx:start[0],cy:start[1],r:active?1.5:.75,class:`airport-dot ${active?'active':''}`}),svg('circle',{cx:end[0],cy:end[1],r:active?1.5:.75,class:`airport-dot ${active?'active':''}`})); }
+  map.setAttribute('viewBox',state.view.join(' '));
+}
+function countryPath(geometry) { const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates; return polygons.map(poly=>poly.map(ring=>ring.map((v,i)=>`${i?'L':'M'}${v[0]},${-v[1]}`).join(' ')+'Z').join(' ')).join(' '); }
+function zoomMap(factor) { const [x,y,w,h]=state.view; if (!factor) state.view=[-180,-90,360,180]; else { const nw=Math.min(720,Math.max(10,w*factor)); state.view=[x+(w-nw)/2,y+(h-nw/2)/2,nw,nw/2]; } drawMap(visibleSegments()); }
+
+async function changeMode(mode) { state.viewMode=mode; state.page=0; $$('.view-tab').forEach(button => { const active=button.dataset.view===mode; button.classList.toggle('active',active); button.setAttribute('aria-selected',String(active)); }); $('#rankPicker').classList.toggle('disabled',mode==='all'); await loadList(true); }
+async function activateDemo() { try { showError(null); await post('/api/demo'); await bootstrap(); } catch (error) { showError(error.message); } }
+async function resetProduct() { try { showError(null); await post('/api/reset'); await bootstrap(); } catch (error) { showError(error.message); } }
+async function uploadProduct(file) { if (!file) return; const form=new FormData(); form.append('product',file,file.name); try { showError(null); $('#uploadInput').disabled=true; const result=await post('/api/upload',form); state.metadata=result.metadata; await bootstrap(false); } catch (error) { showError(error.message); } finally { $('#uploadInput').disabled=false; $('#uploadInput').value=''; } }
+
+async function bootstrap(selectFirst=true) {
+  try { const [metadata, geo] = await Promise.all([api('/api/metadata'),api('/world.geojson')]); state.metadata=metadata; state.geo=geo; renderMetadata(); await loadList(selectFirst); }
+  catch (error) { showError(`Не удалось загрузить snapshot: ${error.message}`); $('#peopleList').replaceChildren(node('div','Снимок недоступен. Используйте demo или загрузите ZIP продукта.','empty-list')); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('#demoButton').addEventListener('click', activateDemo); $('#resetButton').addEventListener('click', resetProduct); $('#uploadInput').addEventListener('change', event => uploadProduct(event.target.files[0]));
+  $$('.view-tab').forEach(button => button.addEventListener('click', () => changeMode(button.dataset.view)));
+  $$('.rank-choice').forEach(button => button.addEventListener('click', async () => { state.limit=Number(button.dataset.limit); state.viewMode='ranking'; state.page=0; $$('.rank-choice').forEach(item => item.classList.toggle('active',item===button)); $$('.view-tab').forEach(item => { const active=item.dataset.view==='ranking'; item.classList.toggle('active',active); item.setAttribute('aria-selected',String(active)); }); await loadList(true); }));
+  $('#statusFilter').addEventListener('change', async event => { state.eligibility=event.target.value; state.page=0; if(state.viewMode==='all') await loadList(false); }); $('#sortSelect').addEventListener('change', async event => { state.sort=event.target.value; state.page=0; if(state.viewMode==='all') await loadList(false); });
+  let timer; $('#searchInput').addEventListener('input', event => { state.query=event.target.value; if(state.viewMode==='ranking'){renderList();return;} clearTimeout(timer); timer=setTimeout(() => {state.page=0;loadList(false);},220); });
+  $('#prevPage').addEventListener('click', async () => { if(state.page>0){state.page-=1;await loadList(false);} }); $('#nextPage').addEventListener('click', async () => { if(state.list.pagination?.has_next){state.page+=1;await loadList(false);} });
+  $('#methodToggle').addEventListener('click', event => { const body=$('#methodBody'); const open=body.hidden; body.hidden=!open; event.currentTarget.setAttribute('aria-expanded',String(open)); });
+  bootstrap(true);
+});

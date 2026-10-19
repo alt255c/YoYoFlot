@@ -1,17 +1,81 @@
 <!doctype html>
 <html lang="ru">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YoYoFlot · Анализ перелётов</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07151f">
+  <title>YoYoFlot Sentinel · мониторинг перелётов</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
 <body>
-<header><a class="brand" href="/"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M6 5h13v13" fill="none" stroke="currentColor" stroke-width="2.5"/></svg> YoYoFlot <span>FLIGHT INTELLIGENCE</span></a><div class="dataset">● Исходный датасет преподавателя</div></header>
-<main>
-<div class="intro"><div><p class="eyebrow">CATCH THE SPIES / АНАЛИТИЧЕСКИЙ ОБЗОР</p><h1>От рейтинга — к фактам.</h1><p>Подозрительные паттерны перелётов, их значимость и подтверждающие поездки.</p></div><div id="window" class="window"></div></div>
-<div id="error" class="error" role="alert" hidden></div>
-<section id="metrics" class="metrics" aria-label="Сводка датасета"></section>
-<div class="workspace">
-<aside class="panel ranking"><div class="panel-heading"><div><p class="eyebrow">ПРИОРИТЕТ ПРОВЕРКИ</p><h2>Топ-50 <span id="topCount"></span></h2></div><span class="tag">Факторы ↓ · Балл ↓</span></div><label class="search">Поиск в топе<input id="search" type="search" placeholder="Имя или идентификатор"></label><p class="hint">Сначала число независимых факторов, затем их вес и выраженность.</p><div id="top" role="list" aria-label="Рейтинг людей"><p class="loading">Читаем снимок…</p></div></aside>
-<section id="dossier" class="dossier" aria-live="polite"><div class="panel empty">Выберите человека в рейтинге.</div></section>
-</div>
-<details class="panel methodology"><summary>Метод, проверка и ограничения данных</summary><div id="method"></div></details>
-<footer>YoYoFlot · Исследование закономерностей перелётов <span>География: OpenFlights (ODbL) · Natural Earth (public domain)</span></footer>
-</main>
-</body></html>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="YoYoFlot Sentinel">
+      <span class="brand-mark"><i></i><i></i><i></i></span>
+      <span><strong>YoYoFlot</strong><em>SENTINEL</em></span>
+    </a>
+    <div class="agent-status"><span class="pulse"></span><span id="agentMode">КОНТУР МОНИТОРИНГА</span><small>read-only · решение за оператором</small></div>
+    <div class="top-actions">
+      <button id="demoButton" class="button subtle" type="button">Открыть demo-шпионов</button>
+      <button id="resetButton" class="button subtle" type="button" hidden>Вернуть основной набор</button>
+      <label class="button upload-button"><input id="uploadInput" type="file" accept=".zip,application/zip">Загрузить snapshot</label>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">ДИНАМИЧЕСКИЙ АГЕНТ МОНИТОРИНГА И НЕЙТРАЛИЗАЦИИ</p>
+        <h1>Подозрительные<br><span>маршруты видны.</span></h1>
+        <p class="lead">YoYoFlot Sentinel собирает факты в одну карточку: критерии, доказательства, повторные направления и карту всей истории перелётов.</p>
+      </div>
+      <div class="hero-orbit" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orbit-dot dot-a"></div><div class="orbit-dot dot-b"></div><div class="orbit-core">YF</div></div>
+      <div class="hero-note"><span id="sourceBadge">ПОДКЛЮЧЕНИЕ…</span><strong id="windowLabel">Окно наблюдений · —</strong><small id="runLabel">run_id · —</small></div>
+    </section>
+
+    <section id="metrics" class="metrics" aria-label="Сводка набора">
+      <div class="metric"><span class="metric-label">Профили в модели</span><strong id="metricPersons">—</strong><small>все прошедшие через расчёт</small></div>
+      <div class="metric"><span class="metric-label">Сегменты поездок</span><strong id="metricSegments">—</strong><small>с сохранённым происхождением</small></div>
+      <div class="metric accent"><span class="metric-label">С достаточными данными</span><strong id="metricEligible">—</strong><small>могут попасть в рейтинг</small></div>
+      <div class="metric"><span class="metric-label">Режим данных</span><strong id="metricMode">—</strong><small id="metricModeHint">проверка snapshot</small></div>
+    </section>
+
+    <section class="control-deck" aria-label="Управление рейтингом">
+      <div class="deck-line">
+        <div><p class="eyebrow">РАБОЧАЯ ОБЛАСТЬ</p><h2>Кого проверяем первым</h2></div>
+        <div class="view-tabs" role="tablist">
+          <button class="view-tab active" data-view="ranking" role="tab" aria-selected="true">Рейтинг</button>
+          <button class="view-tab" data-view="all" role="tab" aria-selected="false">Все профили</button>
+        </div>
+      </div>
+      <div class="filters">
+        <div class="rank-picker" id="rankPicker" aria-label="Размер рейтинга">
+          <span>Показывать</span><button class="rank-choice active" data-limit="50">50</button><button class="rank-choice" data-limit="100">100</button><button class="rank-choice" data-limit="1000">1000</button>
+        </div>
+        <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Имя или person_id" autocomplete="off"></label>
+        <label class="select-box"><span>Статус</span><select id="statusFilter"><option value="all">Все профили</option><option value="eligible">Есть сигналы</option><option value="no_matches">Без совпадений</option><option value="insufficient_data">Недостаточно данных</option></select></label>
+        <label class="select-box"><span>Сортировка</span><select id="sortSelect"><option value="rank">Приоритет проверки</option><option value="score">Баллы</option><option value="name">Имя</option></select></label>
+      </div>
+    </section>
+
+    <div id="error" class="error" role="alert" hidden></div>
+    <section class="workspace">
+      <aside class="directory panel">
+        <div class="directory-head"><div><p class="eyebrow">ОБЪЕКТЫ НАБЛЮДЕНИЯ</p><h2 id="listTitle">Топ-50</h2></div><span id="listCount" class="count-pill">—</span></div>
+        <p id="listDescription" class="hint">Сначала число сработавших групп, затем сумма вкладов и стабильный ID.</p>
+        <div id="peopleList" class="people-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+        <div class="pagination"><button id="prevPage" class="page-button" type="button" disabled>←</button><span id="pageLabel">—</span><button id="nextPage" class="page-button" type="button" disabled>→</button></div>
+      </aside>
+      <section id="profilePanel" class="profile-column" aria-live="polite"><div class="panel empty-state"><span class="empty-icon">◎</span><h2>Выберите профиль</h2><p>Откройте карточку в рейтинге, чтобы увидеть факторы, доказательства и все маршруты.</p></div></section>
+    </section>
+
+    <section class="method panel">
+      <div class="method-title"><span class="method-icon">∿</span><div><p class="eyebrow">ОПЕРАТОРСКАЯ ПАМЯТКА</p><h2>Как читать сигнал</h2></div><button id="methodToggle" class="chevron" type="button" aria-expanded="false">⌄</button></div>
+      <div id="methodBody" class="method-body" hidden><div id="methodText"></div><div class="method-grid"><div><strong>Правила</strong><span>Факторы M01–M03 и их вклад.</span></div><div><strong>IF</strong><span>Отдельный unsupervised score, не доказательство класса.</span></div><div><strong>Данные</strong><span>Пропуски остаются пропусками и не дают баллов.</span></div></div></div>
+    </section>
+    <footer><span>YoYoFlot Sentinel · аналитика маршрутов</span><span>География: OpenFlights · Natural Earth · <b>решение всегда за оператором</b></span></footer>
+  </main>
+</body>
+</html>
