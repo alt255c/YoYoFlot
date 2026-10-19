@@ -83,4 +83,4 @@ html[data-theme='dark'] .timeline-row { border-color:#203b58; }
 html[data-theme='dark'] .metric-accent { background:linear-gradient(135deg,#173656,#122238); }
 html[data-theme='dark'] .factor-card.matched { background:linear-gradient(145deg,#153a3c,#172b43); }
 html[data-theme='dark'] .map-date { stroke:#0e2034; }
-.route-mosquito { pointer-events:none; overflow:visible; image-rendering:pixelated; }
+.route-mosquito { pointer-events:none; overflow:visible; image-rendering:pixelated; mix-blend-mode:normal; opacity:1; }

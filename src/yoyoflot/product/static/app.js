@@ -303,7 +303,10 @@ function drawMap(rows) {
   const activeMarker = svg('marker', {id:'arrow-active', viewBox:'0 0 10 10', refX:8.5, refY:5, markerWidth:scale.arrow*1.3, markerHeight:scale.arrow*1.3, orient:'auto', markerUnits:'userSpaceOnUse'});
   activeMarker.append(svg('path', {d:'M 0 0 L 10 5 L 0 10 z', fill:'#d47d24'}));
   const mosquitoFilter = svg('filter', {id:'mosquito-chroma', 'color-interpolation-filters':'sRGB'});
-  mosquitoFilter.append(svg('feColorMatrix', {type:'matrix', values:'1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 1 1 0'}));
+  const mosquitoChroma = svg('feColorMatrix', {type:'matrix', values:'1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 1 1 0'});
+  const mosquitoOpaque = svg('feComponentTransfer');
+  mosquitoOpaque.append(svg('feFuncA', {type:'discrete', tableValues:'0 0 0 1'}));
+  mosquitoFilter.append(mosquitoChroma, mosquitoOpaque);
   defs.append(marker, activeMarker, mosquitoFilter); map.append(defs);
   const offsets = mapWrapOffsets();
   for (const offset of offsets) for (let x=-180; x<=180; x+=30) map.append(svg('line', {x1:x+offset, x2:x+offset, y1:-90, y2:90, class:'gridline'}));
