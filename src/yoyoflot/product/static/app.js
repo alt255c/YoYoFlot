@@ -281,7 +281,10 @@ function pointInView(point, margin = 18) {
 function animateMosquito(mosquito, from, to, control, size, segmentId) {
   const started = performance.now();
   const duration = 3800;
-  const angle = Math.atan2(to[1] - from[1], to[0] - from[0]) * 180 / Math.PI;
+  let angle = Math.atan2(to[1] - from[1], to[0] - from[0]) * 180 / Math.PI;
+  // Keep the supplied mosquito upright: never rotate it more than 90°.
+  if (angle > 90) angle -= 180;
+  if (angle < -90) angle += 180;
   const tick = now => {
     if (!mosquito.isConnected || state.focus !== segmentId) return;
     const progress = ((now - started) % duration) / duration;
