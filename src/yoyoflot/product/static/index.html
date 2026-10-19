@@ -10,17 +10,18 @@
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <div class="grain" aria-hidden="true"></div>
   <header class="topbar">
-    <a class="brand" href="/" aria-label="YoYoFlot Sentinel">
-      <span class="brand-mark"><i></i><i></i><i></i></span>
-      <span><strong>YoYoFlot</strong><em>SENTINEL</em></span>
-    </a>
-    <div class="agent-status"><span class="pulse"></span><span id="agentMode">КОНТУР МОНИТОРИНГА</span><small>read-only · решение за оператором</small></div>
-    <div class="top-actions">
-      <button id="demoButton" class="button subtle" type="button">Открыть demo-шпионов</button>
-      <button id="resetButton" class="button subtle" type="button" hidden>Вернуть основной набор</button>
-      <label class="button upload-button"><input id="uploadInput" type="file" accept=".zip,application/zip">Загрузить snapshot</label>
+    <div class="topbar-inner">
+      <a class="brand" href="/" aria-label="YoYoFlot Sentinel">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-copy"><strong>YoYoFlot</strong><em>SENTINEL</em></span>
+      </a>
+      <div class="agent-status"><span class="pulse"></span><span id="agentMode">КОНТУР МОНИТОРИНГА</span><small>решение за оператором</small></div>
+      <div class="top-actions">
+        <button id="demoButton" class="button button-ghost" type="button">Открыть демо</button>
+        <button id="resetButton" class="button button-ghost" type="button" hidden>Основной набор</button>
+        <label class="button button-primary upload-button"><input id="uploadInput" type="file" accept=".zip,application/zip">Загрузить snapshot</label>
+      </div>
     </div>
   </header>
 
@@ -28,32 +29,34 @@
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow agent-name"><span class="agent-cap">Д</span>инамический <span class="agent-cap">Ю</span>зерагент <span class="agent-cap">М</span>ониторинга <span class="agent-cap">И</span> <span class="agent-cap">Н</span>ейтрализации</p>
-        <h1>Подозрительные<br><span>маршруты видны.</span></h1>
-        <p class="lead">YoYoFlot Sentinel собирает факты в одну карточку: критерии, доказательства, повторные направления и карту всей истории перелётов.</p>
+        <h1>Подозрительные <span>маршруты</span><br>видны сразу.</h1>
+        <p class="lead">Один экран для первичной проверки: приоритет, сработавшие критерии, доказательства и география перелётов.</p>
       </div>
-      <div class="mosquito-mascot"><img src="/mosquito.gif" alt="Фирменный комарик YoYoFlot"><span>комарик всё видит</span></div>
+      <div class="hero-visual" aria-label="Фирменный комарик YoYoFlot">
+        <div class="hero-visual-grid" aria-hidden="true"></div>
+        <div class="mosquito-mascot"><img src="/mosquito.gif" alt="Фирменный комарик YoYoFlot"><span>видит маршрут</span></div>
+        <span class="visual-caption">операторский контур</span>
+      </div>
     </section>
 
     <section id="metrics" class="metrics" aria-label="Сводка набора">
-      <div class="metric"><span class="metric-label">Профили в модели</span><strong id="metricPersons">—</strong><small>все прошедшие через расчёт</small></div>
-      <div class="metric"><span class="metric-label">Сегменты поездок</span><strong id="metricSegments">—</strong><small>с сохранённым происхождением</small></div>
-      <div class="metric accent"><span class="metric-label">С достаточными данными</span><strong id="metricEligible">—</strong><small>могут попасть в рейтинг</small></div>
-      <div class="metric"><span class="metric-label">Режим данных</span><strong id="metricMode">—</strong><small id="metricModeHint">проверка snapshot</small></div>
+      <div class="metric"><span class="metric-label">Профили</span><strong id="metricPersons">—</strong><small>прошли через модель</small></div>
+      <div class="metric"><span class="metric-label">Сегменты</span><strong id="metricSegments">—</strong><small>с сохранённым происхождением</small></div>
+      <div class="metric metric-accent"><span class="metric-label">Можно проверять</span><strong id="metricEligible">—</strong><small>достаточно данных для рейтинга</small></div>
+      <div class="metric"><span class="metric-label">Активный набор</span><strong id="metricMode">—</strong><small id="metricModeHint">проверка snapshot</small></div>
     </section>
 
-    <section class="control-deck" aria-label="Управление рейтингом">
-      <div class="deck-line">
-        <div><p class="eyebrow">РАБОЧАЯ ОБЛАСТЬ</p><h2>Кого проверяем первым</h2></div>
-        <div class="view-tabs" role="tablist">
+    <section class="control-deck panel" aria-label="Управление рейтингом">
+      <div class="control-head">
+        <div><p class="eyebrow">РАБОЧАЯ ОБЛАСТЬ</p><h2>Кого проверять первым</h2></div>
+        <div class="view-tabs" role="tablist" aria-label="Режим списка">
           <button class="view-tab active" data-view="ranking" role="tab" aria-selected="true">Рейтинг</button>
           <button class="view-tab" data-view="all" role="tab" aria-selected="false">Все профили</button>
         </div>
       </div>
       <div class="filters">
-        <div class="rank-picker" id="rankPicker" aria-label="Размер рейтинга">
-          <span>Показывать</span><button class="rank-choice active" data-limit="50">50</button><button class="rank-choice" data-limit="100">100</button><button class="rank-choice" data-limit="1000">1000</button>
-        </div>
-        <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Имя или person_id" autocomplete="off"></label>
+        <div class="rank-picker" id="rankPicker" aria-label="Размер рейтинга"><span>Топ</span><button class="rank-choice active" data-limit="50">50</button><button class="rank-choice" data-limit="100">100</button><button class="rank-choice" data-limit="1000">1000</button></div>
+        <label class="search-box"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Имя или person_id" autocomplete="off"></label>
         <label class="select-box"><span>Статус</span><select id="statusFilter"><option value="all">Все профили</option><option value="eligible">Есть сигналы</option><option value="no_matches">Без совпадений</option><option value="insufficient_data">Недостаточно данных</option></select></label>
         <label class="select-box"><span>Сортировка</span><select id="sortSelect"><option value="rank">Приоритет проверки</option><option value="score">Баллы</option><option value="name">Имя</option></select></label>
       </div>
@@ -62,15 +65,15 @@
     <div id="error" class="error" role="alert" hidden></div>
     <section class="workspace">
       <aside class="directory panel">
-        <div class="directory-head"><div><p class="eyebrow">ОБЪЕКТЫ НАБЛЮДЕНИЯ</p><h2 id="listTitle">Топ-50</h2></div><span id="listCount" class="count-pill">—</span></div>
-        <p id="listDescription" class="hint">Сначала число сработавших групп, затем сумма вкладов и стабильный ID.</p>
+        <div class="directory-head"><div><p class="eyebrow">СПИСОК ПРОФИЛЕЙ</p><h2 id="listTitle">Топ-50</h2></div><span id="listCount" class="count-pill">—</span></div>
+        <p id="listDescription" class="hint">Сначала профили с наибольшим числом сработавших групп.</p>
         <div id="peopleList" class="people-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
-        <div class="pagination"><button id="prevPage" class="page-button" type="button" disabled>←</button><span id="pageLabel">—</span><button id="nextPage" class="page-button" type="button" disabled>→</button></div>
+        <div class="pagination"><button id="prevPage" class="page-button" type="button" disabled aria-label="Предыдущая страница">←</button><span id="pageLabel">—</span><button id="nextPage" class="page-button" type="button" disabled aria-label="Следующая страница">→</button></div>
       </aside>
-      <section id="profilePanel" class="profile-column" aria-live="polite"><div class="panel empty-state"><span class="empty-icon">◎</span><h2>Выберите профиль</h2><p>Откройте карточку в рейтинге, чтобы увидеть факторы, доказательства и все маршруты.</p></div></section>
+      <section id="profilePanel" class="profile-column" aria-live="polite"><div class="panel empty-state"><span class="empty-icon">◎</span><h2>Выберите профиль</h2><p>Карточка покажет, какие критерии сработали, на каких сегментах они основаны и куда летал человек.</p></div></section>
     </section>
 
-    <footer><span>YoYoFlot Sentinel · аналитика маршрутов</span><span>География: OpenFlights · Natural Earth · <b>решение всегда за оператором</b></span></footer>
+    <footer><span>YoYoFlot Sentinel · аналитика маршрутов</span><span>OpenFlights · Natural Earth · <b>решение всегда за оператором</b></span></footer>
   </main>
 </body>
 </html>
