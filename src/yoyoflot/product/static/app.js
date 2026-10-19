@@ -187,6 +187,15 @@ function shortDate(value) { if (!value) return 'дата неизвестна'; 
 function airportLabel(value) { return String(value || '???').replace(/^openflights:/, ''); }
 function routeKey(segment) { const from=segment.origin?.airport_id || segment.origin_airport_id || '???'; const to=segment.destination?.airport_id || segment.destination_airport_id || '???'; return `${from}→${to}`; }
 function curvedRoute(from, to, bend) { const [x1,y1]=from, [x2,y2]=to; const dx=x2-x1, dy=y2-y1, length=Math.hypot(dx,dy) || 1; const nx=-dy/length, ny=dx/length; const mx=(x1+x2)/2+nx*bend, my=(y1+y2)/2+ny*bend; return {path:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`, label:[mx,my]}; }
+function mapElementScale() {
+  const width = Number(state.view[2]) || 360;
+  const level = Math.pow(Math.min(1, Math.max(.02, width / 360)), 1.35);
+  return {
+    arrow: Math.min(3.4, Math.max(.02, .02 + level * 3.38)),
+    dot: Math.min(.9, Math.max(.025, .025 + level * .875)),
+    date: Math.min(5.4, Math.max(.12, .12 + level * 5.28)),
+  };
+}
 function fitMapView(rows) {
   const points = rows.filter(segment => segment.is_plottable && segment.origin && segment.destination).flatMap(segment => [segment.origin, segment.destination]).map(point => [Number(point.longitude), -Number(point.latitude)]).filter(([x,y]) => Number.isFinite(x) && Number.isFinite(y));
   if (!points.length) return [-180, -90, 360, 180];
@@ -198,7 +207,9 @@ function fitMapView(rows) {
 }
 function drawMap(rows) {
   const map=$('#map'); if (!map) return; map.replaceChildren();
-  const defs=svg('defs'); const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:3.5,markerHeight:3.5,orient:'auto',markerUnits:'userSpaceOnUse'}); marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#0b57b7'})); defs.append(marker); map.append(defs);
+  const scale = mapElementScale(); const defs=svg('defs');
+  const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:scale.arrow,markerHeight:scale.arrow,orient:'auto',markerUnits:'userSpaceOnUse'}); marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#0b57b7'}));
+  const activeMarker=svg('marker',{id:'arrow-active',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:scale.arrow*1.18,markerHeight:scale.arrow*1.18,orient:'auto',markerUnits:'userSpaceOnUse'}); activeMarker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#d47d24'})); defs.append(marker, activeMarker); map.append(defs);
   for (let x=-180;x<=180;x+=30) map.append(svg('line',{x1:x,x2:x,y1:-90,y2:90,class:'gridline'})); for (let y=-60;y<=60;y+=30) map.append(svg('line',{x1:-180,x2:180,y1:y,y2:y,class:'gridline'}));
   for (const feature of state.geo?.features || []) if (['Polygon','MultiPolygon'].includes(feature.geometry?.type)) map.append(svg('path',{d:countryPath(feature.geometry),class:'country'}));
   const plottable=rows.filter(segment => segment.is_plottable && segment.origin && segment.destination); const groups=new Map(); const airports=new Map();
@@ -206,10 +217,10 @@ function drawMap(rows) {
   const showDates=plottable.length<=40;
   for (const group of groups.values()) group.forEach((item,index) => {
     const {segment,start,end}=item; const active=state.focus===segment.segment_id; if (active && airports.has(segment.origin.airport_id)) airports.get(segment.origin.airport_id).active=true;
-    const bend=(index-(group.length-1)/2)*4.5; const curve=curvedRoute(start,end,bend); const line=svg('path',{d:curve.path,class:`route ${active?'active':''}`,'marker-end':'url(#arrow)'}); line.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
-    if (showDates || active) { const tag=svg('g',{class:`map-date-label ${active?'active':''}`}); tag.append(svg('text',{x:curve.label[0],y:curve.label[1]+2,'text-anchor':'middle',class:'map-date'},shortDate(segment.departure_date))); tag.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(tag); }
+    const bend=(index-(group.length-1)/2)*4.5; const curve=curvedRoute(start,end,bend); const line=svg('path',{d:curve.path,class:`route ${active?'active':''}`,'marker-end':`url(#${active?'arrow-active':'arrow'})`}); line.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
+    if (showDates || active) { const tag=svg('g',{class:`map-date-label ${active?'active':''}`}); tag.append(svg('text',{x:curve.label[0],y:curve.label[1]+2,'text-anchor':'middle',class:'map-date',style:`font-size:${scale.date*(active?1.18:1)}px`},shortDate(segment.departure_date))); tag.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(tag); }
   });
-  for (const [airport, info] of airports) { const circle=svg('circle',{cx:info.point[0],cy:info.point[1],r:info.active?.85:.55,class:`airport-dot ${info.active?'active':''}`}); circle.append(svg('title',{},airport)); map.append(circle); }
+  for (const [airport, info] of airports) { const circle=svg('circle',{cx:info.point[0],cy:info.point[1],r:info.active?scale.dot*1.55:scale.dot,class:`airport-dot ${info.active?'active':''}`}); circle.append(svg('title',{},airport)); map.append(circle); }
   map.setAttribute('viewBox',state.view.join(' '));
 }
 function countryPath(geometry) { const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates; return polygons.map(poly=>poly.map(ring=>ring.map((v,i)=>`${i?'L':'M'}${v[0]},${-v[1]}`).join(' ')+'Z').join(' ')).join(' '); }
