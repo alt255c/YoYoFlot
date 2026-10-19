@@ -281,10 +281,11 @@ function pointInView(point, margin = 18) {
 function animateMosquito(mosquito, from, to, control, size, segmentId) {
   const started = performance.now();
   const duration = 3800;
-  let angle = Math.atan2(to[1] - from[1], to[0] - from[0]) * 180 / Math.PI;
-  // Keep the supplied mosquito upright: never rotate it more than 90°.
-  if (angle > 90) angle -= 180;
-  if (angle < -90) angle += 180;
+  const rawAngle = Math.atan2(to[1] - from[1], to[0] - from[0]) * 180 / Math.PI;
+  const mirrored = to[0] < from[0];
+  // The supplied GIF faces right. For westbound routes mirror it and keep
+  // the remaining rotation within the natural -90°…+90° range.
+  const angle = mirrored ? (rawAngle > 0 ? rawAngle - 180 : rawAngle + 180) : rawAngle;
   const tick = now => {
     if (!mosquito.isConnected || state.focus !== segmentId) return;
     const progress = ((now - started) % duration) / duration;
@@ -293,7 +294,7 @@ function animateMosquito(mosquito, from, to, control, size, segmentId) {
     const y = u*u*from[1] + 2*u*progress*control[1] + progress*progress*to[1];
     mosquito.setAttribute('x', String(x - size / 2));
     mosquito.setAttribute('y', String(y - size / 2));
-    mosquito.setAttribute('transform', `rotate(${angle} ${x} ${y})`);
+    mosquito.setAttribute('transform', `translate(${x} ${y}) rotate(${angle}) scale(${mirrored ? -1 : 1} 1) translate(${-x} ${-y})`);
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
@@ -306,9 +307,11 @@ function drawMap(rows) {
   const activeMarker = svg('marker', {id:'arrow-active', viewBox:'0 0 10 10', refX:8.5, refY:5, markerWidth:scale.arrow*1.3, markerHeight:scale.arrow*1.3, orient:'auto', markerUnits:'userSpaceOnUse'});
   activeMarker.append(svg('path', {d:'M 0 0 L 10 5 L 0 10 z', fill:'#d47d24'}));
   const mosquitoFilter = svg('filter', {id:'mosquito-chroma', 'color-interpolation-filters':'sRGB'});
-  const mosquitoChroma = svg('feColorMatrix', {type:'matrix', values:'1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 1 1 0'});
+  // The source GIF has a pure yellow background. Use blue as the key channel:
+  // yellow has B=0, while the white and light-blue mosquito pixels have B>0.
+  const mosquitoChroma = svg('feColorMatrix', {type:'matrix', values:'1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 1 0 0'});
   const mosquitoOpaque = svg('feComponentTransfer');
-  mosquitoOpaque.append(svg('feFuncA', {type:'discrete', tableValues:'0 0 0 1'}));
+  mosquitoOpaque.append(svg('feFuncA', {type:'discrete', tableValues:'0 1'}));
   mosquitoFilter.append(mosquitoChroma, mosquitoOpaque);
   defs.append(marker, activeMarker, mosquitoFilter); map.append(defs);
   const offsets = mapWrapOffsets();
