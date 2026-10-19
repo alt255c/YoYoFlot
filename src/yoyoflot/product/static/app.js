@@ -9,6 +9,7 @@ const state = {
   metadata: null, geo: null, list: [], profile: null, selected: null,
   view: [-180, -90, 360, 180], focus: null, viewMode: 'ranking', limit: 50,
   page: 0, pageSize: 60, query: '', eligibility: 'all', sort: 'rank',
+  timelinePage: 0, timelinePageSize: 8,
   request: 0, routeFrom: '', routeTo: '', showUndated: true,
 };
 
@@ -51,7 +52,7 @@ function renderMetadata() {
 
 function renderList() {
   const root = $('#peopleList'); root.replaceChildren();
-  let rows = state.list;
+  let rows = state.viewMode === 'ranking' ? state.list : (state.list.items || []);
   if (state.viewMode === 'ranking' && state.query.trim()) {
     const query = state.query.trim().toLocaleLowerCase('ru');
     rows = rows.filter(row => `${row.display_name || ''} ${row.person_id}`.toLocaleLowerCase('ru').includes(query));
@@ -102,7 +103,7 @@ async function loadList(selectFirst = false) {
 
 async function selectProfile(id) {
   const shouldScrollToProfile = state.selected !== null && window.matchMedia('(max-width: 780px)').matches;
-  const request = ++state.request; state.selected = id; state.profile = null; state.focus = null; state.view = [-180, -90, 360, 180];
+  const request = ++state.request; state.selected = id; state.profile = null; state.focus = null; state.timelinePage = 0; state.view = [-180, -90, 360, 180];
   renderList(); $('#profilePanel').replaceChildren(node('div', 'Загружаем карточку и историю…', 'panel empty-state')); showError(null);
   try { const data = await api(`/api/profile?id=${encodeURIComponent(id)}`); if (request !== state.request) return; state.profile = data; renderProfile(); if (shouldScrollToProfile) window.setTimeout(() => $('#profilePanel')?.scrollIntoView({behavior:'smooth', block:'start'}), 20); }
   catch (error) { if (request === state.request) { $('#profilePanel').replaceChildren(node('div', 'Карточка недоступна.', 'panel empty-state')); showError(error.message); } }
@@ -128,8 +129,8 @@ function renderProfile() {
 
   const mapPanel = node('section', undefined, 'panel map-panel'); const mapHeading = node('div', undefined, 'section-heading'); const headingCopy = node('div'); headingCopy.append(node('p', 'ГЕОГРАФИЯ И ХРОНОЛОГИЯ', 'eyebrow'), node('h3', 'Направленный граф перелётов')); mapHeading.append(headingCopy, node('span', 'дата · стрелка = направление', 'micro-tag')); mapPanel.append(mapHeading);
   const controls = node('div', undefined, 'route-controls');
-  for (const [id, label] of [['routeFrom', 'С'], ['routeTo', 'По']]) { const wrap = node('label', label); const input = node('input'); input.type = 'date'; input.id = id; input.value = id === 'routeFrom' ? state.routeFrom : state.routeTo; input.addEventListener('change', () => { state.routeFrom = $('#routeFrom').value; state.routeTo = $('#routeTo').value; renderTimeline(); }); wrap.append(input); controls.append(wrap); }
-  const unknown = node('label', undefined, 'check-label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = state.showUndated; checkbox.addEventListener('change', () => { state.showUndated = checkbox.checked; renderTimeline(); }); unknown.append(checkbox, node('span', 'Без даты')); controls.append(unknown);
+  for (const [id, label] of [['routeFrom', 'С'], ['routeTo', 'По']]) { const wrap = node('label', label); const input = node('input'); input.type = 'date'; input.id = id; input.value = id === 'routeFrom' ? state.routeFrom : state.routeTo; input.addEventListener('change', () => { state.routeFrom = $('#routeFrom').value; state.routeTo = $('#routeTo').value; state.timelinePage = 0; renderTimeline(); }); wrap.append(input); controls.append(wrap); }
+  const unknown = node('label', undefined, 'check-label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = state.showUndated; checkbox.addEventListener('change', () => { state.showUndated = checkbox.checked; state.timelinePage = 0; renderTimeline(); }); unknown.append(checkbox, node('span', 'Показывать без даты')); controls.append(unknown);
   const reset = node('button', 'Сбросить период', 'button subtle'); reset.type = 'button'; reset.addEventListener('click', () => { state.routeFrom = ''; state.routeTo = ''; state.showUndated = true; renderProfile(); }); controls.append(reset); mapPanel.append(controls);
   const balance = node('div', undefined, 'route-balance'); balance.id = 'routeBalance'; mapPanel.append(balance);
   const focusSummary = node('div', 'Выберите строку истории, чтобы сфокусировать перелёт.', 'route-focus'); focusSummary.id = 'routeFocus'; mapPanel.append(focusSummary);
@@ -155,9 +156,9 @@ function renderProfile() {
   });
   const stopMapDrag = () => { mapDrag = null; };
   map.addEventListener('pointerup', stopMapDrag); map.addEventListener('pointercancel', stopMapDrag); map.addEventListener('lostpointercapture', stopMapDrag);
-  mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Даты стоят у концов маршрутов. В плотном графе подписи разнесены и сокращены, полный порядок — в истории рейсов. Выберите строку истории, чтобы подсветить рейс; точки — только в аэропортах отправления.', 'map-note')); root.append(mapPanel);
-  const timeline = node('section', undefined, 'panel timeline-panel'); timeline.id = 'timeline'; const timelineHeading = node('div', undefined, 'section-heading'); timelineHeading.append(node('div', undefined), node('span', `${data.segments.length} записей`, 'micro-tag')); timelineHeading.firstChild.append(node('p', 'ПЕРВИЧНЫЕ СВИДЕТЕЛЬСТВА', 'eyebrow'), node('h3', 'Перелёты профиля')); timeline.append(timelineHeading, node('div', undefined, 'timeline-table')); const timelineHost = $('#sidebarTimeline'); if (timelineHost) { timelineHost.replaceChildren(timeline); } else { root.append(timeline); }
-  const secondary = node('div', undefined, 'secondary-grid'); const evidence = node('section', undefined, 'panel mini-panel'); evidence.append(node('p', 'PROVENANCE', 'eyebrow'), node('h3', 'Источники и ссылки')); evidence.append(node('p', data.source_evidence?.length ? `${data.source_evidence.length} строк evidence привязаны к исходным сегментам.` : 'Отдельные source-evidence строки отсутствуют.', 'muted-copy')); const forest = node('section', undefined, 'panel mini-panel'); forest.append(node('p', 'ISOLATION FOREST', 'eyebrow'), node('h3', data.forest?.status === 'demo_only' ? 'Не отдельный вердикт' : 'Экспериментальный score'), node('p', data.forest?.status === 'demo_only' ? 'Для демо показывается только правило. Данные не переобучаются в браузере.' : 'IF хранится отдельно и не добавляет скрытый голос основному рейтингу.', 'muted-copy')); secondary.append(evidence, forest); root.append(secondary);
+  map.addEventListener('click', event => { const path = event.target.closest?.('path.route'); const segmentId = path?.getAttribute('data-segment-id'); if (segmentId) { state.focus = segmentId; renderTimeline(); } });
+  mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Даты стоят у концов маршрутов. Нажмите на линию или строку истории, чтобы подсветить рейс; точки — только в аэропортах отправления.', 'map-note')); root.append(mapPanel);
+  const timeline = node('section', undefined, 'panel timeline-panel'); timeline.id = 'timeline'; const timelineHeading = node('div', undefined, 'section-heading'); timelineHeading.append(node('div', undefined), node('span', `${data.segments.length} записей`, 'micro-tag')); timelineHeading.firstChild.append(node('p', 'ПЕРВИЧНЫЕ СВИДЕТЕЛЬСТВА', 'eyebrow'), node('h3', 'Перелёты профиля')); const showAll = node('button', 'Показать все маршруты', 'button subtle route-reset'); showAll.type = 'button'; showAll.addEventListener('click', () => { state.focus = null; renderTimeline(); }); timelineHeading.append(showAll); timeline.append(timelineHeading, node('div', undefined, 'timeline-table'), node('div', undefined, 'timeline-pagination')); const timelineHost = $('#sidebarTimeline'); if (timelineHost) { timelineHost.replaceChildren(timeline); } else { root.append(timeline); }
   renderTimeline();
 }
 
@@ -173,31 +174,76 @@ function visibleSegments() {
 }
 function renderTimeline() {
   if (!state.profile) return;
-  const rows = visibleSegments(); const balance = $('#routeBalance'); if (balance) balance.textContent = `Показано ${rows.length} из ${state.profile.route_balance.total} · с координатами ${state.profile.route_balance.plottable} · без координат ${state.profile.route_balance.unplottable}`;
-  if (rows.length && !rows.some(row => row.segment_id === state.focus)) state.focus = rows[0].segment_id;
+  const rows = visibleSegments();
+  const undated = rows.filter(row => !row.departure_date).length;
+  const balance = $('#routeBalance');
+  if (balance) balance.textContent = `Показано ${rows.length} из ${state.profile.route_balance.total} · с координатами ${state.profile.route_balance.plottable} · без координат ${state.profile.route_balance.unplottable} · без даты ${undated}`;
+  if (state.focus && !rows.some(row => row.segment_id === state.focus)) state.focus = null;
   if (state.view[0] === -180 && state.view[1] === -90 && state.view[2] === 360 && state.view[3] === 180) state.view = fitMapView(rows);
-  const focused = rows.find(row => row.segment_id === state.focus); const focusSummary = $('#routeFocus'); if (focusSummary) { const origin = focused?.origin?.airport_id || focused?.origin_airport_id || '???'; const destination = focused?.destination?.airport_id || focused?.destination_airport_id || '???'; focusSummary.classList.toggle('focused', Boolean(focused)); focusSummary.textContent = focused ? `Выбранный перелёт · ${dateLabel(focused.departure_date)} · ${airportLabel(origin)} → ${airportLabel(destination)} · ${focused.flight_number || 'рейс не указан'}` : 'Выберите строку истории, чтобы сфокусировать перелёт.'; }
-  const table = document.querySelector('.timeline-table'); if (!table) return; table.replaceChildren(); const header = node('div', undefined, 'timeline-row timeline-header'); ['Дата', 'Маршрут', 'Рейс', 'Статус'].forEach(text => header.append(node('span', text))); table.append(header);
+  const focused = rows.find(row => row.segment_id === state.focus);
+  const focusSummary = $('#routeFocus');
+  if (focusSummary) {
+    const origin = focused?.origin?.airport_id || focused?.origin_airport_id || '???';
+    const destination = focused?.destination?.airport_id || focused?.destination_airport_id || '???';
+    focusSummary.classList.toggle('focused', Boolean(focused));
+    focusSummary.textContent = focused ? `Выбранный перелёт · ${dateLabel(focused.departure_date)} · ${airportLabel(origin)} → ${airportLabel(destination)} · ${focused.flight_number || 'рейс не указан'}` : 'Выберите строку истории, чтобы сфокусировать перелёт.';
+  }
+  const table = document.querySelector('.timeline-table');
+  if (!table) return;
+  table.replaceChildren();
+  const header = node('div', undefined, 'timeline-row timeline-header');
+  ['Дата', 'Маршрут', 'Рейс', 'Статус'].forEach(text => header.append(node('span', text)));
+  table.append(header);
   if (!rows.length) table.append(node('div', 'В выбранном периоде записей нет.', 'empty-list'));
-  for (const segment of rows) { const row=node('button', undefined, `timeline-row ${state.focus === segment.segment_id ? 'focused' : ''}`); row.type='button'; const origin=segment.origin?.airport_id || segment.origin_airport_id || '???'; const destination=segment.destination?.airport_id || segment.destination_airport_id || '???'; row.append(node('span', dateLabel(segment.departure_date), 'date-cell'), node('span', `${airportLabel(origin)} → ${airportLabel(destination)}`, 'route-cell'), node('span', segment.flight_number || '—', 'flight-cell'), node('span', segment.resolution_status || '—', 'state-cell')); row.addEventListener('click', () => { state.focus=segment.segment_id; drawMap(visibleSegments()); renderTimeline(); }); table.append(row); }
+  const pages = Math.max(1, Math.ceil(rows.length / state.timelinePageSize));
+  state.timelinePage = Math.min(Math.max(0, state.timelinePage), pages - 1);
+  const offset = state.timelinePage * state.timelinePageSize;
+  const pageRows = rows.slice(offset, offset + state.timelinePageSize);
+  for (const segment of pageRows) {
+    const row = node('button', undefined, `timeline-row ${state.focus === segment.segment_id ? 'focused' : ''}`);
+    row.type = 'button';
+    const origin = segment.origin?.airport_id || segment.origin_airport_id || '???';
+    const destination = segment.destination?.airport_id || segment.destination_airport_id || '???';
+    row.append(node('span', dateLabel(segment.departure_date), 'date-cell'), node('span', `${airportLabel(origin)} → ${airportLabel(destination)}`, 'route-cell'), node('span', segment.flight_number || '—', 'flight-cell'), node('span', segment.resolution_status || '—', 'state-cell'));
+    row.addEventListener('click', () => { state.focus = segment.segment_id; renderTimeline(); });
+    table.append(row);
+  }
+  const pager = document.querySelector('.timeline-pagination');
+  if (pager) {
+    pager.replaceChildren();
+    const previous = node('button', '← Назад', 'button subtle');
+    const next = node('button', 'Вперёд →', 'button subtle');
+    const label = node('span', `${rows.length ? offset + 1 : 0}–${Math.min(offset + pageRows.length, rows.length)} из ${rows.length}`, 'pagination-label');
+    previous.type = next.type = 'button'; previous.disabled = state.timelinePage <= 0; next.disabled = state.timelinePage >= pages - 1;
+    previous.addEventListener('click', () => { state.timelinePage -= 1; renderTimeline(); });
+    next.addEventListener('click', () => { state.timelinePage += 1; renderTimeline(); });
+    pager.append(previous, label, next);
+  }
   drawMap(rows);
 }
 function routeParts(a, b) { let [x1,y1]=a, [x2,y2]=b; if (Math.abs(x2-x1)<=180) return [[a,b]]; const direction=x1>0?180:-180; x2+=x1>0?360:-360; const ratio=(direction-x1)/(x2-x1); const y=y1+ratio*(y2-y1); return [[[x1,y1],[direction,y]],[[-direction,y],[b[0],y2]]]; }
 function shortDate(value) { if (!value) return 'дата неизвестна'; const parts=String(value).split('-'); return parts.length===3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : String(value); }
 function airportLabel(value) { return String(value || '???').replace(/^openflights:/, ''); }
 function routeKey(segment) { const from=segment.origin?.airport_id || segment.origin_airport_id || '???'; const to=segment.destination?.airport_id || segment.destination_airport_id || '???'; return `${from}→${to}`; }
-function curvedRoute(from, to, bend) { const [x1,y1]=from, [x2,y2]=to; const dx=x2-x1, dy=y2-y1, length=Math.hypot(dx,dy) || 1; const nx=-dy/length, ny=dx/length; const mx=(x1+x2)/2+nx*bend, my=(y1+y2)/2+ny*bend; const t=.86, u=1-t; return {path:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`, label:[u*u*x1+2*u*t*mx+t*t*x2, u*u*y1+2*u*t*my+t*t*y2]}; }
+function curvedRoute(from, to, bend) {
+  const [x1, y1] = from, [x2, y2] = to;
+  const dx = x2 - x1, dy = y2 - y1, length = Math.hypot(dx, dy) || 1;
+  const nx = -dy / length, ny = dx / length;
+  const mx = (x1 + x2) / 2 + nx * bend, my = (y1 + y2) / 2 + ny * bend;
+  const t = .86, u = 1 - t;
+  return {path: `M${x1},${y1} Q${mx},${my} ${x2},${y2}`, label: [u*u*x1 + 2*u*t*mx + t*t*x2, u*u*y1 + 2*u*t*my + t*t*y2], control: [mx, my]};
+}
 function mapElementScale() {
   const width = Number(state.view[2]) || 360;
   const level = Math.pow(Math.min(1, Math.max(.02, width / 360)), 1.2);
   return {
-    arrow: Math.min(5.2, Math.max(.06, .06 + level * 5.14)),
-    dot: Math.min(1.1, Math.max(.04, .04 + level * 1)),
-    date: Math.min(1.1, Math.max(.04, .04 + level * 1.06)),
+    arrow: Math.min(5.2, Math.max(.42, .42 + level * 4.78)),
+    dot: Math.min(1.1, Math.max(.08, .08 + level * .96)),
+    date: Math.min(.86, Math.max(.08, .08 + level * .78)),
   };
 }
 function fitMapView(rows) {
-  const points = rows.filter(segment => segment.is_plottable && segment.origin && segment.destination).flatMap(segment => [segment.origin, segment.destination]).map(point => [Number(point.longitude), -Number(point.latitude)]).filter(([x,y]) => Number.isFinite(x) && Number.isFinite(y));
+  const points = rows.filter(segment => segment.is_plottable && segment.origin && segment.destination).flatMap(segment => [segment.origin, segment.destination]).map(point => [Number(point.longitude), -Number(point.latitude)]).filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
   if (!points.length) return [-180, -90, 360, 180];
   const xs = points.map(point => point[0]), ys = points.map(point => point[1]);
   const spanX = Math.max(10, Math.max(...xs) - Math.min(...xs)), spanY = Math.max(10, Math.max(...ys) - Math.min(...ys));
@@ -205,33 +251,84 @@ function fitMapView(rows) {
   const centerX = (Math.min(...xs) + Math.max(...xs)) / 2; const centerY = (Math.min(...ys) + Math.max(...ys)) / 2;
   return [centerX - width / 2, centerY - height / 2, width, height];
 }
-function drawMap(rows) {
-  const map=$('#map'); if (!map) return; map.replaceChildren();
-  const scale = mapElementScale(); const defs=svg('defs');
-  const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:scale.arrow,markerHeight:scale.arrow,orient:'auto',markerUnits:'userSpaceOnUse'}); marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#0b57b7'}));
-  const activeMarker=svg('marker',{id:'arrow-active',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:scale.arrow*1.3,markerHeight:scale.arrow*1.3,orient:'auto',markerUnits:'userSpaceOnUse'}); activeMarker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#d47d24'})); defs.append(marker, activeMarker); map.append(defs);
-  for (let x=-180;x<=180;x+=30) map.append(svg('line',{x1:x,x2:x,y1:-90,y2:90,class:'gridline'})); for (let y=-60;y<=60;y+=30) map.append(svg('line',{x1:-180,x2:180,y1:y,y2:y,class:'gridline'}));
-  for (const feature of state.geo?.features || []) if (['Polygon','MultiPolygon'].includes(feature.geometry?.type)) map.append(svg('path',{d:countryPath(feature.geometry),class:'country'}));
-  const plottable=rows.filter(segment => segment.is_plottable && segment.origin && segment.destination); const groups=new Map(); const airports=new Map();
-  for (const segment of plottable) { const a=segment.origin, b=segment.destination; const start=[Number(a.longitude),-Number(a.latitude)], end=[Number(b.longitude),-Number(b.latitude)]; const key=routeKey(segment); if (!groups.has(key)) groups.set(key,[]); groups.get(key).push({segment,start,end}); airports.set(a.airport_id,{point:start,active:false}); }
-  const showDates=plottable.length<=40;
-  const dateCandidates=[];
-  for (const group of groups.values()) group.forEach((item,index) => {
-    const {segment,start,end}=item; const active=state.focus===segment.segment_id; if (active && airports.has(segment.origin.airport_id)) airports.get(segment.origin.airport_id).active=true;
-    const bend=(index-(group.length-1)/2)*4.5; const curve=curvedRoute(start,end,bend); const line=svg('path',{d:curve.path,class:`route ${active?'active':''}`,'marker-end':`url(#${active?'arrow-active':'arrow'})`}); line.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
-    if (showDates || active) dateCandidates.push({segment, point:curve.label, active, text:shortDate(segment.departure_date)});
-  });
-  const orderedDates=dateCandidates.sort((a,b)=>Number(b.active)-Number(a.active)); const labelLimit=plottable.length<=10 || state.view[2]<55?orderedDates.length:6; const labels=[];
-  for (const candidate of orderedDates) {
-    if (labels.length>=labelLimit && !candidate.active) continue;
-    const fontSize=scale.date*(candidate.active?1.1:1); const width=candidate.text.length*fontSize*.58; const height=fontSize*1.5; const box={x:candidate.point[0]-width/2-1,y:candidate.point[1]-height/2-1,w:width+2,h:height+2};
-    if (!candidate.active && labels.some(label => box.x<label.x+label.w && box.x+box.w>label.x && box.y<label.y+label.h && box.y+box.h>label.y)) continue;
-    const tag=svg('g',{class:`map-date-label ${candidate.active?'active':''}`}); tag.append(svg('text',{x:candidate.point[0],y:candidate.point[1]+fontSize*.4,'text-anchor':'middle',class:'map-date',style:`font-size:${fontSize}px`},candidate.text)); tag.append(svg('title',{},`${candidate.segment.origin.airport_id} → ${candidate.segment.destination.airport_id} · ${dateLabel(candidate.segment.departure_date)}`)); map.append(tag); labels.push(box);
-  }
-  for (const [airport, info] of airports) { const circle=svg('circle',{cx:info.point[0],cy:info.point[1],r:info.active?scale.dot*1.55:scale.dot,class:`airport-dot ${info.active?'active':''}`}); circle.append(svg('title',{},airport)); map.append(circle); }
-  map.setAttribute('viewBox',state.view.join(' '));
+function mapWrapOffsets() {
+  const [x, , width] = state.view;
+  const first = Math.floor((x - 180) / 360) - 1;
+  const last = Math.ceil((x + width + 180) / 360) + 1;
+  return Array.from({length: Math.max(1, last - first + 1)}, (_, index) => (first + index) * 360);
 }
-function countryPath(geometry) { const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates; return polygons.map(poly=>poly.map(ring=>ring.map((v,i)=>`${i?'L':'M'}${v[0]},${-v[1]}`).join(' ')+'Z').join(' ')).join(' '); }
+function pointInView(point, margin = 18) {
+  const [x, y, width, height] = state.view;
+  return point[0] >= x - margin && point[0] <= x + width + margin && point[1] >= y - margin && point[1] <= y + height + margin;
+}
+function animateMosquito(image, from, to, control, size, segmentId) {
+  const started = performance.now();
+  const duration = 3800;
+  const tick = now => {
+    if (!image.isConnected || state.focus !== segmentId) return;
+    const progress = ((now - started) % duration) / duration;
+    const u = 1 - progress;
+    const x = u*u*from[0] + 2*u*progress*control[0] + progress*progress*to[0];
+    const y = u*u*from[1] + 2*u*progress*control[1] + progress*progress*to[1];
+    image.setAttribute('x', x - size / 2); image.setAttribute('y', y - size / 2);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+function drawMap(rows) {
+  const map = $('#map'); if (!map) return; map.replaceChildren();
+  const scale = mapElementScale(); const defs = svg('defs');
+  const marker = svg('marker', {id:'arrow', viewBox:'0 0 10 10', refX:8.5, refY:5, markerWidth:scale.arrow, markerHeight:scale.arrow, orient:'auto', markerUnits:'userSpaceOnUse'});
+  marker.append(svg('path', {d:'M 0 0 L 10 5 L 0 10 z', fill:'#0b57b7'}));
+  const activeMarker = svg('marker', {id:'arrow-active', viewBox:'0 0 10 10', refX:8.5, refY:5, markerWidth:scale.arrow*1.3, markerHeight:scale.arrow*1.3, orient:'auto', markerUnits:'userSpaceOnUse'});
+  activeMarker.append(svg('path', {d:'M 0 0 L 10 5 L 0 10 z', fill:'#d47d24'})); defs.append(marker, activeMarker); map.append(defs);
+  const offsets = mapWrapOffsets();
+  for (const offset of offsets) for (let x=-180; x<=180; x+=30) map.append(svg('line', {x1:x+offset, x2:x+offset, y1:-90, y2:90, class:'gridline'}));
+  for (let y=-60; y<=60; y+=30) map.append(svg('line', {x1:-180+offsets[0], x2:180+offsets[offsets.length-1], y1:y, y2:y, class:'gridline'}));
+  for (const feature of state.geo?.features || []) if (['Polygon','MultiPolygon'].includes(feature.geometry?.type)) for (const offset of offsets) map.append(svg('path', {d:countryPath(feature.geometry, offset), class:'country'}));
+  const plottable = rows.filter(segment => segment.is_plottable && segment.origin && segment.destination);
+  const groups = new Map(); const airports = new Map(); const dateCandidates = [];
+  for (const segment of plottable) {
+    const a = segment.origin, b = segment.destination;
+    const start = [Number(a.longitude), -Number(a.latitude)], end = [Number(b.longitude), -Number(b.latitude)];
+    const key = routeKey(segment); if (!groups.has(key)) groups.set(key, []); groups.get(key).push({segment, start, end});
+  }
+  for (const group of groups.values()) group.forEach((item, index) => {
+    const {segment, start, end} = item; const bend = (index - (group.length - 1) / 2) * 4.5;
+    for (const offset of offsets) {
+      const shiftedStart = [start[0] + offset, start[1]], shiftedEnd = [end[0] + offset, end[1]];
+      const curve = curvedRoute(shiftedStart, shiftedEnd, bend); const active = state.focus === segment.segment_id; const dimmed = Boolean(state.focus && !active);
+      const airportKey = `${segment.origin.airport_id}:${offset}`;
+      const current = airports.get(airportKey) || {point: shiftedStart, airport: segment.origin.airport_id, active:false, dimmed};
+      current.active = current.active || active; current.dimmed = dimmed; airports.set(airportKey, current);
+      const line = svg('path', {d:curve.path, class:`route ${active?'active':''} ${dimmed?'dimmed':''}`, 'data-segment-id':segment.segment_id, 'marker-end':`url(#${active?'arrow-active':'arrow'})`});
+      line.append(svg('title', {}, `${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
+      if (pointInView(curve.label)) dateCandidates.push({segment, point:curve.label, active, dimmed, text:shortDate(segment.departure_date)});
+      if (active && pointInView(curve.label)) {
+        const size = Math.max(.7, scale.arrow * 2.4);
+        const mosquito = svg('image', {href:'/mosquito.gif', x:shiftedStart[0]-size/2, y:shiftedStart[1]-size/2, width:size, height:size, class:'route-mosquito', preserveAspectRatio:'xMidYMid meet'});
+        mosquito.append(svg('title', {}, 'Маршрут выбран')); map.append(mosquito); animateMosquito(mosquito, shiftedStart, shiftedEnd, curve.control, size, segment.segment_id);
+      }
+    }
+  });
+  const orderedDates = dateCandidates.sort((a,b) => Number(b.active) - Number(a.active));
+  const labels = [];
+  for (const candidate of orderedDates) {
+    const fontSize = scale.date * (candidate.active ? 1.1 : 1); const labelClass = `map-date-label ${candidate.active?'active':''} ${candidate.dimmed?'dimmed':''}`;
+    const tag = svg('g', {class:labelClass});
+    tag.append(svg('text', {x:candidate.point[0], y:candidate.point[1] + fontSize*.4, 'text-anchor':'middle', class:'map-date', style:`font-size:${fontSize}px`}, candidate.text));
+    tag.append(svg('title', {}, `${candidate.segment.origin.airport_id} → ${candidate.segment.destination.airport_id} · ${dateLabel(candidate.segment.departure_date)}`)); map.append(tag); labels.push(tag);
+  }
+  for (const [, info] of airports) {
+    const circle = svg('circle', {cx:info.point[0], cy:info.point[1], r:info.active ? scale.dot*1.55 : scale.dot, class:`airport-dot ${info.active?'active':''} ${info.dimmed?'dimmed':''}`});
+    circle.append(svg('title', {}, info.airport)); map.append(circle);
+  }
+  map.setAttribute('viewBox', state.view.join(' '));
+}
+function countryPath(geometry, offset = 0) {
+  const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+  return polygons.map(poly => poly.map(ring => ring.map((v, i) => `${i?'L':'M'}${v[0] + offset},${-v[1]}`).join(' ') + 'Z').join(' ')).join(' ');
+}
 function zoomMap(factor) { const [x,y,w,h]=state.view; if (!factor) state.view=[-180,-90,360,180]; else { const nw=Math.min(720,Math.max(10,w*factor)); state.view=[x+(w-nw)/2,y+(h-nw/2)/2,nw,nw/2]; } drawMap(visibleSegments()); }
 
 async function changeMode(mode) { state.viewMode=mode; state.page=0; $$('.view-tab').forEach(button => { const active=button.dataset.view===mode; button.classList.toggle('active',active); button.setAttribute('aria-selected',String(active)); }); $('#rankPicker').classList.toggle('disabled',mode==='all'); await loadList(true); }
@@ -248,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#demoButton').addEventListener('click', activateDemo); $('#resetButton').addEventListener('click', resetProduct); $('#uploadInput').addEventListener('change', event => uploadProduct(event.target.files[0]));
   $$('.view-tab').forEach(button => button.addEventListener('click', () => changeMode(button.dataset.view)));
   $$('.rank-choice').forEach(button => button.addEventListener('click', async () => { state.limit=Number(button.dataset.limit); state.viewMode='ranking'; state.page=0; $$('.rank-choice').forEach(item => item.classList.toggle('active',item===button)); $$('.view-tab').forEach(item => { const active=item.dataset.view==='ranking'; item.classList.toggle('active',active); item.setAttribute('aria-selected',String(active)); }); await loadList(true); }));
-  $('#statusFilter').addEventListener('change', async event => { state.eligibility=event.target.value; state.page=0; if(state.viewMode==='all') await loadList(false); }); $('#sortSelect').addEventListener('change', async event => { state.sort=event.target.value; state.page=0; if(state.viewMode==='all') await loadList(false); });
+  $('#statusFilter').addEventListener('change', async event => { state.eligibility = event.target.value; state.page = 0; if (state.viewMode === 'ranking') { state.viewMode = 'all'; $$('.view-tab').forEach(button => { const active = button.dataset.view === 'all'; button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); }); $('#rankPicker').classList.add('disabled'); } await loadList(false); }); $('#sortSelect').addEventListener('change', async event => { state.sort = event.target.value; state.page = 0; if (state.viewMode === 'ranking') { state.viewMode = 'all'; $$('.view-tab').forEach(button => { const active = button.dataset.view === 'all'; button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); }); $('#rankPicker').classList.add('disabled'); } await loadList(false); });
   let timer; $('#searchInput').addEventListener('input', event => { state.query=event.target.value; if(state.viewMode==='ranking'){renderList();return;} clearTimeout(timer); timer=setTimeout(() => {state.page=0;loadList(false);},220); });
   $('#prevPage').addEventListener('click', async () => { if(state.page>0){state.page-=1;await loadList(false);} }); $('#nextPage').addEventListener('click', async () => { if(state.list.pagination?.has_next){state.page+=1;await loadList(false);} });
   bootstrap(true);

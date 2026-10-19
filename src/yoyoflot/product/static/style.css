@@ -24,3 +24,17 @@ body{overflow-x:hidden}
 .eyebrow{font-size:11px}.micro-tag,.count-pill{font-size:10px}.hint{font-size:12px}.metric-label{font-size:12px}.metric small{font-size:11px}.brand-copy em{font-size:9px}.agent-status{font-size:11px}.person-place{font-size:11px}.person-identity small{font-size:10px}.person-score small{font-size:10px}.person-status{font-size:10px}.pagination{font-size:10px}.profile-id{font-size:11px}.score-label{font-size:10px}.score-block small{font-size:11px}.chip{font-size:10px}.factor-status,.factor-id{font-size:9px}.factor-card p{font-size:11px}.evidence-link{font-size:10px}.route-focus{font-size:11px}.route-balance{font-size:10px}.timeline-header{font-size:9px}.date-cell,.flight-cell{font-size:11px}.state-cell{font-size:10px}.muted-copy{font-size:11px}footer{font-size:10px}#sidebarTimeline .date-cell,#sidebarTimeline .flight-cell{font-size:10px}#sidebarTimeline .route-cell{font-size:10px}
 @media(max-width:1100px){.hero-visual{width:300px;height:230px;flex-basis:300px}.mosquito-mascot img{width:190px;height:160px}}
 @media(max-width:780px){.hero-visual{width:100%;height:200px}.mosquito-mascot img{width:160px;height:135px}.mosquito-mascot span{font-size:10px}.timeline-header{font-size:9px}.date-cell,.flight-cell{font-size:10px}}
+
+/* Route interaction refinements */
+.route { cursor: pointer; }
+.route.dimmed { opacity: .2; }
+.airport-dot.dimmed, .map-date-label.dimmed { opacity: .2; }
+.route-mosquito { pointer-events: none; image-rendering: pixelated; mix-blend-mode: multiply; }
+.map-date-label, .map-date-label * { user-select: none; -webkit-user-select: none; }
+.map-date { font-size: 2.6px; fill: rgba(43,79,115,.42); stroke-width: .2px; }
+.map-date-label.active .map-date { font-size: 3px; }
+.timeline-pagination { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; color:var(--soft); font:10px var(--mono); }
+.timeline-pagination .button { padding:7px 9px; font-size:10px; }
+.timeline-pagination .button:disabled { cursor:default; opacity:.42; }
+.route-reset { margin-left:auto; }
+@media(max-width:780px){ .timeline-pagination { font-size:9px; } .route-reset { margin-left:0; } }
