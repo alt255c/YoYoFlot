@@ -160,12 +160,12 @@ def handler(manager):
                     if set(query) != {'id'} or len(query['id']) != 1:
                         raise ValueError('Expected one id parameter')
                     payload=store.profile(query['id'][0])
-                elif path.path in {'/','/app.js','/style.css','/world.geojson','/favicon.svg'}:
+                elif path.path in {'/','/app.js','/style.css','/world.geojson','/favicon.svg','/mosquito.gif'}:
                     name='index.html' if path.path=='/' else path.path[1:]
                     content=files('yoyoflot.product').joinpath('static',name).read_bytes()
                     mime={'index.html':'text/html; charset=utf-8','app.js':'text/javascript; charset=utf-8',
                           'style.css':'text/css; charset=utf-8','world.geojson':'application/geo+json',
-                          'favicon.svg':'image/svg+xml'}[name]
+                          'favicon.svg':'image/svg+xml','mosquito.gif':'image/gif'}[name]
                     self.send_content(200,content,mime)
                     return
                 else:

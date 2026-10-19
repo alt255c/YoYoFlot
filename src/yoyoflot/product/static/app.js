@@ -49,15 +49,6 @@ function renderMetadata() {
   $('#runLabel').textContent = `run_id · ${m.run_id || '—'}`;
   $('#agentMode').textContent = m.data_mode === 'demo_subset' ? 'ДЕМО-КОНТУР МОНИТОРИНГА' : 'КОНТУР МОНИТОРИНГА';
   $('#resetButton').hidden = m.data_mode !== 'demo_subset';
-  const method = $('#methodText');
-  method.replaceChildren();
-  const intro = node('p', 'Сигнал строится на исходных обработанных таблицах. Демо-режим показывает подмножество реального рейтинга и не добавляет людей, перелёты или разметку.');
-  method.append(intro);
-  if (Array.isArray(m.limitations) && m.limitations.length) {
-    const ul = node('ul');
-    m.limitations.slice(0, 5).forEach(item => ul.append(node('li', item)));
-    method.append(ul);
-  }
 }
 
 function renderList() {
@@ -142,7 +133,29 @@ function renderProfile() {
   const unknown = node('label', undefined, 'check-label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = state.showUndated; checkbox.addEventListener('change', () => { state.showUndated = checkbox.checked; renderTimeline(); }); unknown.append(checkbox, node('span', 'Без даты')); controls.append(unknown);
   const reset = node('button', 'Сбросить период', 'button subtle'); reset.type = 'button'; reset.addEventListener('click', () => { state.routeFrom = ''; state.routeTo = ''; state.showUndated = true; renderProfile(); }); controls.append(reset); mapPanel.append(controls);
   const balance = node('div', undefined, 'route-balance'); balance.id = 'routeBalance'; mapPanel.append(balance);
-  const mapWrap = node('div', undefined, 'map-wrap'); const map = svg('svg', {class:'map', viewBox:'-180 -90 360 180', role:'img', 'aria-label':'Карта маршрутов'}); map.id = 'map'; mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Стрелки показывают направление между аэропортами. Неполные записи остаются в таблице и не превращаются в догадки.', 'map-note')); root.append(mapPanel);
+  const mapWrap = node('div', undefined, 'map-wrap'); const map = svg('svg', {class:'map', viewBox:'-180 -90 360 180', role:'img', 'aria-label':'Карта маршрутов'}); map.id = 'map';
+  let mapDrag = null;
+  map.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    mapDrag = {x: event.clientX, y: event.clientY, view: [...state.view]};
+    map.setPointerCapture(event.pointerId);
+  });
+  map.addEventListener('pointermove', event => {
+    if (!mapDrag) return;
+    const rect = map.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const dx = event.clientX - mapDrag.x;
+    const dy = event.clientY - mapDrag.y;
+    state.view = [
+      mapDrag.view[0] - dx * mapDrag.view[2] / rect.width,
+      mapDrag.view[1] - dy * mapDrag.view[3] / rect.height,
+      mapDrag.view[2], mapDrag.view[3],
+    ];
+    drawMap(visibleSegments());
+  });
+  const stopMapDrag = () => { mapDrag = null; };
+  map.addEventListener('pointerup', stopMapDrag); map.addEventListener('pointercancel', stopMapDrag); map.addEventListener('lostpointercapture', stopMapDrag);
+  mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Перетаскивайте карту мышью или пальцем после увеличения. Стрелки показывают направление между аэропортами.', 'map-note')); root.append(mapPanel);
   const timeline = node('section', undefined, 'panel timeline-panel'); timeline.id = 'timeline'; const timelineHeading = node('div', undefined, 'section-heading'); timelineHeading.append(node('div', undefined), node('span', `${data.segments.length} записей`, 'micro-tag')); timelineHeading.firstChild.append(node('p', 'ПЕРВИЧНЫЕ СВИДЕТЕЛЬСТВА', 'eyebrow'), node('h3', 'Перелёты профиля')); timeline.append(timelineHeading, node('div', undefined, 'timeline-table')); root.append(timeline);
   const secondary = node('div', undefined, 'secondary-grid'); const evidence = node('section', undefined, 'panel mini-panel'); evidence.append(node('p', 'PROVENANCE', 'eyebrow'), node('h3', 'Источники и ссылки')); evidence.append(node('p', data.source_evidence?.length ? `${data.source_evidence.length} строк evidence привязаны к исходным сегментам.` : 'Отдельные source-evidence строки отсутствуют.', 'muted-copy')); const forest = node('section', undefined, 'panel mini-panel'); forest.append(node('p', 'ISOLATION FOREST', 'eyebrow'), node('h3', data.forest?.status === 'demo_only' ? 'Не отдельный вердикт' : 'Экспериментальный score'), node('p', data.forest?.status === 'demo_only' ? 'Для демо показывается только правило. Данные не переобучаются в браузере.' : 'IF хранится отдельно и не добавляет скрытый голос основному рейтингу.', 'muted-copy')); secondary.append(evidence, forest); root.append(secondary);
   renderTimeline();
@@ -194,6 +207,5 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#statusFilter').addEventListener('change', async event => { state.eligibility=event.target.value; state.page=0; if(state.viewMode==='all') await loadList(false); }); $('#sortSelect').addEventListener('change', async event => { state.sort=event.target.value; state.page=0; if(state.viewMode==='all') await loadList(false); });
   let timer; $('#searchInput').addEventListener('input', event => { state.query=event.target.value; if(state.viewMode==='ranking'){renderList();return;} clearTimeout(timer); timer=setTimeout(() => {state.page=0;loadList(false);},220); });
   $('#prevPage').addEventListener('click', async () => { if(state.page>0){state.page-=1;await loadList(false);} }); $('#nextPage').addEventListener('click', async () => { if(state.list.pagination?.has_next){state.page+=1;await loadList(false);} });
-  $('#methodToggle').addEventListener('click', event => { const body=$('#methodBody'); const open=body.hidden; body.hidden=!open; event.currentTarget.setAttribute('aria-expanded',String(open)); });
   bootstrap(true);
 });

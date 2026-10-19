@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#07151f">
+  <meta name="theme-color" content="#0b57b7">
   <title>YoYoFlot Sentinel · мониторинг перелётов</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/style.css">
@@ -33,6 +33,7 @@
       </div>
       <div class="hero-orbit" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orbit-dot dot-a"></div><div class="orbit-dot dot-b"></div><div class="orbit-core">YF</div></div>
       <div class="hero-note"><span id="sourceBadge">ПОДКЛЮЧЕНИЕ…</span><strong id="windowLabel">Окно наблюдений · —</strong><small id="runLabel">run_id · —</small></div>
+      <div class="mosquito-mascot"><img src="/mosquito.gif" alt="Фирменный комарик YoYoFlot"><span>комарик всё видит</span></div>
     </section>
 
     <section id="metrics" class="metrics" aria-label="Сводка набора">
@@ -71,10 +72,6 @@
       <section id="profilePanel" class="profile-column" aria-live="polite"><div class="panel empty-state"><span class="empty-icon">◎</span><h2>Выберите профиль</h2><p>Откройте карточку в рейтинге, чтобы увидеть факторы, доказательства и все маршруты.</p></div></section>
     </section>
 
-    <section class="method panel">
-      <div class="method-title"><span class="method-icon">∿</span><div><p class="eyebrow">ОПЕРАТОРСКАЯ ПАМЯТКА</p><h2>Как читать сигнал</h2></div><button id="methodToggle" class="chevron" type="button" aria-expanded="false">⌄</button></div>
-      <div id="methodBody" class="method-body" hidden><div id="methodText"></div><div class="method-grid"><div><strong>Правила</strong><span>Факторы M01–M03 и их вклад.</span></div><div><strong>IF</strong><span>Отдельный unsupervised score, не доказательство класса.</span></div><div><strong>Данные</strong><span>Пропуски остаются пропусками и не дают баллов.</span></div></div></div>
-    </section>
     <footer><span>YoYoFlot Sentinel · аналитика маршрутов</span><span>География: OpenFlights · Natural Earth · <b>решение всегда за оператором</b></span></footer>
   </main>
 </body>
