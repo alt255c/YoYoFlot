@@ -25,9 +25,37 @@ py -3.12 -m venv .venv
 
 Если окружение уже создано, повторять эти команды не нужно.
 
-## 2. Запуск на готовом snapshot
+## 2. Сборка snapshot из данных репозитория
 
-В `PRODUCT_PATH` должен находиться каталог, внутри которого есть:
+В текущем `develop` файлы `persons.parquet` и `segments.parquet` хранятся через
+Git LFS. Сначала скачайте их:
+
+```powershell
+git lfs install
+git lfs pull origin develop
+```
+
+Проверьте, что это реальные файлы, а не LFS-указатели:
+
+```powershell
+Get-Item .\data\processed\persons.parquet, .\data\processed\segments.parquet |
+  Select-Object Name, Length
+```
+
+Затем соберите product snapshot из поставленных T13-таблиц:
+
+```powershell
+& .\.venv\Scripts\python.exe scripts\run_t17.py `
+  --output artifacts\source-product
+```
+
+Команда использует реальные таблицы из `data\processed`, не создаёт людей,
+перелёты или метки. Полный расчёт может занять несколько минут и требует
+свободного места под производные таблицы.
+
+## 3. Запуск на собранном snapshot
+
+После предыдущего шага каталог создаётся автоматически. В нём должны быть:
 
 ```text
 run_manifest.json
@@ -36,10 +64,10 @@ tables\persons.parquet
 tables\segments.parquet
 ```
 
-Запуск:
+Запуск из корня репозитория:
 
 ```powershell
-$product = 'C:\path\to\source-product'
+$product = (Resolve-Path .\artifacts\source-product).Path
 & .\.venv\Scripts\python.exe -m yoyoflot.product.web --product $product
 ```
 
@@ -60,7 +88,7 @@ http://127.0.0.1:8501/
 
 Тогда адрес будет `http://127.0.0.1:8502/`.
 
-## 3. Запуск на Linux/macOS
+## 4. Запуск на Linux/macOS
 
 ```bash
 python3.12 -m venv .venv
@@ -77,7 +105,7 @@ python -m yoyoflot.product.web \
   --host 0.0.0.0 --port 8501
 ```
 
-## 4. Demo-режим
+## 5. Demo-режим
 
 Кнопка **Открыть demo-шпионов** выбирает первые пять профилей из реального
 рейтинга активного snapshot. Новые люди, перелёты и метки не создаются. Это
@@ -93,7 +121,7 @@ python -m yoyoflot.product.web \
 
 Кнопка **Вернуть основной набор** возвращает полный snapshot.
 
-## 5. Загрузка другого продукта
+## 6. Загрузка другого продукта
 
 1. Соберите или получите ZIP уже готового product snapshot.
 2. Запустите веб-сервис на любом исходном snapshot.
@@ -104,14 +132,14 @@ python -m yoyoflot.product.web \
 пути внутри архива и лимиты размера. Raw-архив преподавателя и произвольные
 файлы для выполнения через эту кнопку не принимаются.
 
-## 6. Docker
+## 7. Docker
 
 Нужен Docker Desktop с включённым Compose. Путь к product snapshot задаётся
 через переменную `YOYO_PRODUCT_PATH`:
 
 ```powershell
 cd C:\Users\dv-te\Desktop\DS\yoyoflot
-$env:YOYO_PRODUCT_PATH = 'C:\path\to\source-product'
+$env:YOYO_PRODUCT_PATH = (Resolve-Path .\artifacts\source-product).Path
 docker compose up --build
 ```
 
@@ -130,7 +158,7 @@ YOYO_PRODUCT_PATH=/absolute/path/to/source-product docker compose up --build
 Snapshot монтируется в контейнер только для чтения. Docker упаковывает веб-сервис
 и окружение; он не запускает полный raw-конвейер по кнопке загрузки.
 
-## 7. API для проверки
+## 8. API для проверки
 
 При работающем сервере можно проверить API из PowerShell:
 
@@ -150,7 +178,7 @@ Invoke-RestMethod 'http://127.0.0.1:8501/api/profile?id=PERSON_ID'
 - `POST /api/upload` — ZIP проверенного snapshot через multipart/form-data;
 - `POST /api/demo` и `POST /api/reset` — переключение demo-подмножества.
 
-## 8. Типовые ошибки
+## 9. Типовые ошибки
 
 | Сообщение | Что проверить |
 |---|---|
