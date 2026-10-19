@@ -176,7 +176,7 @@ function renderTimeline() {
   const rows = visibleSegments(); const balance = $('#routeBalance'); if (balance) balance.textContent = `Показано ${rows.length} из ${state.profile.route_balance.total} · с координатами ${state.profile.route_balance.plottable} · без координат ${state.profile.route_balance.unplottable}`;
   if (rows.length && !rows.some(row => row.segment_id === state.focus)) state.focus = rows[0].segment_id;
   if (state.view[0] === -180 && state.view[1] === -90 && state.view[2] === 360 && state.view[3] === 180) state.view = fitMapView(rows);
-  const focused = rows.find(row => row.segment_id === state.focus); const focusSummary = $('#routeFocus'); if (focusSummary) { const origin = focused?.origin?.airport_id || focused?.origin_airport_id || '???'; const destination = focused?.destination?.airport_id || focused?.destination_airport_id || '???'; focusSummary.textContent = focused ? `Выбранный перелёт · ${dateLabel(focused.departure_date)} · ${airportLabel(origin)} → ${airportLabel(destination)} · ${focused.flight_number || 'рейс не указан'}` : 'Выберите строку истории, чтобы сфокусировать перелёт.'; }
+  const focused = rows.find(row => row.segment_id === state.focus); const focusSummary = $('#routeFocus'); if (focusSummary) { const origin = focused?.origin?.airport_id || focused?.origin_airport_id || '???'; const destination = focused?.destination?.airport_id || focused?.destination_airport_id || '???'; focusSummary.classList.toggle('focused', Boolean(focused)); focusSummary.textContent = focused ? `Выбранный перелёт · ${dateLabel(focused.departure_date)} · ${airportLabel(origin)} → ${airportLabel(destination)} · ${focused.flight_number || 'рейс не указан'}` : 'Выберите строку истории, чтобы сфокусировать перелёт.'; }
   const table = document.querySelector('.timeline-table'); if (!table) return; table.replaceChildren(); const header = node('div', undefined, 'timeline-row timeline-header'); ['Дата', 'Маршрут', 'Рейс', 'Статус'].forEach(text => header.append(node('span', text))); table.append(header);
   if (!rows.length) table.append(node('div', 'В выбранном периоде записей нет.', 'empty-list'));
   for (const segment of rows) { const row=node('button', undefined, `timeline-row ${state.focus === segment.segment_id ? 'focused' : ''}`); row.type='button'; const origin=segment.origin?.airport_id || segment.origin_airport_id || '???'; const destination=segment.destination?.airport_id || segment.destination_airport_id || '???'; row.append(node('span', dateLabel(segment.departure_date), 'date-cell'), node('span', `${airportLabel(origin)} → ${airportLabel(destination)}`, 'route-cell'), node('span', segment.flight_number || '—', 'flight-cell'), node('span', segment.resolution_status || '—', 'state-cell')); row.addEventListener('click', () => { state.focus=segment.segment_id; drawMap(visibleSegments()); renderTimeline(); }); table.append(row); }
@@ -186,14 +186,14 @@ function routeParts(a, b) { let [x1,y1]=a, [x2,y2]=b; if (Math.abs(x2-x1)<=180) 
 function shortDate(value) { if (!value) return 'дата неизвестна'; const parts=String(value).split('-'); return parts.length===3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : String(value); }
 function airportLabel(value) { return String(value || '???').replace(/^openflights:/, ''); }
 function routeKey(segment) { const from=segment.origin?.airport_id || segment.origin_airport_id || '???'; const to=segment.destination?.airport_id || segment.destination_airport_id || '???'; return `${from}→${to}`; }
-function curvedRoute(from, to, bend) { const [x1,y1]=from, [x2,y2]=to; const dx=x2-x1, dy=y2-y1, length=Math.hypot(dx,dy) || 1; const nx=-dy/length, ny=dx/length; const mx=(x1+x2)/2+nx*bend, my=(y1+y2)/2+ny*bend; return {path:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`, label:[mx,my]}; }
+function curvedRoute(from, to, bend) { const [x1,y1]=from, [x2,y2]=to; const dx=x2-x1, dy=y2-y1, length=Math.hypot(dx,dy) || 1; const nx=-dy/length, ny=dx/length; const mx=(x1+x2)/2+nx*bend, my=(y1+y2)/2+ny*bend; const t=.82, u=1-t; return {path:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`, label:[u*u*x1+2*u*t*mx+t*t*x2, u*u*y1+2*u*t*my+t*t*y2]}; }
 function mapElementScale() {
   const width = Number(state.view[2]) || 360;
-  const level = Math.pow(Math.min(1, Math.max(.02, width / 360)), 1.35);
+  const level = Math.pow(Math.min(1, Math.max(.02, width / 360)), 1.2);
   return {
-    arrow: Math.min(3.4, Math.max(.02, .02 + level * 3.38)),
-    dot: Math.min(.9, Math.max(.025, .025 + level * .875)),
-    date: Math.min(5.4, Math.max(.12, .12 + level * 5.28)),
+    arrow: Math.min(4.4, Math.max(.05, .05 + level * 4.35)),
+    dot: Math.min(1.1, Math.max(.04, .04 + level * 1)),
+    date: Math.min(3.4, Math.max(.08, .08 + level * 3.32)),
   };
 }
 function fitMapView(rows) {
@@ -218,7 +218,7 @@ function drawMap(rows) {
   for (const group of groups.values()) group.forEach((item,index) => {
     const {segment,start,end}=item; const active=state.focus===segment.segment_id; if (active && airports.has(segment.origin.airport_id)) airports.get(segment.origin.airport_id).active=true;
     const bend=(index-(group.length-1)/2)*4.5; const curve=curvedRoute(start,end,bend); const line=svg('path',{d:curve.path,class:`route ${active?'active':''}`,'marker-end':`url(#${active?'arrow-active':'arrow'})`}); line.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
-    if (showDates || active) { const tag=svg('g',{class:`map-date-label ${active?'active':''}`}); tag.append(svg('text',{x:curve.label[0],y:curve.label[1]+2,'text-anchor':'middle',class:'map-date',style:`font-size:${scale.date*(active?1.18:1)}px`},shortDate(segment.departure_date))); tag.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(tag); }
+    if (showDates || active) { const tag=svg('g',{class:`map-date-label ${active?'active':''}`}); tag.append(svg('text',{x:curve.label[0],y:curve.label[1]+1.5,'text-anchor':'middle',class:'map-date',style:`font-size:${scale.date*(active?1.1:1)}px`},shortDate(segment.departure_date))); tag.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(tag); }
   });
   for (const [airport, info] of airports) { const circle=svg('circle',{cx:info.point[0],cy:info.point[1],r:info.active?scale.dot*1.55:scale.dot,class:`airport-dot ${info.active?'active':''}`}); circle.append(svg('title',{},airport)); map.append(circle); }
   map.setAttribute('viewBox',state.view.join(' '));
