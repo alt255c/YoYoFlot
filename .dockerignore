@@ -1,0 +1,12 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+data
+artifacts
+dist
+tests
+docs
+*.duckdb
+*.sqlite

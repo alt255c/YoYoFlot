@@ -1,17 +1,84 @@
 <!doctype html>
 <html lang="ru">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>YoYoFlot · Анализ перелётов</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b57b7">
+  <title>YoYoFlot Sentinel · мониторинг перелётов</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('yoyoflot-theme')||'dark'}catch(_){document.documentElement.dataset.theme='dark'}</script>
+  <script src="/app.js" defer></script>
+</head>
 <body>
-<header><a class="brand" href="/"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M6 5h13v13" fill="none" stroke="currentColor" stroke-width="2.5"/></svg> YoYoFlot <span>FLIGHT INTELLIGENCE</span></a><div class="dataset">● Исходный датасет преподавателя</div></header>
-<main>
-<div class="intro"><div><p class="eyebrow">CATCH THE SPIES / АНАЛИТИЧЕСКИЙ ОБЗОР</p><h1>От рейтинга — к фактам.</h1><p>Подозрительные паттерны перелётов, их значимость и подтверждающие поездки.</p></div><div id="window" class="window"></div></div>
-<div id="error" class="error" role="alert" hidden></div>
-<section id="metrics" class="metrics" aria-label="Сводка датасета"></section>
-<div class="workspace">
-<aside class="panel ranking"><div class="panel-heading"><div><p class="eyebrow">ПРИОРИТЕТ ПРОВЕРКИ</p><h2>Топ-50 <span id="topCount"></span></h2></div><span class="tag">Факторы ↓ · Балл ↓</span></div><label class="search">Поиск в топе<input id="search" type="search" placeholder="Имя или идентификатор"></label><p class="hint">Сначала число независимых факторов, затем их вес и выраженность.</p><div id="top" role="list" aria-label="Рейтинг людей"><p class="loading">Читаем снимок…</p></div></aside>
-<section id="dossier" class="dossier" aria-live="polite"><div class="panel empty">Выберите человека в рейтинге.</div></section>
-</div>
-<details class="panel methodology"><summary>Метод, проверка и ограничения данных</summary><div id="method"></div></details>
-<footer>YoYoFlot · Исследование закономерностей перелётов <span>География: OpenFlights (ODbL) · Natural Earth (public domain)</span></footer>
-</main>
-</body></html>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/" aria-label="YoYoFlot Sentinel">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-copy"><strong>YoYoFlot</strong><em>SENTINEL</em></span>
+      </a>
+      <div class="agent-status"><span class="pulse"></span><span id="agentMode">КОНТУР МОНИТОРИНГА</span><small>решение за оператором</small></div>
+      <div class="top-actions">
+        <button id="demoButton" class="button button-ghost" type="button">Открыть демо</button>
+        <button id="resetButton" class="button button-ghost" type="button" hidden>Основной набор</button>
+        <button id="themeToggle" class="button button-ghost theme-toggle" type="button" aria-pressed="false">Тёмная тема</button>
+        <label class="button button-primary upload-button"><input id="uploadInput" type="file" accept=".zip,application/zip">Загрузить snapshot</label>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow agent-name"><span class="agent-cap">Д</span>инамический <span class="agent-cap">Ю</span>зерагент <span class="agent-cap">М</span>ониторинга <span class="agent-cap">И</span> <span class="agent-cap">Н</span>ейтрализации</p>
+        <h1>Подозрительные <span>маршруты</span><br>видны сразу.</h1>
+        <p class="lead">Один экран для первичной проверки: приоритет, сработавшие критерии, доказательства и география перелётов.</p>
+      </div>
+      <div class="hero-visual" aria-label="Фирменный комарик YoYoFlot">
+        <div class="hero-visual-grid" aria-hidden="true"></div>
+        <div class="mosquito-mascot"><img src="/mosquito.gif" alt="Фирменный комарик YoYoFlot"><span>ВИДИТ ШПИОНОВ</span></div>
+        <span class="visual-caption">операторский контур</span>
+      </div>
+    </section>
+
+    <section id="metrics" class="metrics" aria-label="Сводка набора">
+      <div class="metric"><span class="metric-label">Профили</span><strong id="metricPersons">—</strong><small>прошли через модель</small></div>
+      <div class="metric"><span class="metric-label">Сегменты</span><strong id="metricSegments">—</strong><small>с сохранённым происхождением</small></div>
+      <div class="metric metric-accent"><span class="metric-label">Можно проверять</span><strong id="metricEligible">—</strong><small id="metricEligibleHint">достаточно данных для рейтинга</small></div>
+      <div class="metric"><span class="metric-label">Активный набор</span><strong id="metricMode">—</strong><small id="metricModeHint">проверка snapshot</small></div>
+    </section>
+
+    <section class="control-deck panel" aria-label="Управление рейтингом">
+      <div class="control-head">
+        <div><p class="eyebrow">РАБОЧАЯ ОБЛАСТЬ</p><h2>Кого проверять первым</h2></div>
+        <div class="view-tabs" role="tablist" aria-label="Режим списка">
+          <button class="view-tab active" data-view="ranking" role="tab" aria-selected="true">Рейтинг</button>
+          <button class="view-tab" data-view="all" role="tab" aria-selected="false">Все профили</button>
+        </div>
+      </div>
+      <div class="filters">
+        <div class="rank-picker" id="rankPicker" aria-label="Размер рейтинга"><span>Топ</span><button class="rank-choice active" data-limit="50">50</button><button class="rank-choice" data-limit="100">100</button><button class="rank-choice" data-limit="1000">1000</button></div>
+        <label class="search-box"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Имя или person_id" autocomplete="off"></label>
+        <label class="select-box"><span>Статус</span><select id="statusFilter"><option value="all">Все профили</option><option value="eligible">Есть сигналы</option><option value="no_matches">Без совпадений</option><option value="insufficient_data">Недостаточно данных</option></select></label>
+        <label class="select-box"><span>Сортировка</span><select id="sortSelect"><option value="rank">Приоритет проверки</option><option value="score">Баллы</option><option value="name">Имя</option></select></label>
+      </div>
+    </section>
+
+    <div id="error" class="error" role="alert" hidden></div>
+    <section class="workspace">
+      <aside class="directory-stack">
+        <section class="directory panel">
+        <div class="directory-head"><div><p class="eyebrow">СПИСОК ПРОФИЛЕЙ</p><h2 id="listTitle">Топ-50</h2></div><span id="listCount" class="count-pill">—</span></div>
+        <p id="listDescription" class="hint">Сначала профили с наибольшим числом сработавших групп.</p>
+        <div id="peopleList" class="people-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+        <div class="pagination"><button id="prevPage" class="page-button" type="button" disabled aria-label="Предыдущая страница">←</button><span id="pageLabel">—</span><button id="nextPage" class="page-button" type="button" disabled aria-label="Следующая страница">→</button></div>
+        </section>
+        <div id="sidebarTimeline"></div>
+      </aside>
+      <section id="profilePanel" class="profile-column" aria-live="polite"><div class="panel empty-state"><span class="empty-icon">◎</span><h2>Выберите профиль</h2><p>Карточка покажет, какие критерии сработали, на каких сегментах они основаны и куда летал человек.</p></div></section>
+    </section>
+
+    <footer><span>YoYoFlot Sentinel · аналитика маршрутов</span><span>OpenFlights · Natural Earth · <b>решение всегда за оператором</b></span></footer>
+  </main>
+</body>
+</html>
