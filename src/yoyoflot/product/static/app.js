@@ -261,16 +261,28 @@ function pointInView(point, margin = 18) {
   const [x, y, width, height] = state.view;
   return point[0] >= x - margin && point[0] <= x + width + margin && point[1] >= y - margin && point[1] <= y + height + margin;
 }
-function animateMosquito(image, from, to, control, size, segmentId) {
+function createRouteMosquito(size) {
+  const group = svg('g', {class:'route-mosquito', 'aria-label':'Комарик летит по маршруту'});
+  group.append(svg('circle', {cx:0, cy:0, r:size*.92, fill:'#fff', opacity:'.9', stroke:'#d47d24', 'stroke-width':size*.08}));
+  group.append(svg('ellipse', {cx:-size*.08, cy:0, rx:size*.22, ry:size*.55, fill:'#0b57b7', stroke:'#163b68', 'stroke-width':size*.06}));
+  group.append(svg('circle', {cx:size*.14, cy:-size*.55, r:size*.16, fill:'#0b57b7'}));
+  group.append(svg('ellipse', {cx:-size*.22, cy:-size*.26, rx:size*.52, ry:size*.22, fill:'#8ed6eb', opacity:'.95', stroke:'#0b57b7', 'stroke-width':size*.05, transform:`rotate(-28 ${-size*.22} ${-size*.26})`}));
+  group.append(svg('ellipse', {cx:-size*.22, cy:size*.26, rx:size*.52, ry:size*.22, fill:'#8ed6eb', opacity:'.95', stroke:'#0b57b7', 'stroke-width':size*.05, transform:`rotate(28 ${-size*.22} ${size*.26})`}));
+  group.append(svg('line', {x1:size*.28, y1:-size*.03, x2:size*.72, y2:-size*.22, stroke:'#0b57b7', 'stroke-width':size*.07, 'stroke-linecap':'round'}));
+  group.append(svg('line', {x1:size*.28, y1:size*.03, x2:size*.72, y2:size*.22, stroke:'#0b57b7', 'stroke-width':size*.07, 'stroke-linecap':'round'}));
+  return group;
+}
+function animateMosquito(mosquito, from, to, control, size, segmentId) {
   const started = performance.now();
   const duration = 3800;
+  const angle = Math.atan2(to[1] - from[1], to[0] - from[0]) * 180 / Math.PI;
   const tick = now => {
-    if (!image.isConnected || state.focus !== segmentId) return;
+    if (!mosquito.isConnected || state.focus !== segmentId) return;
     const progress = ((now - started) % duration) / duration;
     const u = 1 - progress;
     const x = u*u*from[0] + 2*u*progress*control[0] + progress*progress*to[0];
     const y = u*u*from[1] + 2*u*progress*control[1] + progress*progress*to[1];
-    image.setAttribute('x', x - size / 2); image.setAttribute('y', y - size / 2);
+    mosquito.setAttribute('transform', `translate(${x} ${y}) rotate(${angle})`);
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
@@ -304,8 +316,8 @@ function drawMap(rows) {
       const line = svg('path', {d:curve.path, class:`route ${active?'active':''} ${dimmed?'dimmed':''}`, 'data-segment-id':segment.segment_id, 'marker-end':`url(#${active?'arrow-active':'arrow'})`});
       line.append(svg('title', {}, `${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
       if (active && pointInView(curve.label)) {
-        const size = Math.max(2.2, scale.arrow * 10.5);
-        const mosquito = svg('image', {href:'/mosquito.gif', x:shiftedStart[0]-size/2, y:shiftedStart[1]-size/2, width:size, height:size, class:'route-mosquito', preserveAspectRatio:'xMidYMid meet'});
+        const size = Math.min(8, Math.max(2.2, scale.arrow * 3.6));
+        const mosquito = createRouteMosquito(size);
         mosquito.append(svg('title', {}, 'Маршрут выбран')); mosquitoes.push({mosquito, shiftedStart, shiftedEnd, control:curve.control, size, segmentId:segment.segment_id});
       }
     }

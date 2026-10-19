@@ -40,9 +40,9 @@ body{overflow-x:hidden}
 @media(max-width:780px){ .timeline-pagination { font-size:9px; } .route-reset { margin-left:0; } }
 
 /* Map and profile timeline polish */
-.route { stroke-width: 3.2; }
-.route.active { stroke-width: 4.8; }
-.route-mosquito { width: auto; height: auto; z-index: 3; }
+.route { stroke-width: 2.25; }
+.route.active { stroke-width: 3.6; }
+.route-mosquito { pointer-events:none; z-index:3; overflow:visible; }
 .timeline-heading { display:block; }
 .timeline-title { min-width:0; }
 .timeline-title .eyebrow { margin-bottom:7px; }
