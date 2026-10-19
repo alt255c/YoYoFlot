@@ -13,6 +13,23 @@ const state = {
   request: 0, routeFrom: '', routeTo: '', showUndated: true,
 };
 
+function applyTheme(theme) {
+  const next = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('yoyoflot-theme', next); } catch (_) {}
+  const button = $('#themeToggle');
+  if (button) {
+    button.textContent = next === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+    button.setAttribute('aria-pressed', String(next === 'dark'));
+    button.setAttribute('aria-label', next === 'dark' ? 'Переключить на светлую тему' : 'Переключить на тёмную тему');
+  }
+}
+function initTheme() {
+  let saved = 'light';
+  try { saved = localStorage.getItem('yoyoflot-theme') || 'light'; } catch (_) {}
+  applyTheme(saved);
+}
+
 function node(tag, text, className) {
   const element = document.createElement(tag);
   if (text !== undefined && text !== null) element.textContent = String(text);
@@ -237,8 +254,8 @@ function mapElementScale() {
   const width = Number(state.view[2]) || 360;
   const level = Math.pow(Math.min(1, Math.max(.02, width / 360)), 1.2);
   return {
-    arrow: Math.min(5.2, Math.max(.42, .42 + level * 4.78)),
-    dot: Math.min(1.1, Math.max(.08, .08 + level * .96)),
+    arrow: Math.min(4.4, Math.max(.38, .38 + level * 4.02)),
+    dot: Math.min(.92, Math.max(.07, .07 + level * .79)),
     date: Math.min(.86, Math.max(.08, .08 + level * .78)),
   };
 }
@@ -261,17 +278,6 @@ function pointInView(point, margin = 18) {
   const [x, y, width, height] = state.view;
   return point[0] >= x - margin && point[0] <= x + width + margin && point[1] >= y - margin && point[1] <= y + height + margin;
 }
-function createRouteMosquito(size) {
-  const group = svg('g', {class:'route-mosquito', 'aria-label':'Комарик летит по маршруту'});
-  group.append(svg('circle', {cx:0, cy:0, r:size*.92, fill:'#fff', opacity:'.9', stroke:'#d47d24', 'stroke-width':size*.08}));
-  group.append(svg('ellipse', {cx:-size*.08, cy:0, rx:size*.22, ry:size*.55, fill:'#0b57b7', stroke:'#163b68', 'stroke-width':size*.06}));
-  group.append(svg('circle', {cx:size*.14, cy:-size*.55, r:size*.16, fill:'#0b57b7'}));
-  group.append(svg('ellipse', {cx:-size*.22, cy:-size*.26, rx:size*.52, ry:size*.22, fill:'#8ed6eb', opacity:'.95', stroke:'#0b57b7', 'stroke-width':size*.05, transform:`rotate(-28 ${-size*.22} ${-size*.26})`}));
-  group.append(svg('ellipse', {cx:-size*.22, cy:size*.26, rx:size*.52, ry:size*.22, fill:'#8ed6eb', opacity:'.95', stroke:'#0b57b7', 'stroke-width':size*.05, transform:`rotate(28 ${-size*.22} ${size*.26})`}));
-  group.append(svg('line', {x1:size*.28, y1:-size*.03, x2:size*.72, y2:-size*.22, stroke:'#0b57b7', 'stroke-width':size*.07, 'stroke-linecap':'round'}));
-  group.append(svg('line', {x1:size*.28, y1:size*.03, x2:size*.72, y2:size*.22, stroke:'#0b57b7', 'stroke-width':size*.07, 'stroke-linecap':'round'}));
-  return group;
-}
 function animateMosquito(mosquito, from, to, control, size, segmentId) {
   const started = performance.now();
   const duration = 3800;
@@ -282,7 +288,9 @@ function animateMosquito(mosquito, from, to, control, size, segmentId) {
     const u = 1 - progress;
     const x = u*u*from[0] + 2*u*progress*control[0] + progress*progress*to[0];
     const y = u*u*from[1] + 2*u*progress*control[1] + progress*progress*to[1];
-    mosquito.setAttribute('transform', `translate(${x} ${y}) rotate(${angle})`);
+    mosquito.setAttribute('x', String(x - size / 2));
+    mosquito.setAttribute('y', String(y - size / 2));
+    mosquito.setAttribute('transform', `rotate(${angle} ${x} ${y})`);
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
@@ -293,7 +301,10 @@ function drawMap(rows) {
   const marker = svg('marker', {id:'arrow', viewBox:'0 0 10 10', refX:8.5, refY:5, markerWidth:scale.arrow, markerHeight:scale.arrow, orient:'auto', markerUnits:'userSpaceOnUse'});
   marker.append(svg('path', {d:'M 0 0 L 10 5 L 0 10 z', fill:'#0b57b7'}));
   const activeMarker = svg('marker', {id:'arrow-active', viewBox:'0 0 10 10', refX:8.5, refY:5, markerWidth:scale.arrow*1.3, markerHeight:scale.arrow*1.3, orient:'auto', markerUnits:'userSpaceOnUse'});
-  activeMarker.append(svg('path', {d:'M 0 0 L 10 5 L 0 10 z', fill:'#d47d24'})); defs.append(marker, activeMarker); map.append(defs);
+  activeMarker.append(svg('path', {d:'M 0 0 L 10 5 L 0 10 z', fill:'#d47d24'}));
+  const mosquitoFilter = svg('filter', {id:'mosquito-chroma', 'color-interpolation-filters':'sRGB'});
+  mosquitoFilter.append(svg('feColorMatrix', {type:'matrix', values:'1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 1 1 0'}));
+  defs.append(marker, activeMarker, mosquitoFilter); map.append(defs);
   const offsets = mapWrapOffsets();
   for (const offset of offsets) for (let x=-180; x<=180; x+=30) map.append(svg('line', {x1:x+offset, x2:x+offset, y1:-90, y2:90, class:'gridline'}));
   for (let y=-60; y<=60; y+=30) map.append(svg('line', {x1:-180+offsets[0], x2:180+offsets[offsets.length-1], y1:y, y2:y, class:'gridline'}));
@@ -316,8 +327,8 @@ function drawMap(rows) {
       const line = svg('path', {d:curve.path, class:`route ${active?'active':''} ${dimmed?'dimmed':''}`, 'data-segment-id':segment.segment_id, 'marker-end':`url(#${active?'arrow-active':'arrow'})`});
       line.append(svg('title', {}, `${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
       if (active && pointInView(curve.label)) {
-        const size = Math.min(8, Math.max(2.2, scale.arrow * 3.6));
-        const mosquito = createRouteMosquito(size);
+        const size = Math.min(14, Math.max(5, scale.arrow * 3.6));
+        const mosquito = svg('image', {href:'/mosquito.gif', x:shiftedStart[0] - size / 2, y:shiftedStart[1] - size / 2, width:size, height:size, class:'route-mosquito', 'aria-label':'Комарик летит по маршруту', preserveAspectRatio:'xMidYMid meet', filter:'url(#mosquito-chroma)'});
         mosquito.append(svg('title', {}, 'Маршрут выбран')); mosquitoes.push({mosquito, shiftedStart, shiftedEnd, control:curve.control, size, segmentId:segment.segment_id});
       }
     }
@@ -346,6 +357,8 @@ async function bootstrap(selectFirst=true) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  $('#themeToggle').addEventListener('click', () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
   $('#demoButton').addEventListener('click', activateDemo); $('#resetButton').addEventListener('click', resetProduct); $('#uploadInput').addEventListener('change', event => uploadProduct(event.target.files[0]));
   $$('.view-tab').forEach(button => button.addEventListener('click', () => changeMode(button.dataset.view)));
   $$('.rank-choice').forEach(button => button.addEventListener('click', async () => { state.limit=Number(button.dataset.limit); state.viewMode='ranking'; state.page=0; $$('.rank-choice').forEach(item => item.classList.toggle('active',item===button)); $$('.view-tab').forEach(item => { const active=item.dataset.view==='ranking'; item.classList.toggle('active',active); item.setAttribute('aria-selected',String(active)); }); await loadList(true); }));

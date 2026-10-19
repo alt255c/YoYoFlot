@@ -50,3 +50,37 @@ body{overflow-x:hidden}
 .timeline-actions { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-top:12px; }
 .timeline-actions .route-reset { margin-left:0; }
 @media(max-width:560px){ .timeline-actions { justify-content:flex-start; } }
+
+/* Theme switch */
+html[data-theme='dark'] {
+  --navy:#e7f2ff; --blue:#65a8ff; --bright:#81bcff; --cyan:#5fd1e6;
+  --ink:#e5eef9; --muted:#a8bad0; --soft:#8098b5; --bg:#0a1422;
+  --surface:#122238; --surface-alt:#172b43; --line:#294665;
+  --shadow:0 10px 28px rgba(0,0,0,.24);
+}
+html[data-theme='dark'] body { background:linear-gradient(180deg,#0b1828 0,#0a1422 100%); }
+html[data-theme='dark'] .topbar { background:rgba(9,22,37,.95); border-color:var(--line); }
+html[data-theme='dark'] .button-ghost,
+html[data-theme='dark'] .search-box,
+html[data-theme='dark'] .select-box,
+html[data-theme='dark'] .route-controls input,
+html[data-theme='dark'] .map-tools button { background:#162b43; color:var(--ink); }
+html[data-theme='dark'] .button-ghost:hover { background:#1b3856; }
+html[data-theme='dark'] .view-tabs { background:#172b43; }
+html[data-theme='dark'] .person-row { background:var(--surface); border-color:#203b58; }
+html[data-theme='dark'] .person-row:hover,
+html[data-theme='dark'] .person-row.selected { background:#183554; }
+html[data-theme='dark'] .map-wrap { background:#0e2034; border-color:#294b6c; }
+html[data-theme='dark'] .gridline { stroke:rgba(130,190,255,.18); }
+html[data-theme='dark'] .country { fill:rgba(130,190,255,.06); stroke:rgba(130,190,255,.25); }
+html[data-theme='dark'] .route { stroke:rgba(125,190,255,.72); }
+html[data-theme='dark'] .route.active { stroke:#f0a04b; }
+html[data-theme='dark'] .route-focus { background:#183554; }
+html[data-theme='dark'] .route-focus.focused,
+html[data-theme='dark'] .timeline-row.focused { background:#4a321d; color:#ffd7a3; }
+html[data-theme='dark'] .timeline-row:not(.timeline-header):hover { background:#183554; }
+html[data-theme='dark'] .timeline-row { border-color:#203b58; }
+html[data-theme='dark'] .metric-accent { background:linear-gradient(135deg,#173656,#122238); }
+html[data-theme='dark'] .factor-card.matched { background:linear-gradient(145deg,#153a3c,#172b43); }
+html[data-theme='dark'] .map-date { stroke:#0e2034; }
+.route-mosquito { pointer-events:none; overflow:visible; image-rendering:pixelated; }

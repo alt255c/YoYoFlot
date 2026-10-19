@@ -7,6 +7,7 @@
   <title>YoYoFlot Sentinel · мониторинг перелётов</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('yoyoflot-theme')||'light'}catch(_){}</script>
   <script src="/app.js" defer></script>
 </head>
 <body>
@@ -20,6 +21,7 @@
       <div class="top-actions">
         <button id="demoButton" class="button button-ghost" type="button">Открыть демо</button>
         <button id="resetButton" class="button button-ghost" type="button" hidden>Основной набор</button>
+        <button id="themeToggle" class="button button-ghost theme-toggle" type="button" aria-pressed="false">Тёмная тема</button>
         <label class="button button-primary upload-button"><input id="uploadInput" type="file" accept=".zip,application/zip">Загрузить snapshot</label>
       </div>
     </div>
