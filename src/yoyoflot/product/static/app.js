@@ -25,8 +25,8 @@ function applyTheme(theme) {
   }
 }
 function initTheme() {
-  let saved = 'light';
-  try { saved = localStorage.getItem('yoyoflot-theme') || 'light'; } catch (_) {}
+  let saved = 'dark';
+  try { saved = localStorage.getItem('yoyoflot-theme') || 'dark'; } catch (_) {}
   applyTheme(saved);
 }
 
@@ -336,7 +336,7 @@ function drawMap(rows) {
       const line = svg('path', {d:curve.path, class:`route ${active?'active':''} ${dimmed?'dimmed':''}`, 'data-segment-id':segment.segment_id, 'marker-end':`url(#${active?'arrow-active':'arrow'})`});
       line.append(svg('title', {}, `${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
       if (active && pointInView(curve.label)) {
-        const size = Math.min(14, Math.max(5, scale.arrow * 3.6));
+        const size = Math.min(12, Math.max(4.5, scale.arrow * 3.2));
         const mosquito = svg('image', {href:'/mosquito.gif', x:shiftedStart[0] - size / 2, y:shiftedStart[1] - size / 2, width:size, height:size, class:'route-mosquito', 'aria-label':'Комарик летит по маршруту', preserveAspectRatio:'xMidYMid meet', filter:'url(#mosquito-chroma)'});
         mosquito.append(svg('title', {}, 'Маршрут выбран')); mosquitoes.push({mosquito, shiftedStart, shiftedEnd, control:curve.control, size, segmentId:segment.segment_id});
       }
