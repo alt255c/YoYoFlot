@@ -100,9 +100,10 @@ async function loadList(selectFirst = false) {
 }
 
 async function selectProfile(id) {
+  const shouldScrollToProfile = state.selected !== null && window.matchMedia('(max-width: 780px)').matches;
   const request = ++state.request; state.selected = id; state.profile = null; state.focus = null; state.view = [-180, -90, 360, 180];
   renderList(); $('#profilePanel').replaceChildren(node('div', 'Загружаем карточку и историю…', 'panel empty-state')); showError(null);
-  try { const data = await api(`/api/profile?id=${encodeURIComponent(id)}`); if (request !== state.request) return; state.profile = data; renderProfile(); }
+  try { const data = await api(`/api/profile?id=${encodeURIComponent(id)}`); if (request !== state.request) return; state.profile = data; renderProfile(); if (shouldScrollToProfile) window.setTimeout(() => $('#profilePanel')?.scrollIntoView({behavior:'smooth', block:'start'}), 20); }
   catch (error) { if (request === state.request) { $('#profilePanel').replaceChildren(node('div', 'Карточка недоступна.', 'panel empty-state')); showError(error.message); } }
 }
 
@@ -124,7 +125,7 @@ function renderProfile() {
   }
   factorPanel.append(factors); root.append(factorPanel);
 
-  const mapPanel = node('section', undefined, 'panel map-panel'); const mapHeading = node('div', undefined, 'section-heading'); const headingCopy = node('div'); headingCopy.append(node('p', 'ГЕОГРАФИЯ И ХРОНОЛОГИЯ', 'eyebrow'), node('h3', 'След маршрута')); mapHeading.append(headingCopy, node('span', 'координаты только из справочника', 'micro-tag')); mapPanel.append(mapHeading);
+  const mapPanel = node('section', undefined, 'panel map-panel'); const mapHeading = node('div', undefined, 'section-heading'); const headingCopy = node('div'); headingCopy.append(node('p', 'ГЕОГРАФИЯ И ХРОНОЛОГИЯ', 'eyebrow'), node('h3', 'Направленный граф перелётов')); mapHeading.append(headingCopy, node('span', 'дата · стрелка = направление', 'micro-tag')); mapPanel.append(mapHeading);
   const controls = node('div', undefined, 'route-controls');
   for (const [id, label] of [['routeFrom', 'С'], ['routeTo', 'По']]) { const wrap = node('label', label); const input = node('input'); input.type = 'date'; input.id = id; input.value = id === 'routeFrom' ? state.routeFrom : state.routeTo; input.addEventListener('change', () => { state.routeFrom = $('#routeFrom').value; state.routeTo = $('#routeTo').value; renderTimeline(); }); wrap.append(input); controls.append(wrap); }
   const unknown = node('label', undefined, 'check-label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = state.showUndated; checkbox.addEventListener('change', () => { state.showUndated = checkbox.checked; renderTimeline(); }); unknown.append(checkbox, node('span', 'Без даты')); controls.append(unknown);
@@ -152,7 +153,7 @@ function renderProfile() {
   });
   const stopMapDrag = () => { mapDrag = null; };
   map.addEventListener('pointerup', stopMapDrag); map.addEventListener('pointercancel', stopMapDrag); map.addEventListener('lostpointercapture', stopMapDrag);
-  mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Перетаскивайте карту мышью или пальцем после увеличения. Стрелки показывают направление между аэропортами.', 'map-note')); root.append(mapPanel);
+  mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Дуги разнесены по направлениям, стрелка показывает направление. Для большого списка дата показывается на выбранной дуге, полный порядок дат — в истории ниже.', 'map-note')); root.append(mapPanel);
   const timeline = node('section', undefined, 'panel timeline-panel'); timeline.id = 'timeline'; const timelineHeading = node('div', undefined, 'section-heading'); timelineHeading.append(node('div', undefined), node('span', `${data.segments.length} записей`, 'micro-tag')); timelineHeading.firstChild.append(node('p', 'ПЕРВИЧНЫЕ СВИДЕТЕЛЬСТВА', 'eyebrow'), node('h3', 'Перелёты профиля')); timeline.append(timelineHeading, node('div', undefined, 'timeline-table')); root.append(timeline);
   const secondary = node('div', undefined, 'secondary-grid'); const evidence = node('section', undefined, 'panel mini-panel'); evidence.append(node('p', 'PROVENANCE', 'eyebrow'), node('h3', 'Источники и ссылки')); evidence.append(node('p', data.source_evidence?.length ? `${data.source_evidence.length} строк evidence привязаны к исходным сегментам.` : 'Отдельные source-evidence строки отсутствуют.', 'muted-copy')); const forest = node('section', undefined, 'panel mini-panel'); forest.append(node('p', 'ISOLATION FOREST', 'eyebrow'), node('h3', data.forest?.status === 'demo_only' ? 'Не отдельный вердикт' : 'Экспериментальный score'), node('p', data.forest?.status === 'demo_only' ? 'Для демо показывается только правило. Данные не переобучаются в браузере.' : 'IF хранится отдельно и не добавляет скрытый голос основному рейтингу.', 'muted-copy')); secondary.append(evidence, forest); root.append(secondary);
   renderTimeline();
@@ -171,17 +172,30 @@ function visibleSegments() {
 function renderTimeline() {
   if (!state.profile) return;
   const rows = visibleSegments(); const balance = $('#routeBalance'); if (balance) balance.textContent = `Показано ${rows.length} из ${state.profile.route_balance.total} · с координатами ${state.profile.route_balance.plottable} · без координат ${state.profile.route_balance.unplottable}`;
+  if (rows.length && !rows.some(row => row.segment_id === state.focus)) state.focus = rows[0].segment_id;
   const table = document.querySelector('.timeline-table'); if (!table) return; table.replaceChildren(); const header = node('div', undefined, 'timeline-row timeline-header'); ['Дата', 'Маршрут', 'Рейс', 'Статус'].forEach(text => header.append(node('span', text))); table.append(header);
   if (!rows.length) table.append(node('div', 'В выбранном периоде записей нет.', 'empty-list'));
   for (const segment of rows) { const row=node('button', undefined, `timeline-row ${state.focus === segment.segment_id ? 'focused' : ''}`); row.type='button'; const origin=segment.origin?.airport_id || segment.origin_airport_id || '???'; const destination=segment.destination?.airport_id || segment.destination_airport_id || '???'; row.append(node('span', dateLabel(segment.departure_date), 'date-cell'), node('span', `${origin} → ${destination}`, 'route-cell'), node('span', segment.flight_number || '—', 'flight-cell'), node('span', segment.resolution_status || '—', 'state-cell')); row.addEventListener('click', () => { state.focus=segment.segment_id; drawMap(visibleSegments()); renderTimeline(); }); table.append(row); }
   drawMap(rows);
 }
 function routeParts(a, b) { let [x1,y1]=a, [x2,y2]=b; if (Math.abs(x2-x1)<=180) return [[a,b]]; const direction=x1>0?180:-180; x2+=x1>0?360:-360; const ratio=(direction-x1)/(x2-x1); const y=y1+ratio*(y2-y1); return [[[x1,y1],[direction,y]],[[-direction,y],[b[0],y2]]]; }
+function shortDate(value) { if (!value) return 'без даты'; const parts=String(value).split('-'); return parts.length===3 ? `${parts[2]}.${parts[1]}` : String(value); }
+function routeKey(segment) { const from=segment.origin?.airport_id || segment.origin_airport_id || '???'; const to=segment.destination?.airport_id || segment.destination_airport_id || '???'; return `${from}→${to}`; }
+function curvedRoute(from, to, bend) { const [x1,y1]=from, [x2,y2]=to; const dx=x2-x1, dy=y2-y1, length=Math.hypot(dx,dy) || 1; const nx=-dy/length, ny=dx/length; const mx=(x1+x2)/2+nx*bend, my=(y1+y2)/2+ny*bend; return {path:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`, label:[mx,my]}; }
 function drawMap(rows) {
-  const map=$('#map'); if (!map) return; map.replaceChildren(); const defs=svg('defs'); const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto',markerUnits:'strokeWidth'}); marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#80e3d2'})); defs.append(marker); map.append(defs);
+  const map=$('#map'); if (!map) return; map.replaceChildren();
+  const defs=svg('defs'); const marker=svg('marker',{id:'arrow',viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:5,markerHeight:5,orient:'auto',markerUnits:'strokeWidth'}); marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#0b57b7'})); defs.append(marker); map.append(defs);
   for (let x=-180;x<=180;x+=30) map.append(svg('line',{x1:x,x2:x,y1:-90,y2:90,class:'gridline'})); for (let y=-60;y<=60;y+=30) map.append(svg('line',{x1:-180,x2:180,y1:y,y2:y,class:'gridline'}));
   for (const feature of state.geo?.features || []) if (['Polygon','MultiPolygon'].includes(feature.geometry?.type)) map.append(svg('path',{d:countryPath(feature.geometry),class:'country'}));
-  for (const segment of rows) { const a=segment.origin, b=segment.destination; if (!segment.is_plottable || !a || !b) continue; const start=[Number(a.longitude),-Number(a.latitude)], end=[Number(b.longitude),-Number(b.latitude)]; const active=state.focus===segment.segment_id; for (const [from,to] of routeParts(start,end)) { const line=svg('path',{d:`M${from} L${to}`,class:`route ${active?'active':''}`}); if (to[0]===end[0] && to[1]===end[1]) line.setAttribute('marker-end','url(#arrow)'); line.append(svg('title',{},`${a.airport_id} → ${b.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line); } map.append(svg('circle',{cx:start[0],cy:start[1],r:active?1.5:.75,class:`airport-dot ${active?'active':''}`}),svg('circle',{cx:end[0],cy:end[1],r:active?1.5:.75,class:`airport-dot ${active?'active':''}`})); }
+  const plottable=rows.filter(segment => segment.is_plottable && segment.origin && segment.destination); const groups=new Map(); const airports=new Map();
+  for (const segment of plottable) { const a=segment.origin, b=segment.destination; const start=[Number(a.longitude),-Number(a.latitude)], end=[Number(b.longitude),-Number(b.latitude)]; const key=routeKey(segment); if (!groups.has(key)) groups.set(key,[]); groups.get(key).push({segment,start,end}); airports.set(a.airport_id,{point:start,active:false}); airports.set(b.airport_id,{point:end,active:false}); }
+  const showDates=plottable.length<=10;
+  for (const group of groups.values()) group.forEach((item,index) => {
+    const {segment,start,end}=item; const active=state.focus===segment.segment_id; if (active) { airports.get(segment.origin.airport_id).active=true; airports.get(segment.destination.airport_id).active=true; }
+    const bend=(index-(group.length-1)/2)*4.5; const curve=curvedRoute(start,end,bend); const line=svg('path',{d:curve.path,class:`route ${active?'active':''}`,'marker-end':'url(#arrow)'}); line.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
+    if (showDates || active) { const tag=svg('g',{class:`map-date-label ${active?'active':''}`}); tag.append(svg('rect',{x:curve.label[0]-15,y:curve.label[1]-7,width:30,height:11,rx:3,class:'map-date-bg'})); tag.append(svg('text',{x:curve.label[0],y:curve.label[1]+2,'text-anchor':'middle',class:'map-date'},shortDate(segment.departure_date))); tag.append(svg('title',{},`${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(tag); }
+  });
+  for (const [airport, info] of airports) { const circle=svg('circle',{cx:info.point[0],cy:info.point[1],r:info.active?2.2:1.15,class:`airport-dot ${info.active?'active':''}`}); circle.append(svg('title',{},airport)); map.append(circle); if (info.active || airports.size<=16) { const label=airport.replace(/^openflights:/,''); map.append(svg('text',{x:info.point[0]+2.4,y:info.point[1]-2.4,class:`airport-label ${info.active?'active':''}`},label)); } }
   map.setAttribute('viewBox',state.view.join(' '));
 }
 function countryPath(geometry) { const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates; return polygons.map(poly=>poly.map(ring=>ring.map((v,i)=>`${i?'L':'M'}${v[0]},${-v[1]}`).join(' ')+'Z').join(' ')).join(' '); }
