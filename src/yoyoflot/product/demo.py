@@ -61,3 +61,8 @@ class DemoSubsetStore:
         if person_id not in self.ids:
             raise KeyError('Profile not found in demo subset')
         return self.source.profile(person_id)
+
+    def source_details(self, person_id):
+        if person_id not in self.ids:
+            raise KeyError('Profile not found in demo subset')
+        return self.source.source_details(person_id)

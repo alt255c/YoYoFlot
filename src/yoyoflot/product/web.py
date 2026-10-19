@@ -160,6 +160,10 @@ def handler(manager):
                     if set(query) != {'id'} or len(query['id']) != 1:
                         raise ValueError('Expected one id parameter')
                     payload=store.profile(query['id'][0])
+                elif path.path == '/api/profile/source':
+                    if set(query) != {'id'} or len(query['id']) != 1:
+                        raise ValueError('Expected one id parameter')
+                    payload=store.source_details(query['id'][0])
                 elif path.path in {'/','/app.js','/style.css','/world.geojson','/favicon.svg','/mosquito.gif'}:
                     name='index.html' if path.path=='/' else path.path[1:]
                     content=files('yoyoflot.product').joinpath('static',name).read_bytes()

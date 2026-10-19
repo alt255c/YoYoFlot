@@ -6,7 +6,7 @@ const number = value => value === null || value === undefined || value === '' ? 
 const dateLabel = value => value || 'Дата неизвестна';
 const NS = 'http://www.w3.org/2000/svg';
 const state = {
-  metadata: null, geo: null, list: [], profile: null, selected: null,
+  metadata: null, geo: null, list: [], profile: null, sourceDetails: null, selected: null,
   view: [-180, -90, 360, 180], focus: null, viewMode: 'ranking', limit: 50,
   page: 0, pageSize: 60, query: '', eligibility: 'all', sort: 'rank',
   timelinePage: 0, timelinePageSize: 8,
@@ -120,10 +120,80 @@ async function loadList(selectFirst = false) {
 
 async function selectProfile(id) {
   const shouldScrollToProfile = state.selected !== null && window.matchMedia('(max-width: 780px)').matches;
-  const request = ++state.request; state.selected = id; state.profile = null; state.focus = null; state.timelinePage = 0; state.view = [-180, -90, 360, 180];
+  const request = ++state.request; state.selected = id; state.profile = null; state.sourceDetails = null; state.focus = null; state.timelinePage = 0; state.view = [-180, -90, 360, 180];
   renderList(); $('#profilePanel').replaceChildren(node('div', 'Загружаем карточку и историю…', 'panel empty-state')); showError(null);
-  try { const data = await api(`/api/profile?id=${encodeURIComponent(id)}`); if (request !== state.request) return; state.profile = data; renderProfile(); if (shouldScrollToProfile) window.setTimeout(() => $('#profilePanel')?.scrollIntoView({behavior:'smooth', block:'start'}), 20); }
+  try { const data = await api(`/api/profile?id=${encodeURIComponent(id)}`); if (request !== state.request) return; state.profile = data; renderProfile(); loadSourceDetails(id, request); if (shouldScrollToProfile) window.setTimeout(() => $('#profilePanel')?.scrollIntoView({behavior:'smooth', block:'start'}), 20); }
   catch (error) { if (request === state.request) { $('#profilePanel').replaceChildren(node('div', 'Карточка недоступна.', 'panel empty-state')); showError(error.message); } }
+}
+
+async function loadSourceDetails(id, request) {
+  try {
+    const data = await api(`/api/profile/source?id=${encodeURIComponent(id)}`);
+    if (request !== state.request || state.selected !== id) return;
+    state.sourceDetails = data;
+    renderSourceDetails();
+  } catch (error) {
+    if (request !== state.request || state.selected !== id) return;
+    state.sourceDetails = {available: false, reason: error.message, observations: [], travels: [], identifiers: [], documents: []};
+    renderSourceDetails();
+  }
+}
+
+function appendSourceFields(parent, fields) {
+  const grid = node('dl', undefined, 'source-fields');
+  for (const [label, value] of fields) {
+    const dt = node('dt', label); const dd = node('dd', value === null || value === undefined || value === '' ? '—' : value);
+    grid.append(dt, dd);
+  }
+  parent.append(grid);
+}
+
+function renderSourceDetails() {
+  const root = $('#sourceDetailsPanel'); if (!root) return;
+  root.replaceChildren();
+  const data = state.sourceDetails;
+  const heading = node('div', undefined, 'section-heading'); const copy = node('div');
+  copy.append(node('p', 'ИСТОЧНИКОВЫЕ ДАННЫЕ', 'eyebrow'), node('h3', 'Документы и идентификаторы'));
+  heading.append(copy); root.append(heading);
+  if (!data) { root.append(node('p', 'Запрашиваем канонический parquet…', 'source-loading')); return; }
+  if (!data.available) { root.append(node('p', data.reason || 'Исходный parquet недоступен.', 'source-loading')); return; }
+  const identifiers = data.identifiers || [];
+  const documents = data.documents || [];
+  const summary = node('p', `${number(data.travels_count || 0)} связанных перелётов · ${number(identifiers.length)} записей идентификаторов`, 'source-summary'); root.append(summary);
+  if (data.fallback_used) root.append(node('p', 'Дополнительные документы найдены по каноническому имени и дате рождения, если она указана.', 'source-loading'));
+  if (data.complete === false) root.append(node('p', `Связь с исходными данными неполная: конфликт идентификатора оставлен без автоматического объединения.`, 'source-loading'));
+  const groupRows = rows => {
+    const groups = new Map();
+    for (const row of rows) {
+      const key = [row.kind || '', row.programme || '', row.value || ''].join('\u001f');
+      const group = groups.get(key) || {kind: row.kind, programme: row.programme, value: row.value, count: 0, sources: new Set(), locators: []};
+      group.count += 1;
+      if (row.source_id) group.sources.add(row.source_id);
+      if (row.locator && group.locators.length < 3) group.locators.push(row.locator);
+      groups.set(key, group);
+    }
+    return [...groups.values()];
+  };
+  const documentBlock = node('div', undefined, 'source-block');
+  const documentGroups = groupRows(documents);
+  documentBlock.append(node('h4', `Документы и паспорта (${documentGroups.length})`));
+  if (!documentGroups.length) documentBlock.append(node('p', 'В связанных исходных записях паспортные/документные идентификаторы не найдены.', 'muted-copy'));
+  for (const row of documentGroups) {
+    const card = node('article', undefined, 'source-card document-card');
+    card.append(node('strong', row.value || 'Номер не указан'), node('span', `${row.count} повторений · ${[...row.sources].join(', ') || 'источник неизвестен'}`, 'source-meta'));
+    appendSourceFields(card, [['Тип', row.kind], ['Программа/серия', row.programme], ['Примеры локаторов', row.locators.join(' · ') || '—']]);
+    documentBlock.append(card);
+  }
+  root.append(documentBlock);
+  const identifiersBlock = node('div', undefined, 'source-block'); identifiersBlock.append(node('h4', 'Все идентификаторы'));
+  const identifierTable = node('div', undefined, 'source-table');
+  for (const row of groupRows(identifiers)) {
+    const item = node('article', undefined, 'source-table-row');
+    item.append(node('span', row.kind || '—', 'source-kind'), node('strong', row.value || '—'), node('span', `${row.count} повторений · ${[...row.sources].join(', ') || 'источник неизвестен'}`, 'source-meta'));
+    identifierTable.append(item);
+  }
+  if (!identifierTable.children.length) identifierTable.append(node('p', 'Идентификаторов нет.', 'muted-copy'));
+  identifiersBlock.append(identifierTable); root.append(identifiersBlock);
 }
 
 function renderProfile() {
@@ -133,6 +203,8 @@ function renderProfile() {
   const score = node('div', undefined, 'score-block'); score.append(node('span', 'RULE SCORE', 'score-label'), node('strong', number(person.rule_score)), node('small', `${person.matched_criteria_count || 0} сработавших групп`));
   const head = node('section', undefined, 'profile-head panel'); head.append(identity, score);
   const chips = node('div', undefined, 'profile-chips'); chips.append(node('span', `${statusLabel(person.eligibility_status)}`, `chip ${statusClass(person.eligibility_status)}`), node('span', `${number(person.total_segments || data.segments.length)} сегментов`, 'chip'), node('span', `${number(data.route_balance.total)} маршрутов`, 'chip')); head.append(chips); root.append(head);
+
+  const sourcePanel = node('section', undefined, 'panel source-details-panel'); sourcePanel.id = 'sourceDetailsPanel'; root.append(sourcePanel); renderSourceDetails();
 
   const factorPanel = node('section', undefined, 'panel factor-panel'); const factorTitle = node('div', undefined, 'section-heading'); factorTitle.append(node('div', undefined)); factorTitle.firstChild.append(node('p', 'ДОКАЗАТЕЛЬСТВА СИГНАЛА', 'eyebrow'), node('h3', 'Что сработало')); factorPanel.append(factorTitle);
   const factors = node('div', undefined, 'factor-grid');
