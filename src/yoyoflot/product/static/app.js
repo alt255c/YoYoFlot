@@ -127,7 +127,7 @@ function renderProfile() {
   }
   factorPanel.append(factors); root.append(factorPanel);
 
-  const mapPanel = node('section', undefined, 'panel map-panel'); const mapHeading = node('div', undefined, 'section-heading'); const headingCopy = node('div'); headingCopy.append(node('p', 'ГЕОГРАФИЯ И ХРОНОЛОГИЯ', 'eyebrow'), node('h3', 'Направленный граф перелётов')); mapHeading.append(headingCopy, node('span', 'дата · стрелка = направление', 'micro-tag')); mapPanel.append(mapHeading);
+  const mapPanel = node('section', undefined, 'panel map-panel'); const mapHeading = node('div', undefined, 'section-heading'); const headingCopy = node('div'); headingCopy.append(node('p', 'ГЕОГРАФИЯ И ХРОНОЛОГИЯ', 'eyebrow'), node('h3', 'Направленный граф перелётов')); mapHeading.append(headingCopy, node('span', 'стрелка = направление', 'micro-tag')); mapPanel.append(mapHeading);
   const controls = node('div', undefined, 'route-controls');
   for (const [id, label] of [['routeFrom', 'С'], ['routeTo', 'По']]) { const wrap = node('label', label); const input = node('input'); input.type = 'date'; input.id = id; input.value = id === 'routeFrom' ? state.routeFrom : state.routeTo; input.addEventListener('change', () => { state.routeFrom = $('#routeFrom').value; state.routeTo = $('#routeTo').value; state.timelinePage = 0; renderTimeline(); }); wrap.append(input); controls.append(wrap); }
   const unknown = node('label', undefined, 'check-label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = state.showUndated; checkbox.addEventListener('change', () => { state.showUndated = checkbox.checked; state.timelinePage = 0; renderTimeline(); }); unknown.append(checkbox, node('span', 'Показывать без даты')); controls.append(unknown);
@@ -157,8 +157,8 @@ function renderProfile() {
   const stopMapDrag = () => { mapDrag = null; };
   map.addEventListener('pointerup', stopMapDrag); map.addEventListener('pointercancel', stopMapDrag); map.addEventListener('lostpointercapture', stopMapDrag);
   map.addEventListener('click', event => { const path = event.target.closest?.('path.route'); const segmentId = path?.getAttribute('data-segment-id'); if (segmentId) { state.focus = segmentId; renderTimeline(); } });
-  mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Даты стоят у концов маршрутов. Нажмите на линию или строку истории, чтобы подсветить рейс; точки — только в аэропортах отправления.', 'map-note')); root.append(mapPanel);
-  const timeline = node('section', undefined, 'panel timeline-panel'); timeline.id = 'timeline'; const timelineHeading = node('div', undefined, 'section-heading'); timelineHeading.append(node('div', undefined), node('span', `${data.segments.length} записей`, 'micro-tag')); timelineHeading.firstChild.append(node('p', 'ПЕРВИЧНЫЕ СВИДЕТЕЛЬСТВА', 'eyebrow'), node('h3', 'Перелёты профиля')); const showAll = node('button', 'Показать все маршруты', 'button subtle route-reset'); showAll.type = 'button'; showAll.addEventListener('click', () => { state.focus = null; renderTimeline(); }); timelineHeading.append(showAll); timeline.append(timelineHeading, node('div', undefined, 'timeline-table'), node('div', undefined, 'timeline-pagination')); const timelineHost = $('#sidebarTimeline'); if (timelineHost) { timelineHost.replaceChildren(timeline); } else { root.append(timeline); }
+  mapWrap.append(map); const tools = node('div', undefined, 'map-tools'); [['+', .7], ['−', 1.4], ['Обзор', 0]].forEach(([label, factor]) => { const button = node('button', label); button.type='button'; button.addEventListener('click', () => zoomMap(factor)); tools.append(button); }); mapWrap.append(tools); mapPanel.append(mapWrap, node('p', 'Нажмите на линию или строку истории, чтобы подсветить рейс; точки — только в аэропортах отправления.', 'map-note')); root.append(mapPanel);
+  const timeline = node('section', undefined, 'panel timeline-panel'); timeline.id = 'timeline'; const timelineHeading = node('div', undefined, 'timeline-heading'); const timelineTitle = node('div', undefined, 'timeline-title'); timelineTitle.append(node('p', 'ПЕРВИЧНЫЕ СВИДЕТЕЛЬСТВА', 'eyebrow'), node('h3', 'Перелёты профиля')); const timelineActions = node('div', undefined, 'timeline-actions'); timelineActions.append(node('span', `${data.segments.length} записей`, 'micro-tag')); const showAll = node('button', 'Показать все маршруты', 'button subtle route-reset'); showAll.type = 'button'; showAll.addEventListener('click', () => { state.focus = null; renderTimeline(); }); timelineActions.append(showAll); timelineHeading.append(timelineTitle, timelineActions); timeline.append(timelineHeading, node('div', undefined, 'timeline-table'), node('div', undefined, 'timeline-pagination')); const timelineHost = $('#sidebarTimeline'); if (timelineHost) { timelineHost.replaceChildren(timeline); } else { root.append(timeline); }
   renderTimeline();
 }
 
@@ -287,7 +287,7 @@ function drawMap(rows) {
   for (let y=-60; y<=60; y+=30) map.append(svg('line', {x1:-180+offsets[0], x2:180+offsets[offsets.length-1], y1:y, y2:y, class:'gridline'}));
   for (const feature of state.geo?.features || []) if (['Polygon','MultiPolygon'].includes(feature.geometry?.type)) for (const offset of offsets) map.append(svg('path', {d:countryPath(feature.geometry, offset), class:'country'}));
   const plottable = rows.filter(segment => segment.is_plottable && segment.origin && segment.destination);
-  const groups = new Map(); const airports = new Map(); const dateCandidates = [];
+  const groups = new Map(); const airports = new Map(); const mosquitoes = [];
   for (const segment of plottable) {
     const a = segment.origin, b = segment.destination;
     const start = [Number(a.longitude), -Number(a.latitude)], end = [Number(b.longitude), -Number(b.latitude)];
@@ -303,26 +303,18 @@ function drawMap(rows) {
       current.active = current.active || active; current.dimmed = dimmed; airports.set(airportKey, current);
       const line = svg('path', {d:curve.path, class:`route ${active?'active':''} ${dimmed?'dimmed':''}`, 'data-segment-id':segment.segment_id, 'marker-end':`url(#${active?'arrow-active':'arrow'})`});
       line.append(svg('title', {}, `${segment.origin.airport_id} → ${segment.destination.airport_id} · ${dateLabel(segment.departure_date)}`)); map.append(line);
-      if (pointInView(curve.label)) dateCandidates.push({segment, point:curve.label, active, dimmed, text:shortDate(segment.departure_date)});
       if (active && pointInView(curve.label)) {
-        const size = Math.max(.7, scale.arrow * 2.4);
+        const size = Math.max(2.2, scale.arrow * 10.5);
         const mosquito = svg('image', {href:'/mosquito.gif', x:shiftedStart[0]-size/2, y:shiftedStart[1]-size/2, width:size, height:size, class:'route-mosquito', preserveAspectRatio:'xMidYMid meet'});
-        mosquito.append(svg('title', {}, 'Маршрут выбран')); map.append(mosquito); animateMosquito(mosquito, shiftedStart, shiftedEnd, curve.control, size, segment.segment_id);
+        mosquito.append(svg('title', {}, 'Маршрут выбран')); mosquitoes.push({mosquito, shiftedStart, shiftedEnd, control:curve.control, size, segmentId:segment.segment_id});
       }
     }
   });
-  const orderedDates = dateCandidates.sort((a,b) => Number(b.active) - Number(a.active));
-  const labels = [];
-  for (const candidate of orderedDates) {
-    const fontSize = scale.date * (candidate.active ? 1.1 : 1); const labelClass = `map-date-label ${candidate.active?'active':''} ${candidate.dimmed?'dimmed':''}`;
-    const tag = svg('g', {class:labelClass});
-    tag.append(svg('text', {x:candidate.point[0], y:candidate.point[1] + fontSize*.4, 'text-anchor':'middle', class:'map-date', style:`font-size:${fontSize}px`}, candidate.text));
-    tag.append(svg('title', {}, `${candidate.segment.origin.airport_id} → ${candidate.segment.destination.airport_id} · ${dateLabel(candidate.segment.departure_date)}`)); map.append(tag); labels.push(tag);
-  }
   for (const [, info] of airports) {
     const circle = svg('circle', {cx:info.point[0], cy:info.point[1], r:info.active ? scale.dot*1.55 : scale.dot, class:`airport-dot ${info.active?'active':''} ${info.dimmed?'dimmed':''}`});
     circle.append(svg('title', {}, info.airport)); map.append(circle);
   }
+  for (const item of mosquitoes) { map.append(item.mosquito); animateMosquito(item.mosquito, item.shiftedStart, item.shiftedEnd, item.control, item.size, item.segmentId); }
   map.setAttribute('viewBox', state.view.join(' '));
 }
 function countryPath(geometry, offset = 0) {

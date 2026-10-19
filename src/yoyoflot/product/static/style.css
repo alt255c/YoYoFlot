@@ -38,3 +38,15 @@ body{overflow-x:hidden}
 .timeline-pagination .button:disabled { cursor:default; opacity:.42; }
 .route-reset { margin-left:auto; }
 @media(max-width:780px){ .timeline-pagination { font-size:9px; } .route-reset { margin-left:0; } }
+
+/* Map and profile timeline polish */
+.route { stroke-width: 3.2; }
+.route.active { stroke-width: 4.8; }
+.route-mosquito { width: auto; height: auto; z-index: 3; }
+.timeline-heading { display:block; }
+.timeline-title { min-width:0; }
+.timeline-title .eyebrow { margin-bottom:7px; }
+.timeline-title h3 { margin:0; color:var(--navy); font-size:19px; letter-spacing:-.05em; }
+.timeline-actions { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.timeline-actions .route-reset { margin-left:0; }
+@media(max-width:560px){ .timeline-actions { justify-content:flex-start; } }
