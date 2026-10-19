@@ -1,15 +1,19 @@
-# Контракт продукта 1.0 · source_dataset
+# Контракт продукта 1.1 · source_dataset
 
 Продукт собирается из неизменённых выходов T13: `persons.parquet` и
 `segments.parquet`. Поддерживаются точные LFS-байты, поставленные в develop,
-или завершённый T13 с совпадающими SHA-256 в `resolution_manifest.json`.
+или полный завершённый T13 с проверенными SHA-256 всех опубликованных файлов,
+схемами, балансом строк и отчётами в `resolution_manifest.json`.
 `train --input <T16 snapshot>` использует подкаталог `tables` этого снимка.
 Подписи/хеши доказывают целостность входа, а не достоверность каждого события.
 
-`run_manifest.json`: schema_version=1.0, status=complete,
+`run_manifest.json`: schema_version=1.1, status=complete,
 data_mode=source_dataset, run_id, request (входы/код/runtime), files (SHA-256),
-window, counts, eligibility, limitations, sort_order и статусы модели/графа.
+window, counts, eligibility, limitations, sort_order, source_provenance и статусы модели/графа.
 Частичный или изменённый снимок не открывается. Пути вне снимка запрещены.
+Версия 1.1 меняет допуск в рейтинг на доступность отдельных факторов и фиксирует
+популяции сравнений. Снимки/конфигурации 1.0 нужно пересобрать с новой конфигурацией
+в отдельный output; автоматической переинтерпретации старых результатов нет.
 
 | Файл | Ключ / содержание |
 |---|---|
@@ -27,6 +31,7 @@ window, counts, eligibility, limitations, sort_order и статусы моде�
 | rules.json / product.yaml | Итоговые пороги/референсы и исходная конфигурация |
 | evaluation.json / review.csv | Устойчивость и незаполненная выборка для ручного ревью |
 | airports.csv / reference_manifest.json | Проверенный справочник координат той же версии |
+| provenance/ | Проверенные отчёты и манифесты T13/T16 с происхождением и ограничениями |
 
 `ProductStore` проверяет снимок один раз при открытии; после этого снимок
 считается неизменяемым. Входы защищены от случайной подмены; хеши не являются

@@ -10,6 +10,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import sys
 import unicodedata
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime, time, timedelta, timezone
@@ -24,6 +25,19 @@ RULE_VERSION = 'airports:1.1'
 FLIGHT_RE = re.compile(r'([A-Z0-9]{2}|[A-Z]{3})\s*0*(\d{1,5})([A-Z]?)')
 ISO_DATE = re.compile(r'\d{4}-\d{2}-\d{2}')
 ISO_DATETIME = re.compile(r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})?')
+SCHEDULE_PAYLOAD_FIELDS = ('schedule_id', 'source_id', 'source_record_id', 'locator',
+    'flight_number', 'origin', 'destination', 'valid_from', 'valid_to', 'days_of_week',
+    'departure_local', 'arrival_local', 'arrival_day_offset', 'parse_status', 'codeshare_mark', 'operated_by')
+
+
+class CompatibleSchedules(tuple):
+    """One immutable compatibility result, partitioned once for repeated trips."""
+    def __new__(cls, values):
+        result = super().__new__(cls, values)
+        result.outside = tuple(c for c in result if c['coverage'] == 'outside_period')
+        result.contenders = tuple(c for c in result if c['coverage'] != 'outside_period')
+        result.reference_group_id = None
+        return result
 
 
 def key(value):
@@ -293,6 +307,8 @@ class ScheduleIndex:
     """Disk index, bulk-built indices and a byte-bounded route candidate cache."""
     CACHE_BYTES = 24 * 1024 * 1024
     EVIDENCE_BYTES = 8 * 1024 * 1024
+    COMPATIBILITY_CACHE_BYTES = 32 * 1024 * 1024
+    REFERENCE_CACHE_BYTES = 32 * 1024 * 1024
 
     def __init__(self, path, reference):
         self.db = sqlite3.connect(path)
@@ -308,24 +324,56 @@ class ScheduleIndex:
         self._cache, self._evidence = OrderedDict(), OrderedDict()
         self._cache_bytes = self._evidence_bytes = 0
         self.cache_hits = self.cache_misses = self.decoded_rows = 0
+        self._compatibility = OrderedDict()
+        self._compatibility_bytes = 0
+        self.compatibility_cache_hits = self.compatibility_cache_misses = 0
+        # Compact outside-period results retain only an on-disk group reference,
+        # not the decoded schedules. This working set can span many more routes.
+        self._references = OrderedDict()
+        self._reference_bytes = 0
+        self.reference_cache_hits = self.reference_cache_misses = 0
+        self.period_start = self.period_end = None
+        self.periods_known = True
+        self.min_arrival_offset = self.max_arrival_offset = 0
         self.db.execute('CREATE TABLE schedules (id TEXT NOT NULL, flight TEXT, '
                         'origin_id TEXT, destination_id TEXT, parse_status TEXT, payload TEXT)')
+        self.db.execute('CREATE TABLE reference_groups (group_id TEXT PRIMARY KEY, member_count INTEGER NOT NULL)')
+        self.db.execute('CREATE TABLE reference_members (group_id TEXT NOT NULL, schedule_id TEXT NOT NULL, '
+                        'PRIMARY KEY(group_id,schedule_id))')
 
     def close(self):
         self._cache.clear()
         self._evidence.clear()
+        self._compatibility.clear()
+        self._references.clear()
         self.db.close()
 
     def add(self, row):
-        payload = {k: row.get(k) for k in ('schedule_id', 'source_id', 'source_record_id', 'locator',
-                   'flight_number', 'origin', 'destination', 'valid_from', 'valid_to', 'days_of_week',
-                   'departure_local', 'arrival_local', 'arrival_day_offset', 'parse_status', 'codeshare_mark', 'operated_by')}
+        payload = {k: row.get(k) for k in SCHEDULE_PAYLOAD_FIELDS}
         for side in ('origin', 'destination'):
             p = self.reference.resolve(row.get(side), row['source_id'])
             payload[side + '_airport_id'] = p['airport_id']
         if self._cache:
             self._cache.clear()
             self._cache_bytes = 0
+        self._compatibility.clear()
+        self._compatibility_bytes = 0
+        self._references.clear()
+        self._reference_bytes = 0
+        if row.get('parse_status') == 'ok' and all(payload[s + '_airport_id'] for s in ('origin', 'destination')):
+            offset = row.get('arrival_day_offset')
+            if offset is not None:
+                self.min_arrival_offset = min(self.min_arrival_offset, offset)
+                self.max_arrival_offset = max(self.max_arrival_offset, offset)
+            try:
+                start, end = date.fromisoformat(row['valid_from']), date.fromisoformat(row['valid_to'])
+                if start > end:
+                    raise ValueError('reversed period')
+            except (KeyError, TypeError, ValueError):
+                self.periods_known = False
+            else:
+                self.period_start = min(start, self.period_start) if self.period_start else start
+                self.period_end = max(end, self.period_end) if self.period_end else end
         self.db.execute('INSERT INTO schedules VALUES (?,?,?,?,?,?)',
                         (row['schedule_id'], flight_key(row.get('flight_number')),
                          payload['origin_airport_id'], payload['destination_airport_id'],
@@ -400,14 +448,110 @@ class ScheduleIndex:
                 self._cache_bytes -= size
         return result
 
+    def outside_cache_key(self, row, places, primary, alias, day):
+        # A single unknown/reversed relevant period disables this optimization.
+        # Such a schedule remains a contender even when every known period is later.
+        if (not self.periods_known or day is None or self.period_start is None
+                or self.period_start <= day <= self.period_end):
+            return None
+        clocks = []
+        for field in ('departure_local', 'arrival_local'):
+            value = row.get(field)
+            clock = None
+            if value and ISO_DATETIME.fullmatch(value):
+                try:
+                    clock = datetime.fromisoformat(value.replace('Z', '+00:00')).time().replace(tzinfo=None).isoformat()
+                except ValueError:
+                    clock = 'invalid_clock'
+            clocks.append(clock)
+        arrival = row.get('arrival_local')
+        offset = None
+        if arrival and (ISO_DATE.fullmatch(arrival) or ISO_DATETIME.fullmatch(arrival)):
+            try:
+                day + timedelta(days=self.min_arrival_offset)
+                day + timedelta(days=self.max_arrival_offset)
+            except OverflowError:
+                return None
+            try:
+                offset = (date.fromisoformat(arrival[:10]) - day).days
+            except ValueError:
+                offset = 'invalid_arrival_date'
+        return (tuple(sorted({v for v in (primary, alias) if v})),
+                tuple(places['origin']['candidates']), tuple(places['destination']['candidates']),
+                tuple(clocks), offset)
 
-def compatible_candidates(row, places, index):
+    def remember_compatibility(self, key, result):
+        # Include all retained schedules in the budget, even when the route cache
+        # also refers to them. Evicting that cache must not make this one unbounded.
+        size = len(repr(key).encode('utf-8')) + 256
+        size += sum(len(json_text(c).encode('utf-8')) + 256 for c in result)
+        if size > self.COMPATIBILITY_CACHE_BYTES:
+            return
+        previous = self._compatibility.pop(key, None)
+        if previous is not None:
+            self._compatibility_bytes -= previous[1]
+        self._compatibility[key] = (result, size)
+        self._compatibility_bytes += size
+        while self._compatibility_bytes > self.COMPATIBILITY_CACHE_BYTES:
+            _, (_, weight) = self._compatibility.popitem(last=False)
+            self._compatibility_bytes -= weight
+
+    def cached_reference(self, key):
+        entry = self._references.get(key)
+        if entry is None:
+            self.reference_cache_misses += 1
+            return None
+        self.reference_cache_hits += 1
+        self._references.move_to_end(key)
+        return entry[0]
+
+    def remember_reference(self, key, descriptor):
+        # Count the retained tuple/string objects, including shared objects each
+        # time, plus cache-entry overhead. No schedule payload is retained here.
+        size, pending = 256, [key, descriptor]
+        while pending:
+            item = pending.pop()
+            size += sys.getsizeof(item)
+            if isinstance(item, tuple):
+                pending.extend(item)
+        if size > self.REFERENCE_CACHE_BYTES:
+            return
+        previous = self._references.pop(key, None)
+        if previous is not None:
+            self._reference_bytes -= previous[1]
+        self._references[key] = (descriptor, size)
+        self._reference_bytes += size
+        while self._reference_bytes > self.REFERENCE_CACHE_BYTES:
+            _, (_, weight) = self._references.popitem(last=False)
+            self._reference_bytes -= weight
+
+    def reference_group(self, candidates):
+        if not candidates.outside:
+            return None
+        if candidates.reference_group_id is None:
+            ids = [c['schedule']['schedule_id'] for c in candidates.outside]
+            group_id = hashlib.sha256(json_text(ids).encode('utf-8')).hexdigest()
+            inserted = self.db.execute('INSERT OR IGNORE INTO reference_groups VALUES (?,?)', (group_id, len(ids))).rowcount
+            if inserted:
+                self.db.executemany('INSERT INTO reference_members VALUES (?,?)', ((group_id, sid) for sid in ids))
+            candidates.reference_group_id = group_id
+        return candidates.reference_group_id
+
+
+def compatible_candidates(row, places, index, *, cache=True):
     primary = flight_key(row.get('flight_number_normalized',row.get('flight_number')), row.get('carrier'))
     alias = flight_key(row.get('codeshare'))  # A boolean/star/number is not an alias.
     day = departure_date(row)
     found = []
     if any(p['kind'] != 'missing' and not p['candidates'] for p in places.values()):
-        return []
+        return CompatibleSchedules(())
+    cache_key = index.outside_cache_key(row, places, primary, alias, day) if cache else None
+    if cache_key is not None:
+        if cache_key in index._compatibility:
+            index.compatibility_cache_hits += 1
+            index._compatibility.move_to_end(cache_key)
+            return index._compatibility[cache_key][0]
+        index.compatibility_cache_misses += 1
     for schedule in index.candidates(primary, alias, places['origin']['candidates'], places['destination']['candidates']):
         if schedule['parse_status'] != 'ok':
             continue
@@ -436,7 +580,9 @@ def compatible_candidates(row, places, index):
         if coverage == 'confirmed':
             if not days or not re.fullmatch('[1-7]+', days):
                 coverage, reason = 'unknown', 'unknown_days_of_week'
-            elif str(day.isoweekday()) not in days:
+            # SkyTeam's original legend (PDF page 3) numbers Sunday as 1
+            # through Saturday as 7. The reader preserves those source digits.
+            elif str(day.isoweekday() % 7 + 1) not in days:
                 continue
         # An observed clock value must agree. Do not infer a date change from clocks.
         conflict = False
@@ -456,19 +602,40 @@ def compatible_candidates(row, places, index):
         if coverage == 'confirmed' and index.corpus_coverage != 'confirmed':
             coverage, reason = 'unknown', 'schedule_source_coverage_unknown'
         found.append(dict(schedule=schedule, coverage=coverage, reason=reason))
-    return found
+    result = CompatibleSchedules(found)
+    if cache_key is not None:
+        index.remember_compatibility(cache_key, result)
+    return result
 
 
-def enrich_travel(row, reference, index):
+def enrich_travel(row, reference, index, compact=False):
     out = dict(row)
     places = {s: reference.resolve(row.get(s + '_raw'), row['source_id']) for s in ('origin', 'destination')}
     canonical_rules = json.loads(row.get('normalization_rules_json') or '{}')
     for side, place in places.items():
         if canonical_rules.get(side+'_raw') == 'type.incompatible':
             place.update(kind='unknown',status='unresolved',reason='incompatible_source_location',candidates=(),airport_id=None)
-    candidates = compatible_candidates(row, places, index)
+    reference_descriptor, reference_key = None, None
+    if compact and not any(p['kind'] != 'missing' and not p['candidates'] for p in places.values()):
+        primary = flight_key(row.get('flight_number_normalized', row.get('flight_number')), row.get('carrier'))
+        alias = flight_key(row.get('codeshare'))
+        reference_key = index.outside_cache_key(row, places, primary, alias, departure_date(row))
+        if reference_key is not None:
+            reference_descriptor = index.cached_reference(reference_key)
+    if reference_descriptor is None:
+        # A descriptor miss still uses the full conservative matcher. Persist its
+        # exact memberships before caching; unknown periods never take this path.
+        candidates = compatible_candidates(row, places, index, cache=reference_key is None)
+        if compact:
+            reference_descriptor = (index.reference_group(candidates), len(candidates.outside))
+            if reference_key is not None:
+                if candidates.contenders:
+                    raise ValueError('Outside-period cache proof admitted a temporal contender')
+                index.remember_reference(reference_key, reference_descriptor)
+    else:
+        candidates = CompatibleSchedules(())
     # Unknown-period candidates remain contenders: they can defeat uniqueness.
-    contenders = [c for c in candidates if c['coverage'] != 'outside_period']
+    contenders = candidates.contenders
     chosen = contenders[0] if len(contenders) == 1 and contenders[0]['coverage'] == 'confirmed' else None
     filled = {}
     day = departure_date(row)
@@ -519,13 +686,16 @@ def enrich_travel(row, reference, index):
         out[side + '_candidates_json'] = candidate_ids_json(place['candidates'])
         out[side + '_override_json'] = place['rule_id']
     out['schedule_match_status'] = ('matched' if chosen else 'ambiguous' if len(contenders)>1 else
-                                    'temporal_unknown' if contenders else 'reference_only' if candidates else 'unresolved')
+                                    'temporal_unknown' if contenders else 'reference_only' if candidates or
+                                    (reference_descriptor is not None and reference_descriptor[1]) else 'unresolved')
     out['schedule_id_used'] = chosen['schedule']['schedule_id'] if chosen else None
     out['geography_rule_version'] = RULE_VERSION
     out['geography_reference_version'] = reference.version
     out['inferred_fields_json'] = json_text(filled)
+    if compact:
+        out['schedule_reference_group_id'], out['schedule_reference_count'] = reference_descriptor
     links = []
-    for c in candidates:
+    for c in contenders if compact else candidates:
         s = c['schedule']
         status = ('reference_only' if c['coverage']=='outside_period' else 'ambiguous' if len(contenders)>1 else
                   'temporal_unknown' if c['coverage']=='unknown' else 'matched')

@@ -29,7 +29,7 @@ from ..provenance import fingerprint
 from .config import TITLES, load
 from .input import verify
 
-VERSION = '1.0'
+VERSION = '1.1'
 FEATURES = ['trip_rate_30_days', 'quick_return_share', 'repeated_route_share']
 
 
@@ -39,6 +39,41 @@ def write_json(path, value):
 
 def _digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
+
+
+def _source_provenance(paths, origin):
+    """Describe verified lineage without claiming an independent human audit."""
+    result = {
+        'origin': origin,
+        'input_mode': 'supplied_t13' if origin == 'supplied_develop_t13' else 't13',
+        'raw_reingestion_verified': False,
+        'independent_human_review': 'pending',
+    }
+    core_path = paths.get('t16/run_manifest.json')
+    if core_path is not None:
+        core = json.loads(Path(core_path).read_text(encoding='utf-8'))
+        result.update({
+            'core_run_id': core['run_id'],
+            'core_status': core['status'],
+            'input_mode': core['input_mode'],
+            'configured_sources': core.get('configured_sources', []),
+            'raw_reingestion_verified': core['input_mode'] == 'raw'
+                and core['status'] in {'complete', 'complete_with_limitations'}
+                and core.get('options', {}).get('require_all') is True
+                and core.get('options', {}).get('allow_source_errors') is False,
+        })
+        repair_path = paths.get('t16/repair_manifest.json')
+        if repair_path is not None:
+            repair = json.loads(Path(repair_path).read_text(encoding='utf-8'))
+            result['auxiliary_repair'] = {
+                'version': repair['version'],
+                'status': repair['status'],
+                'parent_core_run_id': repair['parent_run_id'],
+                'parent_manifest_sha256': repair['parent_manifest_sha256'],
+                'repair_manifest_sha256': fingerprint(repair_path),
+                'scope': 'workbook_coverage.csv only; canonical and resolution tables unchanged',
+            }
+    return result
 
 
 def _rows(db, sql, params=None):
@@ -150,7 +185,7 @@ def _features(db, cfg, window):
         count(*) FILTER(WHERE e.status='matched')::INTEGER matched_criteria_count,
         count(*) FILTER(WHERE e.status<>'unavailable')::INTEGER available_criteria_count,
         sum(e.contribution) rule_score,
-        CASE WHEN count(*) FILTER(WHERE e.status<>'unavailable')<3 THEN 'insufficient_data'
+        CASE WHEN count(*) FILTER(WHERE e.status<>'unavailable')=0 THEN 'insufficient_data'
              WHEN count(*) FILTER(WHERE e.status='matched')=0 THEN 'no_matches' ELSE 'eligible' END eligibility_status
         FROM features f JOIN explanations e USING(person_id) GROUP BY ALL''')
     db.execute('''CREATE TABLE rankings AS SELECT *,CASE WHEN eligibility_status='eligible' THEN
@@ -244,24 +279,34 @@ def _forest(db, cfg, folder):
 
 def _evaluation(db, cfg, forest):
     base = {r['person_id'] for r in _rows(db, 'SELECT person_id FROM top50')}
+    population_size = db.execute("SELECT count(*) FROM rankings WHERE eligibility_status IN ('eligible','no_matches')").fetchone()[0]
     experiments = []
     for scale in [.8,1.,1.2]:
         for omit in [None, *TITLES]:
-            rows = _rows(db, '''WITH scores AS (SELECT person_id,
-                count(*) FILTER(WHERE status<>'unavailable' AND value>=threshold*?) AS matched_count,
-                sum(CASE WHEN status<>'unavailable' AND value>=threshold*? THEN weight*least(3.0,value/(threshold*?)) ELSE 0 END) score,
-                count(*) FILTER(WHERE status<>'unavailable') available
-                FROM explanations WHERE criterion_id IS DISTINCT FROM ? GROUP BY person_id)
-                SELECT person_id FROM scores WHERE available=? AND matched_count>0
-                ORDER BY matched_count DESC,score DESC,person_id LIMIT 50''', [scale,scale,scale,omit,2 if omit else 3])
+            rows = _rows(db, '''WITH scores AS (SELECT e.person_id,
+                count(*) FILTER(WHERE e.status<>'unavailable' AND value>=threshold*?) AS matched_count,
+                sum(CASE WHEN e.status<>'unavailable' AND value>=threshold*? THEN weight*least(3.0,value/(threshold*?)) ELSE 0 END) score
+                FROM explanations e JOIN rankings r USING(person_id)
+                WHERE r.eligibility_status IN ('eligible','no_matches')
+                  AND criterion_id IS DISTINCT FROM ? GROUP BY e.person_id)
+                SELECT person_id FROM scores WHERE matched_count>0
+                ORDER BY matched_count DESC,score DESC,person_id LIMIT 50''', [scale,scale,scale,omit])
             ids = {r['person_id'] for r in rows}
             experiments.append({'threshold_scale':scale,'omitted_criterion':omit, 'top_count':len(ids),
                                 'jaccard_to_primary':len(ids&base)/len(ids|base) if ids|base else None})
     agreement = None
+    comparison_population_size = None
     if forest['status']=='complete':
+        comparison_population_size = db.execute('SELECT count(*) FROM if_scores').fetchone()[0]
         ids = {r['person_id'] for r in _rows(db, 'SELECT person_id FROM if_scores ORDER BY if_score DESC,person_id LIMIT 50')}
-        agreement = len(ids&base)/len(ids|base) if ids|base else None
+        common_rules = {r['person_id'] for r in _rows(db, '''SELECT r.person_id FROM rankings r
+            JOIN if_scores f USING(person_id)
+            ORDER BY r.matched_criteria_count DESC,r.rule_score DESC,r.person_id LIMIT 50''')}
+        agreement = len(ids&common_rules)/len(ids|common_rules) if ids|common_rules else None
     return {'status':'computed_without_labels', 'experiments':experiments, 'rules_if_top50_jaccard':agreement,
+            'population_fixed':True, 'population_size':population_size,
+            'rules_if_population_size':comparison_population_size,
+            'rules_if_comparison':'Both methods ranked on the same complete-case IF population; not a comparison against the broader primary top50.',
             'quality_metrics':None,'reason':'No supplied ground-truth labels; precision/recall and reviewer decisions are not fabricated.',
             'independent_review':'pending'}
 
@@ -338,6 +383,15 @@ def run(input_dir, output, config='configs/product.yaml', reference='data/refere
             shutil.copyfile(reference,stage/'airports.csv')
             shutil.copyfile(ref_manifest,stage/'reference_manifest.json')
             shutil.copyfile(config,stage/'product.yaml')
+            provenance_files = {
+                'resolution_manifest.json', 'resolution_report.json',
+                't16/run_manifest.json', 't16/input_manifest.json', 't16/repair_manifest.json',
+            }
+            provenance_files.update(name for name in paths if name.startswith('t16/repair/'))
+            for name in provenance_files & paths.keys():
+                destination = stage / 'provenance' / name
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(paths[name], destination)
             write_json(stage/'evaluation.json',evaluation)
             write_json(stage/'forest.json',forest)
             write_json(stage/'graph.json',graph)
@@ -350,6 +404,7 @@ def run(input_dir, output, config='configs/product.yaml', reference='data/refere
             files = {p.relative_to(stage).as_posix():fingerprint(p) for p in sorted(stage.rglob('*')) if p.is_file()}
             manifest={'schema_version':VERSION,'data_mode':'source_dataset','status':'complete','run_id':run_id,
                       'request':request,'files':files,'window':window,'counts':counts,'eligibility':statuses,
+                      'source_provenance':_source_provenance(paths, origin),
                       'limitations':limitations,'sort_order':['matched_criteria_count DESC','rule_score DESC','person_id ASC'],
                       'contribution_formula':'weight * min(3, value / threshold) for each matched independent group',
                       'graph_status':graph['status'],'forest_status':forest['status'], 'independent_review':'pending',

@@ -17,13 +17,61 @@ import yaml
 from yoyoflot.cli import main
 from yoyoflot.product.build import _features, _graph, run
 from yoyoflot.product.config import load
-from yoyoflot.product.input import verify
+from yoyoflot.product.input import UPSTREAM_FILES, verify
 from yoyoflot.product.store import ProductStore
 from yoyoflot.product.web import handler
 from yoyoflot.provenance import fingerprint
-from yoyoflot.resolve.common import SCHEMAS
+from yoyoflot.resolve.common import SCHEMAS, stable_id
 
 ROOT=Path(__file__).resolve().parents[1]
+
+
+def upstream_tables(root, person_links, segments, segment_links):
+    """Author a small versioned upstream artifact set without running ETL."""
+    from yoyoflot.normalize.canonical import SCHEMAS as CANONICAL_SCHEMAS, ERROR_SCHEMA, LOG_SCHEMA, DUP_SCHEMA
+    from yoyoflot.normalize.geography import EXTRA_FIELDS, META, LINK_SCHEMA, INVENTORY_SCHEMA, PLACE_FIELDS, REFERENCE_GROUP_SCHEMA, REFERENCE_MEMBER_SCHEMA
+
+    root.mkdir()
+    observations=[{key:row[key] for key in ('observation_id','source_id','source_record_id','locator')}
+                  for row in person_links]
+    travels=[{key:row[key] for key in ('travel_id','observation_id','source_id','source_record_id','locator')}
+             for row in segment_links]
+    rows={'observations':observations,'travel_observations':travels}
+    schemas={**CANONICAL_SCHEMAS,'normalization_errors':ERROR_SCHEMA,'transformation_log':LOG_SCHEMA,
+             'duplicate_reads':DUP_SCHEMA}
+    for name,schema in schemas.items():
+        pq.write_table(pa.Table.from_pylist(rows.get(name,[]),schema=schema),root/f'{name}.parquet')
+    canonical={'version':'canonical:1.0','status':'complete','acceptance':'pending_real_data_review',
+               'normalization_errors':0,'source_error_severities':{},'source_reports':{},
+               'counts':{name:len(rows.get(name,[])) for name in CANONICAL_SCHEMAS},
+               'limitations':['Authored canonical control for unit tests.']}
+    (root/'canonical_report.json').write_text(json.dumps(canonical))
+    (root/'canonical_summary.txt').write_text('Authored canonical unit-test control.\n')
+    canonical_files={p.name:fingerprint(p) for p in root.iterdir()}
+    (root/'canonical_manifest.json').write_text(json.dumps({'version':'canonical:1.0','files':canonical_files}))
+    geo_files=[]
+    for name,base,records in [('travel_geography','travel_observations',travels),('schedule_geography','schedules',[])]:
+        extras = EXTRA_FIELDS if name=='travel_geography' else {f'{side}_geo_{key}':typ for side in ('origin','destination') for key,typ in PLACE_FIELDS.items()}
+        if name=='travel_geography':
+            records=[{**row,'schedule_reference_count':0} for row in records]
+        schema=pa.schema(list(CANONICAL_SCHEMAS[base])+[pa.field(k,t) for k,t in extras.items()],
+                         metadata={**CANONICAL_SCHEMAS[base].metadata,**META})
+        pq.write_table(pa.Table.from_pylist(records,schema=schema),root/f'{name}.parquet')
+        geo_files.append(f'{name}.parquet')
+    for name,schema in [('schedule_links',LINK_SCHEMA),('place_inventory',INVENTORY_SCHEMA),
+                        ('schedule_reference_groups',REFERENCE_GROUP_SCHEMA),('schedule_reference_members',REFERENCE_MEMBER_SCHEMA)]:
+        pq.write_table(pa.Table.from_pylist([],schema=schema),root/f'{name}.parquet')
+        geo_files.append(f'{name}.parquet')
+    geography={'rule_version':'airports:1.1','geography_contract_version':'2.0','status':'complete','acceptance':'pending_real_data_and_T12_review',
+               'inputs':{str(root/'travel_observations.parquet'):fingerprint(root/'travel_observations.parquet')},
+               'schedule_sources':[],'counts':{'travels':len(travels),'schedules':0,'schedule_links':0,'schedule_reference_groups':0,
+                 'schedule_reference_members':0,'schedule_reference_associations':0,'logical_schedule_links':0},
+               'limitations':['Authored geography control for unit tests.']}
+    (root/'geography_report.json').write_text(json.dumps(geography))
+    (root/'geography_summary.txt').write_text('Authored geography unit-test control.\n')
+    geo_files+=['geography_report.json','geography_summary.txt']
+    (root/'t11_manifest.json').write_text(json.dumps({'rule_version':'airports:1.1',
+                                                    'files':{name:fingerprint(root/name) for name in geo_files}}))
 
 
 def tables(tmp_path, people=3):
@@ -31,9 +79,18 @@ def tables(tmp_path, people=3):
     root.mkdir()
     persons=[]
     segments=[]
+    person_links=[]
+    segment_links=[]
     for i in range(people):
         pid=f'person_{i:03d}'
-        persons.append(dict(person_id=pid,display_name=f'Контроль {i}',identity_status='accepted'))
+        observation_id=f'observation_{i}'
+        persons.append(dict(person_id=pid,display_name=f'Контроль {i}',identity_status='accepted',
+                            anchor_observation_id=observation_id,observation_count=1,source_count=1,
+                            rule_id='identity.source_observation',graph_eligible=False))
+        person_links.append(dict(observation_id=observation_id,person_id=pid,source_id='boarding_csv',
+                                 source_record_id=str(i),locator=f'row:{i}',status='accepted',
+                                 confidence='source_only',rule_id='identity.source_observation',
+                                 node_index=i,graph_eligible=False))
         for day in range(8):
             a,b=('openflights:2965','openflights:2990') if day%2 else ('openflights:2990','openflights:2965')
             segments.append(dict(person_id=pid,segment_id=f'{pid}_{day}',anchor_travel_id=f'travel_{i}_{day}',
@@ -41,9 +98,35 @@ def tables(tmp_path, people=3):
                 origin_airport_id=a,destination_airport_id=b,origin_iata='SVO' if day%2 else 'LED',destination_iata='LED' if day%2 else 'SVO',
                 departure_precision='date',identity_status='accepted',resolution_status='resolved',
                 participation_status='reported_only',graph_eligible=False))
-    for table,rows in [('persons',persons),('segments',segments)]:
-        pq.write_table(pa.Table.from_pylist(rows,schema=SCHEMAS[table]),root/f'{table}.parquet')
-    manifest={'version':'resolution:1.0','files':{f'{n}.parquet':fingerprint(root/f'{n}.parquet') for n in ['persons','segments']}}
+            segment_links.append(dict(travel_id=f'travel_{i}_{day}',segment_id=f'{pid}_{day}',
+                                      person_id=pid,observation_id=observation_id,source_id='boarding_csv',
+                                      source_record_id=f'{i}:{day}',locator=f'row:{i}:{day}',
+                                      status='resolved',graph_eligible=False))
+    rows_by_table={'persons':persons,'segments':segments,'person_links':person_links,'segment_links':segment_links}
+    for table,schema in SCHEMAS.items():
+        pq.write_table(pa.Table.from_pylist(rows_by_table.get(table,[]),schema=schema),root/f'{table}.parquet')
+    # This authored publication fixture models a portable T13 transfer. Its
+    # original upstream artifacts live separately and are never app fallback data.
+    upstream=tmp_path/'upstream'
+    upstream_tables(upstream,person_links,segments,segment_links)
+    inputs={str(upstream/name):fingerprint(upstream/name) for name in UPSTREAM_FILES}
+    inputs[str(ROOT/'configs/resolution.yaml')]=fingerprint(ROOT/'configs/resolution.yaml')
+    run_fingerprint=stable_id('run',sorted(inputs.values()))
+    report={'version':'resolution:1.0','status':'complete','run_fingerprint':run_fingerprint,
+            'acceptance':'pending_independent_100_pair_review_and_signoff',
+            'config_sha256':fingerprint(ROOT/'configs/resolution.yaml'),'inputs':inputs,
+            'counts':{name:len(rows_by_table.get(name,[])) for name in SCHEMAS},
+            'personal_sources_present':['boarding_csv'] if people else [],
+            'personal_sources_missing':(['boarding_csv'] if not people else [])+
+                ['boardingpass_xlsx','forum_json','pointz_xml','sirena_fixed','skyteam_yaml'],
+            'upstream':{'canonical_status':'complete','canonical_normalization_errors':0,
+                        'reader_error_severities':{},'schedule_sources':[]},
+            'limitations':['Authored unit-test publication; no independent human review.']}
+    (root/'resolution_report.json').write_text(json.dumps(report))
+    (root/'resolution_review_sample.csv').write_text('pair_id,reviewer,decision,reason\n')
+    (root/'resolution_summary.txt').write_text('Authored T13 publication control.\n')
+    manifest={'version':'resolution:1.0','run_fingerprint':run_fingerprint,
+              'files':{path.name:fingerprint(path) for path in root.iterdir()}}
     (root/'resolution_manifest.json').write_text(json.dumps(manifest))
     return root
 
@@ -132,7 +215,7 @@ def test_null_dates_routes_and_ambiguous_identity_never_inflate(tmp_path):
     assert db.execute("SELECT status FROM explanations WHERE person_id='person_000' AND criterion_id='M02'").fetchone()[0]=='unavailable'
     assert db.execute("SELECT status FROM explanations WHERE person_id='person_001' AND criterion_id='M03'").fetchone()[0]=='unavailable'
     assert db.execute("SELECT sum(contribution) FROM explanations WHERE person_id='person_002'").fetchone()[0]==0
-    assert db.execute('SELECT count(*) FROM top50').fetchone()[0]==0
+    assert db.execute('SELECT count(*) FROM top50').fetchone()[0]==2
     db.close()
 
 

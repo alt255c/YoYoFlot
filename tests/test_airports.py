@@ -239,8 +239,32 @@ def test_unknown_period_candidate_defeats_uniqueness(reference,tmp_path):
 
 
 def test_wrong_weekday(reference,tmp_path):
-    out,links=enrich(reference,tmp_path,travel(),[schedule(days_of_week='2')])
+    # The observation is Monday; SkyTeam day 1 is Sunday, not ISO Monday.
+    out,links=enrich(reference,tmp_path,travel(),[schedule(days_of_week='1')])
     assert not links and out['origin_airport_id'] is None
+
+
+@pytest.mark.parametrize('observed_date,source_day,iso_day', [
+    ('2017-01-01', '1', '7'),  # Sunday
+    ('2017-01-02', '2', '1'),  # Monday
+    ('2017-01-03', '3', '2'),  # Tuesday
+    ('2017-01-04', '4', '3'),  # Wednesday
+    ('2017-01-05', '5', '4'),  # Thursday
+    ('2017-01-06', '6', '5'),  # Friday
+    ('2017-01-07', '7', '6'),  # Saturday
+])
+def test_schedule_weekdays_follow_original_skyteam_legend(reference, tmp_path, observed_date, source_day, iso_day):
+    row = travel()
+    row['departure_local'] = observed_date
+    out, links = enrich(reference, tmp_path, row, [
+        schedule('correct', days_of_week=source_day),
+        schedule('iso_shift', days_of_week=iso_day, origin='CCC'),
+    ])
+    # A shifted interpretation would silently select a different origin.
+    assert out['origin_iata'] == 'AAA'
+    assert out['schedule_match_status'] == 'matched'
+    assert out['departure_local'] == observed_date
+    assert [link['schedule_id'] for link in links] == ['correct']
 
 
 def test_different_carrier_not_same_flight(reference,tmp_path):

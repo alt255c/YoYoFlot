@@ -93,6 +93,7 @@ def parser():
     start = pipeline.add_mutually_exclusive_group()
     start.add_argument("--from-interim", type=Path, help="Use completed reader outputs; original raw files are not revalidated")
     start.add_argument("--from-processed", type=Path, help="Verify/adopt existing T11/T12/T13; do not repeat their calculations")
+    start.add_argument("--core-snapshot", type=Path, help="Reuse a fully verified raw T16 snapshot with matching current sources/configuration; requires --require-all --until product")
     pipeline.add_argument("--product-config", type=Path, default=Path("configs/product.yaml"))
     pipeline.add_argument("--until", choices=["build", "product"], default="build", help="build = entire data core through T14, not only T12")
     pipeline.add_argument("--normalization-config", type=Path, default=Path("configs/normalization.yaml"))
@@ -119,6 +120,10 @@ def parser():
         product = sub.add_parser(command, help="Inspect graph/evaluation of one verified source-dataset product")
         product.add_argument("--product", type=Path)
         product.add_argument("-q", "--quiet", action="store_true")
+    report = sub.add_parser("report", help="Export verified top-50, factor evidence and flight geography without a web server")
+    report.add_argument("--product", type=Path, required=True)
+    report.add_argument("--output", type=Path, required=True)
+    report.add_argument("-q", "--quiet", action="store_true")
     web = sub.add_parser("serve", help="Start read-only top-50, evidence and flight-geography web app")
     web.add_argument("--product", type=Path, required=True)
     web.add_argument("--host", default="127.0.0.1")
@@ -131,6 +136,12 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "report":
+            from .product.report import run, format_console
+            result = run(args.product, args.output)
+            if not args.quiet:
+                print(format_console(result, args.output), end="")
+            return 0
         if args.command == "serve":
             from .product.web import serve
             serve(args.product, args.host, args.port)
@@ -156,8 +167,19 @@ def main(argv=None):
                 print(json.dumps({k:report[k] for k in ["run_id", "counts", "eligibility", "forest_status", "graph_status"]}, ensure_ascii=False, indent=2))
             return 0
         if args.command == "run":
-            from .pipeline import run
-            core, summary = run(config=args.config, data_dir=args.data_dir, work_dir=args.work_dir,
+            if args.core_snapshot is not None:
+                if args.until != "product" or not args.require_all or args.allow_source_errors:
+                    raise ValueError('--core-snapshot requires --require-all --until product and forbids --allow-source-errors')
+                from .product.reuse import verify_raw_core
+                if not args.quiet:
+                    print('Verifying the published raw core and all current source/configuration hashes...', flush=True)
+                tables, core = verify_raw_core(args.core_snapshot, data_dir=args.data_dir, config=args.config,
+                    normalization=args.normalization_config, resolution=args.resolution_config,
+                    reference=args.reference, overrides=args.overrides, reference_manifest=args.reference_manifest)
+                summary = "Verified raw T16 snapshot: " + str(tables.parent) + "\n"
+            else:
+                from .pipeline import run
+                core, summary = run(config=args.config, data_dir=args.data_dir, work_dir=args.work_dir,
                              output=args.output if args.until == "build" else None, from_interim=args.from_interim, from_processed=args.from_processed,
                              artifacts_dir=args.artifacts_dir if args.until == "build" else args.artifacts_dir / "core",
                              normalization=args.normalization_config, resolution=args.resolution_config,
@@ -165,9 +187,10 @@ def main(argv=None):
                              batch_size=args.batch_size, memory_limit=args.memory_limit, chunk_pages=args.chunk_pages,
                              sample_size=args.sample_size, require_all=args.require_all, allow_source_errors=args.allow_source_errors,
                              progress=None if args.quiet else lambda message: print(message, flush=True))
+                tables = args.artifacts_dir / "core" / core["run_id"] / "tables"
             if args.until == "product":
                 from .product.build import run as build_product
-                product = build_product(args.artifacts_dir / "core" / core["run_id"] / "tables",
+                product = build_product(tables,
                                         args.output or args.artifacts_dir / ("product-" + core["run_id"]),
                                         config=args.product_config, reference=args.reference, memory_limit=args.memory_limit,
                                         progress=None if args.quiet else lambda message: print(message, flush=True))

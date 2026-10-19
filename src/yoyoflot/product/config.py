@@ -25,8 +25,8 @@ TITLES = {'M01': 'Частота перелётов', 'M02': 'Быстрые в�
 
 def load(path):
     data = yaml.load(Path(path).read_bytes(), Loader=UniqueLoader)
-    if not isinstance(data, dict) or set(data) != {'version', 'criteria', 'coverage', 'forest', 'calibration'} or data['version'] != 'product-1.0':
-        raise ValueError('Expected product-1.0 configuration')
+    if not isinstance(data, dict) or set(data) != {'version', 'criteria', 'coverage', 'forest', 'calibration'} or data['version'] != 'product-1.1':
+        raise ValueError('Expected product-1.1 configuration')
     if not isinstance(data['criteria'], dict) or set(data['criteria']) != set(TITLES):
         raise ValueError('Explicit M01, M02 and M03 settings are required')
     def number(value, low, high):

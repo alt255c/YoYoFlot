@@ -65,25 +65,56 @@ def check(product):
             raise ValueError('Route imbalance')
         segments += len(rows)
     with store.connection() as db:
+        invalid = db.execute('''SELECT count(*) FROM explanations
+            WHERE status IS NULL OR status NOT IN ('matched','not_matched','unavailable')
+               OR contribution IS NULL OR NOT isfinite(contribution) OR contribution<0
+               OR threshold IS NULL OR NOT isfinite(threshold) OR threshold<=0
+               OR weight IS NULL OR NOT isfinite(weight) OR weight<=0
+               OR (status<>'unavailable' AND (value IS NULL OR NOT isfinite(value)))''').fetchone()[0]
+        if invalid:
+            raise ValueError('Invalid population factor state or numeric value')
         invalid = db.execute('''WITH actual AS (SELECT person_id,sum(contribution) score,
+            count(*) factor_count, count(DISTINCT criterion_id) distinct_factor_count,
+            count(*) FILTER(WHERE status<>'unavailable') available_count,
             count(*) FILTER(WHERE status='matched') AS matched_count FROM explanations GROUP BY person_id)
-            SELECT count(*) FROM rankings r JOIN actual a USING(person_id)
-            WHERE abs(r.rule_score-a.score)>1e-10 OR r.matched_criteria_count<>a.matched_count''').fetchone()[0]
+            SELECT count(*) FROM rankings r FULL OUTER JOIN actual a USING(person_id)
+            WHERE r.person_id IS NULL OR a.person_id IS NULL OR a.factor_count<>3
+               OR a.distinct_factor_count<>3 OR r.rule_score IS NULL OR NOT isfinite(r.rule_score)
+               OR abs(r.rule_score-a.score)>1e-10 OR r.matched_criteria_count IS DISTINCT FROM a.matched_count
+               OR r.available_criteria_count IS DISTINCT FROM a.available_count
+               OR r.eligibility_status IS DISTINCT FROM CASE WHEN a.available_count=0 THEN 'insufficient_data'
+                    WHEN a.matched_count=0 THEN 'no_matches' ELSE 'eligible' END''').fetchone()[0]
         if invalid:
             raise ValueError('Population score/explanation mismatch')
+        expected_ids = [row[0] for row in db.execute('''SELECT person_id FROM rankings
+            WHERE eligibility_status='eligible'
+            ORDER BY matched_criteria_count DESC,rule_score DESC,person_id LIMIT 50''').fetchall()]
+        if expected_ids != [person['person_id'] for person in top]:
+            raise ValueError('Top excludes a higher-ranked eligible profile')
+        invalid = db.execute('''WITH ordered AS (SELECT person_id,
+            row_number() OVER(ORDER BY matched_criteria_count DESC,rule_score DESC,person_id) expected_rank
+            FROM rankings WHERE eligibility_status='eligible')
+            SELECT count(*) FROM rankings r LEFT JOIN ordered o USING(person_id)
+            WHERE r.rank IS DISTINCT FROM o.expected_rank''').fetchone()[0]
+        if invalid:
+            raise ValueError('Population ranks are not consistent with the declared ordering')
         if store.manifest['forest_status'] == 'complete':
-            invalid = db.execute('''SELECT count(*) FROM if_scores WHERE if_percentile NOT BETWEEN 0 AND 1
+            invalid = db.execute('''SELECT count(*) FROM if_scores WHERE if_score IS NULL OR NOT isfinite(if_score)
+                OR if_percentile IS NULL OR rules_percentile IS NULL OR combined_score IS NULL
+                OR if_percentile NOT BETWEEN 0 AND 1
                 OR rules_percentile NOT BETWEEN 0 AND 1 OR abs(combined_score-(if_percentile+rules_percentile)*0.5)>1e-12''').fetchone()[0]
             if invalid:
                 raise ValueError('Invalid model percentiles/combination')
-            roles = db.execute('SELECT role,count(*) FROM if_scores GROUP BY role').fetchall()
+            roles = db.execute('SELECT role,count(*) FROM if_scores GROUP BY role ORDER BY role').fetchall()
         else:
             roles = []
     return {'status':'passed', 'run_id':store.manifest['run_id'], 'counts':store.manifest['counts'],
             'profiles_independently_checked':len(top), 'segments_checked':segments,
             'evidence_links_checked':evidence_count, 'population_scores_consistent':True,
             'if_roles':dict(roles), 'input_sha256':{n:h for n,h in store.manifest['request']['inputs'].items() if n.endswith('.parquet')},
-            'raw_reingestion_verified':False, 'independent_human_review':'pending'}
+            'raw_reingestion_verified':store.manifest.get('source_provenance', {}).get('raw_reingestion_verified', False),
+            'source_provenance':store.manifest.get('source_provenance', {}),
+            'independent_human_review':'pending'}
 
 
 def main():
@@ -92,7 +123,7 @@ def main():
     parser.add_argument('--report',type=Path)
     args = parser.parse_args()
     result = check(args.product)
-    content = json.dumps(result,ensure_ascii=False,indent=2)+'\n'
+    content = json.dumps(result,ensure_ascii=False,indent=2,sort_keys=True,allow_nan=False)+'\n'
     if args.report:
         args.report.parent.mkdir(parents=True,exist_ok=True)
         args.report.write_text(content,encoding='utf-8')

@@ -1,0 +1,2567 @@
+{
+  "schema_version": "backend-validation:1.0",
+  "date": "2026-10-18",
+  "base_branch": "develop",
+  "base_commit": "902a471",
+  "status": "automated_backend_accepted",
+  "scope": "Automated original-source backend acceptance: complete input lineage, audited coverage repair, model/product, numerical audit, independent export consistency review and byte-identical repeat verified. No web server or human truth-label review is claimed.",
+  "independent_human_review": "pending",
+  "ground_truth_labels_available": false,
+  "precision_recall_claimed": false,
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q",
+    "passed": 898,
+    "failed": 0,
+    "elapsed_seconds": 156.82,
+    "evidence": {
+      "path": "pytest-backend-accepted.log",
+      "sha256": "e14a2f537c5a1a05bfc20391d97718c65356c641fea949fb8d3b37919b65f634"
+    },
+    "junit_evidence": {
+      "path": "pytest-backend-accepted.xml",
+      "sha256": "58e7eda182a3b2a68a2b3d4532a08379b3c9d0faf53273b7711c54edfcf9b0e2"
+    },
+    "previous_full_suite": {
+      "command": ".venv/bin/python -m pytest -q",
+      "passed": 823,
+      "failed": 0,
+      "elapsed_seconds": 163.36,
+      "evidence": {
+        "path": "pytest-backend-final.log",
+        "sha256": "9edc0b3c58f459281cc95521c372ee4635f3b9941785e05341650f4d8f42f022"
+      },
+      "scope": "Historical full suite before coverage-repair implementation"
+    },
+    "independent_coverage_suite": {
+      "passed": 25,
+      "failed": 0,
+      "elapsed_seconds": 4.6
+    },
+    "additional_checks": {
+      "pip_check": "passed",
+      "bash_syntax": "passed",
+      "git_diff_check": "passed"
+    },
+    "post_full_suite_serialization_regression": {
+      "scope": "scripts/verify_source_product.py deterministic role-order and JSON serialization; source/model package unchanged",
+      "status": "passed",
+      "passed": 4,
+      "failed": 0,
+      "elapsed_seconds": 12.19,
+      "new_regressions": 1,
+      "full_suite_rerun_claimed": false,
+      "evidence": {
+        "path": "audit_serialization_fix.json",
+        "sha256": "d600885f7f84d1dbe6b2555f63654732809a1473fa8cbe6e04c8c464687d6d5e"
+      }
+    }
+  },
+  "artifacts": {
+    "core": "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+    "product": "/tmp/yoyoflot-products/source-product-final",
+    "report": "/tmp/yoyoflot-products/source-product-final-report",
+    "verification": "/tmp/yoyoflot-products/source-product-final-verification.json",
+    "core_run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+    "product_run_id": "product-5658ce2a39028f7c6781",
+    "report_id": "report-60d06cef88956736232d"
+  },
+  "raw_sources": {
+    "count": 7,
+    "total_bytes": 1541640375,
+    "original_bytes_unchanged": true,
+    "pinned_manifest": {
+      "path": "scripts/dataset_manifest.json",
+      "sha256": "37bdb7753daef2f35c9ff466597f8c451beca12a73091b6c313f281fd3cb0723"
+    },
+    "archive": {
+      "name": "Airlines-All.zip",
+      "url": "https://drive.google.com/uc?id=1LkvceJHziGFI9abUb2qe8uErI4oudkbb&export=download",
+      "bytes": 477710849,
+      "sha256": "ce8aac0806d8c001fe1a4253176ad826ebf3f1487e54b8c6bcf46fa5848bcc1b"
+    },
+    "files": {
+      "boarding_csv": {
+        "file": "BoardingData.csv",
+        "bytes": 19178467,
+        "sha256": "9ba2c4be763f5c51b38f99e84e86b68737ba3dc0cfab00b498a9d3de029b053f",
+        "independent_hash_and_size_verified": true
+      },
+      "boardingpass_xlsx": {
+        "file": "YourBoardingPassDotAero.zip",
+        "bytes": 277220766,
+        "sha256": "b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6",
+        "independent_hash_and_size_verified": true
+      },
+      "forum_json": {
+        "file": "FrequentFlyerForum-Profiles.json",
+        "bytes": 567508577,
+        "sha256": "3370f67664dfb2bf790ec343e971ffac95e42c0dd175c1b27037bac5868b1e8c",
+        "independent_hash_and_size_verified": true
+      },
+      "pointz_xml": {
+        "file": "PointzAggregator-AirlinesData.xml",
+        "bytes": 146242307,
+        "sha256": "71559a60837468731f8baa71c1ab9680a2248930ce9f476b6bf13aae6ad9a880",
+        "independent_hash_and_size_verified": true
+      },
+      "sirena_fixed": {
+        "file": "Sirena-export-fixed.tab",
+        "bytes": 56128294,
+        "sha256": "45c56c0f0c1f146468006788b7727dfd77d7222d9b34b3ad15fec208720cb261",
+        "independent_hash_and_size_verified": true
+      },
+      "skyteam_yaml": {
+        "file": "SkyTeam-Exchange.yaml",
+        "bytes": 163560839,
+        "sha256": "ce4e47a2ba6f3db6fca0e86f603de032d0b32e5e20f613b638dafee11b6ad2a9",
+        "independent_hash_and_size_verified": true
+      },
+      "timetable_pdf": {
+        "file": "Skyteam_Timetable.pdf",
+        "bytes": 311801125,
+        "sha256": "b7b3848d320e788518c315fd2d7655106dd172692238bb34e02c9e8cd4daf34d",
+        "independent_hash_and_size_verified": true
+      }
+    },
+    "reader_reports": {
+      "boarding_csv": {
+        "status": "complete",
+        "counts": {
+          "provenance": 542789,
+          "identifiers": 232494,
+          "person_observations": 155147,
+          "travel_observations": 155147,
+          "errors": 1,
+          "schedules": 0
+        },
+        "error_severities": {
+          "info": 1
+        }
+      },
+      "boardingpass_xlsx": {
+        "status": "complete",
+        "counts": {
+          "provenance": 1978354,
+          "identifiers": 746812,
+          "person_observations": 615771,
+          "travel_observations": 615771,
+          "schedules": 0,
+          "errors": 0
+        },
+        "error_severities": {}
+      },
+      "forum_json": {
+        "status": "complete",
+        "counts": {
+          "provenance": 1464406,
+          "travel_observations": 1308987,
+          "person_observations": 66592,
+          "identifiers": 88827,
+          "schedules": 0,
+          "errors": 0
+        },
+        "error_severities": {}
+      },
+      "pointz_xml": {
+        "status": "complete",
+        "counts": {
+          "provenance": 591565,
+          "travel_observations": 436090,
+          "identifiers": 88818,
+          "person_observations": 66657,
+          "schedules": 0,
+          "errors": 0
+        },
+        "error_severities": {}
+      },
+      "sirena_fixed": {
+        "status": "complete",
+        "counts": {
+          "provenance": 674945,
+          "identifiers": 363431,
+          "person_observations": 155757,
+          "travel_observations": 155757,
+          "schedules": 0,
+          "errors": 0
+        },
+        "error_severities": {}
+      },
+      "skyteam_yaml": {
+        "status": "complete",
+        "counts": {
+          "provenance": 5061159,
+          "person_observations": 1687053,
+          "identifiers": 1687053,
+          "travel_observations": 1687053,
+          "schedules": 0,
+          "errors": 0
+        },
+        "error_severities": {}
+      },
+      "timetable_pdf": {
+        "status": "complete",
+        "counts": {
+          "schedules": 1527643,
+          "provenance": 1527643,
+          "person_observations": 0,
+          "identifiers": 0,
+          "travel_observations": 0,
+          "errors": 0
+        },
+        "pages": 27514,
+        "total_pages": 27514,
+        "excluded_pages": 0,
+        "extraction_errors": 0,
+        "rows": 1527643
+      }
+    },
+    "error_level_error_count": 0,
+    "all_reader_reports_status_complete": true
+  },
+  "core": {
+    "status": "complete_with_limitations",
+    "input_mode": "raw",
+    "options": {
+      "batch_size": 4000,
+      "memory_limit": "1GB",
+      "chunk_pages": 100,
+      "sample_size": 30,
+      "require_all": true,
+      "allow_source_errors": false
+    },
+    "configured_sources": [
+      "boarding_csv",
+      "boardingpass_xlsx",
+      "forum_json",
+      "pointz_xml",
+      "sirena_fixed",
+      "skyteam_yaml",
+      "timetable_pdf"
+    ],
+    "personal_sources_missing": [],
+    "limitations": [
+      "independent_review_pending"
+    ],
+    "canonical": {
+      "status": "complete",
+      "counts": {
+        "observations": 2746977,
+        "identifiers": 3207435,
+        "travel_observations": 4358805,
+        "schedules": 1527643,
+        "provenance": 11840861,
+        "errors": 1
+      },
+      "normalization_errors": 0,
+      "source_error_severities": {
+        "info": 1
+      },
+      "balances": [
+        {
+          "source_id": "boarding_csv",
+          "entity_table": "observations",
+          "input_rows": 155147,
+          "output_rows": 155147,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "forum_json",
+          "entity_table": "observations",
+          "input_rows": 66592,
+          "output_rows": 66592,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "pointz_xml",
+          "entity_table": "observations",
+          "input_rows": 66657,
+          "output_rows": 66657,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "sirena_fixed",
+          "entity_table": "observations",
+          "input_rows": 155757,
+          "output_rows": 155757,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "skyteam_yaml",
+          "entity_table": "observations",
+          "input_rows": 1687053,
+          "output_rows": 1687053,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "boardingpass_xlsx",
+          "entity_table": "observations",
+          "input_rows": 615771,
+          "output_rows": 615771,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "boarding_csv",
+          "entity_table": "identifiers",
+          "input_rows": 232494,
+          "output_rows": 232494,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "forum_json",
+          "entity_table": "identifiers",
+          "input_rows": 88827,
+          "output_rows": 88827,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "pointz_xml",
+          "entity_table": "identifiers",
+          "input_rows": 88818,
+          "output_rows": 88818,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "sirena_fixed",
+          "entity_table": "identifiers",
+          "input_rows": 363431,
+          "output_rows": 363431,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "skyteam_yaml",
+          "entity_table": "identifiers",
+          "input_rows": 1687053,
+          "output_rows": 1687053,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "boardingpass_xlsx",
+          "entity_table": "identifiers",
+          "input_rows": 746812,
+          "output_rows": 746812,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "boarding_csv",
+          "entity_table": "travel_observations",
+          "input_rows": 155147,
+          "output_rows": 155147,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "forum_json",
+          "entity_table": "travel_observations",
+          "input_rows": 1308987,
+          "output_rows": 1308987,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "pointz_xml",
+          "entity_table": "travel_observations",
+          "input_rows": 436090,
+          "output_rows": 436090,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "sirena_fixed",
+          "entity_table": "travel_observations",
+          "input_rows": 155757,
+          "output_rows": 155757,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "skyteam_yaml",
+          "entity_table": "travel_observations",
+          "input_rows": 1687053,
+          "output_rows": 1687053,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "boardingpass_xlsx",
+          "entity_table": "travel_observations",
+          "input_rows": 615771,
+          "output_rows": 615771,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "timetable_pdf",
+          "entity_table": "schedules",
+          "input_rows": 1527643,
+          "output_rows": 1527643,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "boarding_csv",
+          "entity_table": "provenance",
+          "input_rows": 542789,
+          "output_rows": 542789,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "forum_json",
+          "entity_table": "provenance",
+          "input_rows": 1464406,
+          "output_rows": 1464406,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "pointz_xml",
+          "entity_table": "provenance",
+          "input_rows": 591565,
+          "output_rows": 591565,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "sirena_fixed",
+          "entity_table": "provenance",
+          "input_rows": 674945,
+          "output_rows": 674945,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "skyteam_yaml",
+          "entity_table": "provenance",
+          "input_rows": 5061159,
+          "output_rows": 5061159,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "boardingpass_xlsx",
+          "entity_table": "provenance",
+          "input_rows": 1978354,
+          "output_rows": 1978354,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "timetable_pdf",
+          "entity_table": "provenance",
+          "input_rows": 1527643,
+          "output_rows": 1527643,
+          "duplicates_removed": 0
+        },
+        {
+          "source_id": "boarding_csv",
+          "entity_table": "errors",
+          "input_rows": 1,
+          "output_rows": 1,
+          "duplicates_removed": 0
+        }
+      ]
+    },
+    "geography": {
+      "status": "complete",
+      "counts": {
+        "schedules": 1527643,
+        "logical_schedule_links": 104790822,
+        "schedule_reference_associations": 104790822,
+        "schedule_links": 0,
+        "travels": 4358805,
+        "schedule_reference_groups": 75738,
+        "schedule_reference_members": 1804414,
+        "unique_places_by_source_field": 14077
+      },
+      "contract_version": "2.0",
+      "rule_version": "airports:1.1",
+      "reference_associations_are_observed_travel": false,
+      "limitations": [
+        "Reference is not a certified historical airport-code register.",
+        "Unresolved geography/time and out-of-period links are not parser errors."
+      ]
+    },
+    "resolution": {
+      "status": "complete",
+      "counts": {
+        "persons": 840606,
+        "person_links": 2746977,
+        "person_pairs": 2805429,
+        "segments": 2979166,
+        "segment_links": 4358805,
+        "conflicts": 159119,
+        "blocking_issues": 113257
+      },
+      "balances": {
+        "input_observations": 2746977,
+        "person_links": 2746977,
+        "persons": 840606,
+        "observations_combined": 1906371,
+        "input_travels": 4358805,
+        "segment_links": 4358805,
+        "segments": 2979166,
+        "duplicate_travel_witnesses_combined": 1379639
+      },
+      "person_pair_statuses": {
+        "ambiguous": 483181,
+        "accepted": 2271160,
+        "rejected": 51088
+      },
+      "person_link_statuses": {
+        "ambiguous": 1678518,
+        "accepted": 1068459
+      },
+      "segment_statuses": {
+        "resolved": 2663437,
+        "ambiguous": 315729
+      },
+      "graph_eligible_segments": 52831,
+      "review": {
+        "target": {
+          "accepted": 50,
+          "ambiguous": 30,
+          "rejected": 20
+        },
+        "available": {
+          "ambiguous": 483181,
+          "accepted": 2271160,
+          "rejected": 51088
+        },
+        "selected": {
+          "accepted": 50,
+          "ambiguous": 30,
+          "rejected": 20
+        },
+        "shortages": {
+          "accepted": 0,
+          "ambiguous": 0,
+          "rejected": 0
+        },
+        "reviewed": 0,
+        "acceptance": "pending_independent_review",
+        "method": "deterministic SHA-256 ordering within accepted/ambiguous/rejected strata",
+        "seed": "T13-review-v1",
+        "population_accuracy": null,
+        "editable_csv": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/work/t16/review/person_pairs.csv"
+      },
+      "limitations": [
+        "No independent human review has been fabricated; CSV reviewer fields start blank.",
+        "Similarity is a string feature, not a match probability.",
+        "Stable IDs mean same snapshot/rules, independent of input ordering and batch size; incremental merges may change anchors.",
+        "Uncertain identities and weak flight evidence are excluded from confident graph participation.",
+        "Large blocks use a stable spanning star; oversized name/trip groups stay explicitly unresolved.",
+        "Only observed geography/time is used for event deduplication; schedule inference is not observed travel."
+      ]
+    },
+    "quality": {
+      "status": "pass_with_limitations",
+      "input_dir": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/work/t16/processed",
+      "counts": {
+        "observations": 2746977,
+        "identifiers": 3207435,
+        "travel_observations": 4358805,
+        "schedules": 1527643,
+        "provenance": 11840861,
+        "errors": 1
+      },
+      "schemas": {
+        "observations": true,
+        "identifiers": true,
+        "travel_observations": true,
+        "schedules": true,
+        "provenance": true,
+        "errors": true
+      },
+      "duplicate_or_null_keys": {
+        "observations": 0,
+        "identifiers": 0,
+        "travel_observations": 0,
+        "schedules": 0,
+        "provenance": 0,
+        "errors": 0
+      },
+      "relations": {
+        "identifiers.observation_id->observations.observation_id": 0,
+        "travel_observations.observation_id->observations.observation_id": 0,
+        "travel_observations.loyalty_identifier_id->identifiers.identifier_id": 0,
+        "loyalty_context_mismatch": 0
+      },
+      "provenance": {
+        "duplicate_links": 0,
+        "missing_by_table": {
+          "observations": 0,
+          "identifiers": 0,
+          "travel_observations": 0,
+          "schedules": 0,
+          "errors": 0
+        },
+        "unknown_targets": 0
+      },
+      "coverage_by_source": {
+        "boarding_csv": {
+          "observations": 155147,
+          "with_name": 155147,
+          "with_birth_date": 155147,
+          "identifiers": 232494,
+          "travels": 155147,
+          "with_route": 0,
+          "with_departure": 155147
+        },
+        "boardingpass_xlsx": {
+          "observations": 615771,
+          "with_name": 615771,
+          "with_birth_date": 0,
+          "identifiers": 746812,
+          "travels": 615771,
+          "with_route": 615771,
+          "with_departure": 615771
+        },
+        "forum_json": {
+          "observations": 66592,
+          "with_name": 33460,
+          "with_birth_date": 0,
+          "identifiers": 88827,
+          "travels": 1308987,
+          "with_route": 1308987,
+          "with_departure": 1308987
+        },
+        "pointz_xml": {
+          "observations": 66657,
+          "with_name": 66657,
+          "with_birth_date": 0,
+          "identifiers": 88818,
+          "travels": 436090,
+          "with_route": 436090,
+          "with_departure": 436090
+        },
+        "sirena_fixed": {
+          "observations": 155757,
+          "with_name": 155757,
+          "with_birth_date": 77703,
+          "identifiers": 363431,
+          "travels": 155757,
+          "with_route": 155757,
+          "with_departure": 155757
+        },
+        "skyteam_yaml": {
+          "observations": 1687053,
+          "with_name": 0,
+          "with_birth_date": 0,
+          "identifiers": 1687053,
+          "travels": 1687053,
+          "with_route": 1687053,
+          "with_departure": 1687053
+        }
+      },
+      "errors_by_severity": {
+        "info": 1
+      },
+      "balance": {
+        "status": "passed",
+        "mismatches": {},
+        "input_counts": {
+          "observations": 2746977,
+          "identifiers": 3207435,
+          "travel_observations": 4358805,
+          "schedules": 1527643,
+          "provenance": 11840861,
+          "errors": 1
+        },
+        "source_status": "complete"
+      },
+      "blockers": [],
+      "limitations": [
+        "independent_review_pending"
+      ],
+      "review_sample": {
+        "path": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/work/t16/quality/quality_review_sample.csv",
+        "rows": 180,
+        "status": "pending_independent_review"
+      }
+    },
+    "run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+    "repair": {
+      "version": "workbook-coverage-repair:1",
+      "repair_sha256": "22f8459dbbab3342a780eed8944563c96a5e151a8372c52acd986180f6fdf852",
+      "parent_manifest_sha256": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517"
+    }
+  },
+  "product": {
+    "status": "complete",
+    "schema_version": "1.1",
+    "counts": {
+      "persons": 840606,
+      "segments": 2979166,
+      "top50": 50
+    },
+    "eligibility": [
+      {
+        "eligibility_status": "eligible",
+        "profiles": 5346
+      },
+      {
+        "eligibility_status": "insufficient_data",
+        "profiles": 798450
+      },
+      {
+        "eligibility_status": "no_matches",
+        "profiles": 36810
+      }
+    ],
+    "population_factor_statuses": {
+      "M01": {
+        "matched": 1841,
+        "not_matched": 26681,
+        "unavailable": 812084
+      },
+      "M02": {
+        "matched": 1566,
+        "not_matched": 24783,
+        "unavailable": 814257
+      },
+      "M03": {
+        "matched": 2346,
+        "not_matched": 39807,
+        "unavailable": 798453
+      }
+    },
+    "window": {
+      "basis": "global observed dataset dates; source completeness is unknown",
+      "days": 366,
+      "end": "2018-01-01",
+      "start": "2017-01-01"
+    },
+    "source_provenance": {
+      "auxiliary_repair": {
+        "parent_core_run_id": "data-9daf7d3ba35b5972df53",
+        "parent_manifest_sha256": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+        "repair_manifest_sha256": "73c254b331fe872f9526da639866873baf686e98988fd3d9b20e51b1bae950df",
+        "scope": "workbook_coverage.csv only; canonical and resolution tables unchanged",
+        "status": "verified_auxiliary_repair",
+        "version": "workbook-coverage-repair:1"
+      },
+      "configured_sources": [
+        "boarding_csv",
+        "boardingpass_xlsx",
+        "forum_json",
+        "pointz_xml",
+        "sirena_fixed",
+        "skyteam_yaml",
+        "timetable_pdf"
+      ],
+      "core_run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+      "core_status": "complete_with_limitations",
+      "independent_human_review": "pending",
+      "input_mode": "raw",
+      "origin": "verified_t13",
+      "raw_reingestion_verified": true
+    },
+    "forest": {
+      "calibration_rows": 4907,
+      "combination": "0.5 * IF calibration percentile + 0.5 * rules calibration percentile; separate experimental score",
+      "config": {
+        "enabled": true,
+        "max_samples": 256,
+        "max_training_rows": 100000,
+        "n_estimators": 200,
+        "random_state": 1901
+      },
+      "features": [
+        "trip_rate_30_days",
+        "quick_return_share",
+        "repeated_route_share"
+      ],
+      "scope": "Retrospective unsupervised anomaly detection; scoring all supplied profiles, not future prediction",
+      "split": "sha256(person_id) first 32 bits mod 10: 0–5 train, 6–7 calibration, 8–9 holdout",
+      "status": "complete",
+      "training_rows": 14473,
+      "versions": {
+        "numpy": "2.5.4",
+        "sklearn": "1.9.1"
+      }
+    },
+    "if_roles": {
+      "calibration": 4907,
+      "train": 14473,
+      "holdout": 4931
+    },
+    "if_scored_profiles": 24311,
+    "graph": {
+      "events": 50772,
+      "excluded_oversized_events": 0,
+      "limitation": "Repeated observed co-occurrence; not calibrated significance. M07 does not add a ranking vote.",
+      "ranking_contribution": false,
+      "repeated_pairs": 0,
+      "status": "complete"
+    },
+    "evaluation": {
+      "experiments": [
+        {
+          "jaccard_to_primary": 0.20481927710843373,
+          "omitted_criterion": null,
+          "threshold_scale": 0.8,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.42857142857142855,
+          "omitted_criterion": "M01",
+          "threshold_scale": 0.8,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.041666666666666664,
+          "omitted_criterion": "M02",
+          "threshold_scale": 0.8,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.030927835051546393,
+          "omitted_criterion": "M03",
+          "threshold_scale": 0.8,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 1.0,
+          "omitted_criterion": null,
+          "threshold_scale": 1.0,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.47058823529411764,
+          "omitted_criterion": "M01",
+          "threshold_scale": 1.0,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.08695652173913043,
+          "omitted_criterion": "M02",
+          "threshold_scale": 1.0,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.0989010989010989,
+          "omitted_criterion": "M03",
+          "threshold_scale": 1.0,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.35135135135135137,
+          "omitted_criterion": null,
+          "threshold_scale": 1.2,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.35135135135135137,
+          "omitted_criterion": "M01",
+          "threshold_scale": 1.2,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.06382978723404255,
+          "omitted_criterion": "M02",
+          "threshold_scale": 1.2,
+          "top_count": 50
+        },
+        {
+          "jaccard_to_primary": 0.13636363636363635,
+          "omitted_criterion": "M03",
+          "threshold_scale": 1.2,
+          "top_count": 50
+        }
+      ],
+      "independent_review": "pending",
+      "population_fixed": true,
+      "population_size": 42156,
+      "quality_metrics": null,
+      "reason": "No supplied ground-truth labels; precision/recall and reviewer decisions are not fabricated.",
+      "rules_if_comparison": "Both methods ranked on the same complete-case IF population; not a comparison against the broader primary top50.",
+      "rules_if_population_size": 24311,
+      "rules_if_top50_jaccard": 0.35135135135135137,
+      "status": "computed_without_labels"
+    },
+    "limitations": [
+      "T13: No independent human review has been fabricated; CSV reviewer fields start blank.",
+      "T13: Similarity is a string feature, not a match probability.",
+      "T13: Stable IDs mean same snapshot/rules, independent of input ordering and batch size; incremental merges may change anchors.",
+      "T13: Uncertain identities and weak flight evidence are excluded from confident graph participation.",
+      "T13: Large blocks use a stable spanning star; oversized name/trip groups stay explicitly unresolved.",
+      "T13: Only observed geography/time is used for event deduplication; schedule inference is not observed travel.",
+      "T13 acceptance: pending_independent_100_pair_review_and_signoff.",
+      "Upstream reader error severities: {\"info\": 1}.",
+      "T12: No identity resolution or substantive trip deduplication; T13 owns those decisions.",
+      "T12: Source-scoped document/ticket keys require confirmed type/issuer before cross-source matching.",
+      "T12 acceptance: pending_real_data_review.",
+      "Upstream reader report: {\"contract_version\": \"1.0\", \"counts\": {\"errors\": 1, \"identifiers\": 232494, \"person_observations\": 155147, \"provenance\": 542789, \"schedules\": 0, \"travel_observations\": 155147}, \"error_severities\": {\"info\": 1}, \"input_counts\": {\"input_rows\": 155148}, \"input_path\": \"/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/raw/BoardingData.csv\", \"options\": {\"batch_size\": 4000, \"encoding\": \"utf-8-sig\"}, \"process_peak_rss_mib\": 184.1328125, \"reader_version\": \"1.0\", \"seconds\": 42.08425720900004, \"sha256\": \"9ba2c4be763f5c51b38f99e84e86b68737ba3dc0cfab00b498a9d3de029b053f\", \"source_id\": \"boarding_csv\", \"status\": \"complete\"}.",
+      "T11: Reference is not a certified historical airport-code register.",
+      "T11: Unresolved geography/time and out-of-period links are not parser errors.",
+      "T11 acceptance: pending_real_data_and_T12_review.",
+      "Published manifest hashes verify artifact integrity and provenance consistency; they are not a digital signature or independent raw-source authentication.",
+      "T16: independent_review_pending",
+      "T16 acceptance: pending_real_data_and_independent_review.",
+      "T16 XLSX coverage verified: {\"accepted_rows\": 615771, \"boarding_card_sheets\": 615771, \"canonical_evidence\": {\"errors\": 0, \"observations\": 615771, \"per_sheet_counts_verified\": true, \"travel_observations\": 615771}, \"coverage_rows\": 615771, \"coverage_sha256\": \"4b0f7a3761a76b8406e7cf8859ef5c0f76997da551580e12af5a802e44684a7d\", \"errors\": 0, \"excluded_rows\": 0, \"input_rows\": 615771, \"sheets\": 615771, \"source_sha256\": \"b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6\", \"status\": \"passed\", \"validator_version\": \"xlsx-coverage:1.0\", \"workbooks\": 366}.",
+      "T16 source inventory: mode=raw; configured sources=boarding_csv, boardingpass_xlsx, forum_json, pointz_xml, sirena_fixed, skyteam_yaml, timetable_pdf; raw_files_verified=true; original source paths are recorded evidence and are not reopened by the product build.",
+      "T16 source acceptance options: {\"allow_source_errors\": false, \"batch_size\": 4000, \"chunk_pages\": 100, \"memory_limit\": \"1GB\", \"require_all\": true, \"sample_size\": 30}.",
+      "The source observation window is inferred from dataset dates; continuous source coverage is not asserted.",
+      "Rule thresholds and weights require domain review; scores are not class probabilities."
+    ],
+    "run_id": "product-5658ce2a39028f7c6781",
+    "elapsed_seconds": 165.221
+  },
+  "export": {
+    "counts": {
+      "exported_factors": 150,
+      "exported_segments": 1133,
+      "persons": 840606,
+      "segments": 2979166,
+      "source_evidence_rows": 2025,
+      "top50": 50
+    },
+    "top50_coverage": {
+      "available_factors": 146,
+      "dated_segments": 1133,
+      "factor_statuses": {
+        "matched": 119,
+        "not_matched": 27,
+        "unavailable": 4
+      },
+      "plottable_segments": 1125,
+      "profiles_with_all_factors": 46,
+      "segments_without_source_links": 0,
+      "source_linked_segments": 1133,
+      "total_factors": 150,
+      "undated_segments": 0,
+      "unplottable_segments": 8
+    },
+    "matched_factor_count_distribution": {
+      "3": 19,
+      "2": 31
+    },
+    "available_factor_count_distribution": {
+      "3": 46,
+      "2": 4
+    },
+    "unavailable_value_presentation": {
+      "count": 4,
+      "criterion_id": "M01",
+      "behavior": "ProductStore masks the intermediate table value as null for unavailable factors; CSV is blank. Zero contribution and the availability reason are retained.",
+      "source_table_values_modified": false
+    },
+    "unknown_coordinate_endpoint_counts": {
+      "destination": 3,
+      "origin": 5
+    },
+    "flight_status_counts": {
+      "identity_status": {
+        "accepted": 1133
+      },
+      "resolution_status": {
+        "resolved": 1125,
+        "ambiguous": 8
+      },
+      "participation_status": {
+        "reported_only": 1068,
+        "boarding_record_present": 65
+      },
+      "departure_precision": {
+        "date": 1068,
+        "minute": 65
+      },
+      "arrival_precision": {
+        "null": 1133
+      }
+    },
+    "report_id": "report-60d06cef88956736232d",
+    "status": "complete",
+    "published_file_count": 7,
+    "published_total_bytes": 13509939
+  },
+  "numerical_audit": {
+    "counts": {
+      "persons": 840606,
+      "segments": 2979166,
+      "top50": 50
+    },
+    "evidence_links_checked": 2374,
+    "if_roles": {
+      "calibration": 4907,
+      "holdout": 4931,
+      "train": 14473
+    },
+    "independent_human_review": "pending",
+    "population_scores_consistent": true,
+    "profiles_independently_checked": 50,
+    "raw_reingestion_verified": true,
+    "run_id": "product-5658ce2a39028f7c6781",
+    "segments_checked": 1133,
+    "source_provenance": {
+      "auxiliary_repair": {
+        "parent_core_run_id": "data-9daf7d3ba35b5972df53",
+        "parent_manifest_sha256": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+        "repair_manifest_sha256": "73c254b331fe872f9526da639866873baf686e98988fd3d9b20e51b1bae950df",
+        "scope": "workbook_coverage.csv only; canonical and resolution tables unchanged",
+        "status": "verified_auxiliary_repair",
+        "version": "workbook-coverage-repair:1"
+      },
+      "configured_sources": [
+        "boarding_csv",
+        "boardingpass_xlsx",
+        "forum_json",
+        "pointz_xml",
+        "sirena_fixed",
+        "skyteam_yaml",
+        "timetable_pdf"
+      ],
+      "core_run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+      "core_status": "complete_with_limitations",
+      "independent_human_review": "pending",
+      "input_mode": "raw",
+      "origin": "verified_t13",
+      "raw_reingestion_verified": true
+    },
+    "status": "passed",
+    "evidence": {
+      "path": "/tmp/yoyoflot-products/source-product-final-verification.json",
+      "sha256": "447ac23629470bf4f85ebabf9e1f8fffb0baeff7033fe0d0d33920f367beee81"
+    }
+  },
+  "independent_export_consistency_review": {
+    "evidence": {
+      "path": "final_export_review.json",
+      "sha256": "be5221da3e8207d28b4ec2435d7339dd0617304f042915d29bc78a5973d43a09"
+    },
+    "record": {
+      "review_kind": "independent_read_only_final_export_consistency_review",
+      "created_at": "2026-10-18T18:28:17.031446+00:00",
+      "status": "passed",
+      "product_run_id": "product-5658ce2a39028f7c6781",
+      "core_run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+      "product_manifest_sha256": "2cdfca27214f546973bd859bd1a32add18058ed32963d8f7c855165cb9cdb452",
+      "report_manifest_sha256": "8b721baa21801c15a0122ce8b4bf761a3569a6e0e5490c83027f5d8587b1aacc",
+      "checks": {
+        "expected_product_run": true,
+        "completed_product_and_report": true,
+        "all_report_run_ids": true,
+        "report_manifest_hashes": true,
+        "product_manifest_hashes": true,
+        "report_source_manifest_hash": true,
+        "report_source_file_inventory": true,
+        "core_provenance_manifests_exact": true,
+        "seven_original_raw_hashes_and_sizes": true,
+        "raw_source_provenance_consistent": true,
+        "forest_complete": true,
+        "fifty_unique_profiles": true,
+        "rank_one_to_fifty": true,
+        "csv_top_ids": true,
+        "three_factors_per_profile": true,
+        "ranking_sort_order": true,
+        "profiles_exact_frozen_top_rows": true,
+        "top_matches_primary_global_ranking": true,
+        "unique_factor_csv_rows": true,
+        "unique_flight_csv_rows": true,
+        "all_profile_segments_match_frozen_rows": true,
+        "all_profile_source_evidence_matches_frozen_rows": true,
+        "all_if_rows_match_frozen_scores": true,
+        "all_factor_evidence_memberships_valid": true,
+        "all_csv_factor_cells_match_profiles": true,
+        "all_csv_flight_cells_match_profiles": true,
+        "all_csv_top_cells_match_profiles": true,
+        "all_coordinates_match_frozen_reference": true,
+        "all_factor_contributions_and_scores_consistent": true,
+        "all_profile_route_balances_consistent": true,
+        "all_factor_fields_match_frozen_rows_with_documented_unavailable_value_mask": true,
+        "unavailable_factors_expose_no_usable_value": true,
+        "no_flights_dropped": true,
+        "all_evidence_retained": true,
+        "population_factor_coverage_matches_frozen_table": true,
+        "summary_top_rows_exact": true,
+        "summary_top_coverage_exact": true,
+        "honest_independent_review_and_accuracy_limits": true,
+        "human_report_explicit_limitations": true,
+        "all_repair_provenance_copied_exactly": true,
+        "all_repair_provenance_bound_to_product_request": true,
+        "auxiliary_repair_provenance_identity": true,
+        "only_inherited_coverage_artifact_changed": true,
+        "inherited_core_metadata_unchanged": true,
+        "repair_structural_identity": true,
+        "all_inherited_core_table_identities_unchanged": true,
+        "all_retained_core_files_samefile_as_original": true,
+        "repaired_xlsx_coverage_full_counts": true,
+        "repaired_xlsx_coverage_card_rows_exact": true,
+        "repaired_coverage_ordered_inventory_identity": true,
+        "repaired_coverage_sha_identity": true,
+        "all_analytical_tables_and_model_bytes_unchanged": true,
+        "product_population_counts_match_parquet": true
+      },
+      "failures": [],
+      "counts": {
+        "exported_factors": 150,
+        "exported_segments": 1133,
+        "persons": 840606,
+        "segments": 2979166,
+        "source_evidence_rows": 2025,
+        "top50": 50,
+        "raw_files": 7,
+        "raw_bytes": 1541640375,
+        "if_scored_profiles": 24311
+      },
+      "source_provenance": {
+        "auxiliary_repair": {
+          "parent_core_run_id": "data-9daf7d3ba35b5972df53",
+          "parent_manifest_sha256": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+          "repair_manifest_sha256": "73c254b331fe872f9526da639866873baf686e98988fd3d9b20e51b1bae950df",
+          "scope": "workbook_coverage.csv only; canonical and resolution tables unchanged",
+          "status": "verified_auxiliary_repair",
+          "version": "workbook-coverage-repair:1"
+        },
+        "configured_sources": [
+          "boarding_csv",
+          "boardingpass_xlsx",
+          "forum_json",
+          "pointz_xml",
+          "sirena_fixed",
+          "skyteam_yaml",
+          "timetable_pdf"
+        ],
+        "core_run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+        "core_status": "complete_with_limitations",
+        "independent_human_review": "pending",
+        "input_mode": "raw",
+        "origin": "verified_t13",
+        "raw_reingestion_verified": true
+      },
+      "raw_hashes_verified": {
+        "raw:boarding_csv": true,
+        "raw:boardingpass_xlsx": true,
+        "raw:forum_json": true,
+        "raw:pointz_xml": true,
+        "raw:sirena_fixed": true,
+        "raw:skyteam_yaml": true,
+        "raw:timetable_pdf": true
+      },
+      "top50_coverage": {
+        "available_factors": 146,
+        "total_factors": 150,
+        "factor_statuses": {
+          "matched": 119,
+          "not_matched": 27,
+          "unavailable": 4
+        },
+        "profiles_with_all_factors": 46,
+        "dated_segments": 1133,
+        "undated_segments": 0,
+        "plottable_segments": 1125,
+        "unplottable_segments": 8,
+        "source_linked_segments": 1133,
+        "segments_without_source_links": 0
+      },
+      "top50_matched_factor_count_distribution": {
+        "3": 19,
+        "2": 31
+      },
+      "top50_available_factor_count_distribution": {
+        "3": 46,
+        "2": 4
+      },
+      "factor_variety": {
+        "M02": {
+          "statuses": {
+            "matched": 50
+          },
+          "availability_reasons": {},
+          "distinct_non_null_values": 22,
+          "value_range": [
+            0.07142857142857142,
+            0.2222222222222222
+          ],
+          "distinct_contributions": 21
+        },
+        "M03": {
+          "statuses": {
+            "matched": 49,
+            "not_matched": 1
+          },
+          "availability_reasons": {},
+          "distinct_non_null_values": 33,
+          "value_range": [
+            0.0714285714285714,
+            0.4
+          ],
+          "distinct_contributions": 30
+        },
+        "M01": {
+          "statuses": {
+            "matched": 20,
+            "not_matched": 26,
+            "unavailable": 4
+          },
+          "availability_reasons": {
+            "Есть неоднозначные сегменты": 4
+          },
+          "distinct_non_null_values": 20,
+          "value_range": [
+            0.9836065573770492,
+            2.7049180327868854
+          ],
+          "distinct_contributions": 8
+        }
+      },
+      "flight_status_counts": {
+        "identity_status": {
+          "accepted": 1133
+        },
+        "resolution_status": {
+          "resolved": 1125,
+          "ambiguous": 8
+        },
+        "participation_status": {
+          "reported_only": 1068,
+          "boarding_record_present": 65
+        },
+        "departure_precision": {
+          "date": 1068,
+          "minute": 65
+        },
+        "arrival_precision": {
+          "null": 1133
+        }
+      },
+      "unknown_coordinate_endpoint_counts": {
+        "destination": 3,
+        "origin": 5
+      },
+      "source_evidence_counts": {
+        "forum_json": 583,
+        "skyteam_yaml": 1099,
+        "pointz_xml": 278,
+        "boardingpass_xlsx": 65
+      },
+      "model_status": {
+        "forest": "complete",
+        "training_rows": 14473,
+        "calibration_rows": 4907,
+        "graph": "complete"
+      },
+      "unavailable_value_presentation": {
+        "count": 4,
+        "criterion_id": "M01",
+        "source_table_values_modified": false,
+        "behavior": "ProductStore masks intermediate values of unavailable factors as null; CSV is blank. Zero contribution and reason remain."
+      },
+      "repair_coverage_counts": {
+        "coverage_rows": 615771,
+        "sheets": 615771,
+        "boarding_card_sheets": 615771,
+        "input_rows": 615771,
+        "accepted_rows": 615771,
+        "errors": 0,
+        "workbooks": 366
+      },
+      "repair_ordered_keys_sha256": "3ff0043268fd8742cb06c5cd7ef52f324ca9ea0671a3f61810812c4d6674f0f2",
+      "copied_repair_provenance": {
+        "repair/audit_code/coverage.py": true,
+        "repair_manifest.json": true,
+        "repair/raw_inventory.json": true,
+        "repair/fresh_environment.json": true,
+        "repair/coverage_validation.json": true,
+        "repair/fresh_source_report.json": true,
+        "repair/parent_run_manifest.json": true,
+        "repair/audit_code/repair.py": true
+      },
+      "inherited_core_parquet_identity_count": 22,
+      "inherited_samefile_count": 59,
+      "analytical_artifact_comparison": {
+        "evaluation.json": {
+          "old_sha256": "c07f014b615fdb4bd3175e922800b08fa7f1248f59864d35a52a2d4901725cd2",
+          "new_sha256": "c07f014b615fdb4bd3175e922800b08fa7f1248f59864d35a52a2d4901725cd2",
+          "byte_identical": true
+        },
+        "forest.json": {
+          "old_sha256": "1e8c940e1231f6fe013e15546e2053da21f00fbf9414af2a44c7a1feb357db40",
+          "new_sha256": "1e8c940e1231f6fe013e15546e2053da21f00fbf9414af2a44c7a1feb357db40",
+          "byte_identical": true
+        },
+        "graph.json": {
+          "old_sha256": "69c33fb473e8da2477cfd0994abdeb30ca42a1e66e102c5941b2cebe50bde967",
+          "new_sha256": "69c33fb473e8da2477cfd0994abdeb30ca42a1e66e102c5941b2cebe50bde967",
+          "byte_identical": true
+        },
+        "if_scores.parquet": {
+          "old_sha256": "b803ff04a8842be3ade9e254def754539a2764eb81990df68250f1a2398c0891",
+          "new_sha256": "b803ff04a8842be3ade9e254def754539a2764eb81990df68250f1a2398c0891",
+          "byte_identical": true
+        },
+        "isolation_forest.joblib": {
+          "old_sha256": "0f072ea5fd8a7cfa70ad63c66bd4221897b00eb43accee20a435bc0b32007a42",
+          "new_sha256": "0f072ea5fd8a7cfa70ad63c66bd4221897b00eb43accee20a435bc0b32007a42",
+          "byte_identical": true
+        },
+        "rules.json": {
+          "old_sha256": "daff5c6770ea5f106b147dcfca00a21e75a6cff5a95344c23dcb930e5f92808d",
+          "new_sha256": "daff5c6770ea5f106b147dcfca00a21e75a6cff5a95344c23dcb930e5f92808d",
+          "byte_identical": true
+        },
+        "tables/event_members.parquet": {
+          "old_sha256": "f462e93eddd5068b1359a0b3584ddef5c52c796f5d0429b74a624e07ebbb1070",
+          "new_sha256": "f462e93eddd5068b1359a0b3584ddef5c52c796f5d0429b74a624e07ebbb1070",
+          "byte_identical": true
+        },
+        "tables/explanations.parquet": {
+          "old_sha256": "be44d80d8466fbe29706314ff943ddb800d8b2b4913f9f140bd660c6bfa05d19",
+          "new_sha256": "be44d80d8466fbe29706314ff943ddb800d8b2b4913f9f140bd660c6bfa05d19",
+          "byte_identical": true
+        },
+        "tables/features.parquet": {
+          "old_sha256": "cd7fa2dc47fb22431e01bad289fb20cdaae0634d5e8e3dcb88b99cbc36a38030",
+          "new_sha256": "cd7fa2dc47fb22431e01bad289fb20cdaae0634d5e8e3dcb88b99cbc36a38030",
+          "byte_identical": true
+        },
+        "tables/graph_edges.parquet": {
+          "old_sha256": "1cf1b9e29e733202c1e74b6c1048849d41b82e93e1dd0835b34858f89102b3ac",
+          "new_sha256": "1cf1b9e29e733202c1e74b6c1048849d41b82e93e1dd0835b34858f89102b3ac",
+          "byte_identical": true
+        },
+        "tables/persons.parquet": {
+          "old_sha256": "2fcec8f4dce8c01bc9cb5551f289f5f65eb64db4f06db7505385ff9c8f7d8661",
+          "new_sha256": "2fcec8f4dce8c01bc9cb5551f289f5f65eb64db4f06db7505385ff9c8f7d8661",
+          "byte_identical": true
+        },
+        "tables/rankings.parquet": {
+          "old_sha256": "9664103ad4a85c6512c1fe6306e9bbed08a57f6986999b34070a7c2e4e4adbb1",
+          "new_sha256": "9664103ad4a85c6512c1fe6306e9bbed08a57f6986999b34070a7c2e4e4adbb1",
+          "byte_identical": true
+        },
+        "tables/segment_links.parquet": {
+          "old_sha256": "5b5f5cc2fbb92fba922e2f3ef228626b64864ce14775a449beee8d47b39c943e",
+          "new_sha256": "5b5f5cc2fbb92fba922e2f3ef228626b64864ce14775a449beee8d47b39c943e",
+          "byte_identical": true
+        },
+        "tables/segments.parquet": {
+          "old_sha256": "3367887c924c39ff38dd443a41f257cb7e38c0f55b44050a323ecc4244502ae3",
+          "new_sha256": "3367887c924c39ff38dd443a41f257cb7e38c0f55b44050a323ecc4244502ae3",
+          "byte_identical": true
+        },
+        "tables/top50.parquet": {
+          "old_sha256": "5cc65a55a6c86d1e2fa08f0c786e46fcc84040c13580efa26c9d35ca11538281",
+          "new_sha256": "5cc65a55a6c86d1e2fa08f0c786e46fcc84040c13580efa26c9d35ca11538281",
+          "byte_identical": true
+        }
+      },
+      "limitations": [
+        "Technical consistency review only; independent human truth labels and identity/pair signoff remain pending.",
+        "All product/report files and seven raw files were hashed. Full core Parquets were not reread: their inherited manifest identities were compared.",
+        "Raw ZIP sheet inventory was not re-extracted in this audit; its saved ordered-key proof is bound to the repaired CSV and unchanged raw hash.",
+        "No precision, recall, class probability or proven detection accuracy is asserted."
+      ],
+      "findings": [
+        "Every exported factor, segment and source-evidence row was checked against the immutable product tables.",
+        "Unavailable intermediate factor values are explicitly masked through the ProductStore contract, not changed in source tables."
+      ]
+    }
+  },
+  "repeat_run": {
+    "command": [
+      "./build_and_run.sh",
+      "--archive",
+      "/workspace/scratch/9fa4b63d5b39/source_download/Airlines-All.zip",
+      "--core-snapshot",
+      "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+      "--output",
+      "/tmp/yoyoflot-products/source-product-final",
+      "--report-output",
+      "/tmp/yoyoflot-products/source-product-final-report"
+    ],
+    "exit_code": 0,
+    "seconds": 124.34788340699924,
+    "before": {
+      "core_manifest": "5a518216ab8692db011d1a37bcfb7332f7d08e2235d4f68277f85ccec8df2012",
+      "product_manifest": "2cdfca27214f546973bd859bd1a32add18058ed32963d8f7c855165cb9cdb452",
+      "report_manifest": "8b721baa21801c15a0122ce8b4bf761a3569a6e0e5490c83027f5d8587b1aacc",
+      "verification": "447ac23629470bf4f85ebabf9e1f8fffb0baeff7033fe0d0d33920f367beee81"
+    },
+    "after": {
+      "core_manifest": "5a518216ab8692db011d1a37bcfb7332f7d08e2235d4f68277f85ccec8df2012",
+      "product_manifest": "2cdfca27214f546973bd859bd1a32add18058ed32963d8f7c855165cb9cdb452",
+      "report_manifest": "8b721baa21801c15a0122ce8b4bf761a3569a6e0e5490c83027f5d8587b1aacc",
+      "verification": "447ac23629470bf4f85ebabf9e1f8fffb0baeff7033fe0d0d33920f367beee81"
+    },
+    "byte_identical": true,
+    "elapsed_seconds": 124.34788340699924,
+    "manifests_and_verification_byte_identical": true,
+    "core_snapshot_reused": true,
+    "evidence": {
+      "path": "final_repeat_run.json",
+      "sha256": "e5bf27aa109caad88ca623391fc902eeab212d6e1a8df56c15ddb49ad015d5fc"
+    },
+    "scope_note": "Final identical-command repeat after the audited coverage repair and deterministic numeric-report serialization fix. Reuses and verifies published core/product/report; not a cold raw ingestion benchmark."
+  },
+  "timings": {
+    "scope": "Historical core invocation resumed verified ingestion/canonical/geography. The final 254.375-second command validated/reused the separately repaired published core and built the product; the final 124.348-second command reused verified outputs. The XLSX-only recovery is recorded separately. No cold full raw-to-product time is claimed.",
+    "canonical_previous_completed_stage_seconds": 1202.916,
+    "geography_previous_completed_stage_seconds": 789.092,
+    "resolution_report_seconds": 2709.597,
+    "accepted_t16_invocation_seconds": 2811.803,
+    "accepted_t16_manifest_rounded_seconds": 2811.8,
+    "product_build_including_model_seconds": 144.809,
+    "repeated_command_seconds": 66.88933231800002,
+    "accepted_stage_timings": {
+      "preflight": {
+        "action": "executed",
+        "seconds": 1.335
+      },
+      "ingest:boarding_csv": {
+        "action": "reused",
+        "seconds": 0.143
+      },
+      "ingest:forum_json": {
+        "action": "reused",
+        "seconds": 0.268
+      },
+      "ingest:pointz_xml": {
+        "action": "reused",
+        "seconds": 0.118
+      },
+      "ingest:sirena_fixed": {
+        "action": "reused",
+        "seconds": 0.179
+      },
+      "ingest:skyteam_yaml": {
+        "action": "reused",
+        "seconds": 0.938
+      },
+      "ingest:boardingpass_xlsx": {
+        "action": "reused",
+        "seconds": 0.572
+      },
+      "ingest:timetable_pdf": {
+        "action": "reused",
+        "seconds": 4.065
+      },
+      "canonical": {
+        "action": "reused",
+        "seconds": 2.606
+      },
+      "geography": {
+        "action": "reused",
+        "seconds": 1.191
+      },
+      "resolution": {
+        "action": "executed",
+        "seconds": 2716.877
+      },
+      "quality": {
+        "action": "executed",
+        "seconds": 32.096
+      },
+      "publish": {
+        "action": "executed",
+        "seconds": 27.979
+      }
+    },
+    "accepted_runner_evidence": {
+      "path": "build-and-run-accepted.log",
+      "sha256": "83ad01bcaab2d203a40d034fa324b9c3e1276af225b5385b5e52858a118a6d48"
+    },
+    "xlsx_reingestion_seconds": 487.14628703000017,
+    "xlsx_reingestion_and_verification_seconds": 491.83488282799954,
+    "final_product_command_seconds": 254.37450475300102,
+    "final_product_build_including_model_seconds": 165.221,
+    "final_product_command_scope": "Validates and reuses the separately published repaired raw core, builds a new product/model, verifies numeric results and exports reports. It is not a fresh cold raw-to-product run.",
+    "final_identical_command_repeat_seconds": 124.34788340699924
+  },
+  "environment": {
+    "execution_volume_gib": 32,
+    "recommended_free_space_gb": 50,
+    "python": "3.12.14",
+    "platform": "Linux",
+    "dependencies": {
+      "duckdb": "1.5.6",
+      "pyarrow": "26.0.0",
+      "ijson": "3.5.1",
+      "lxml": "6.1.3",
+      "openpyxl": "3.1.5",
+      "pymupdf": "1.28.2",
+      "pyyaml": "6.0.3",
+      "scikit-learn": "1.9.1",
+      "tzdata": "2026.5"
+    },
+    "core_code_sha256": "d138135493ffc518d184a6a05e5e98cf8ee2032d56a21305a206548f9b0a335b",
+    "product_runtime": {
+      "duckdb": "1.5.6",
+      "numpy": "2.5.4",
+      "pyarrow": "26.0.0",
+      "python": "3.12.14",
+      "sklearn": "1.9.1"
+    }
+  },
+  "operational_adjustments": {
+    "summary": "The constrained 32 GiB volume required documented removal of completed redundant caches and closed T13 temporary files. Derived PDF CSV/JSONL files were temporarily compressed losslessly, then restored and SHA-256 verified before core publication. Original raw files, model settings and published tables were not altered. Duplicate reader/processed caches were evicted after publication; an identical run reuses the immutable snapshot.",
+    "standard_free_space_recommendation_gb": 50,
+    "records": {
+      "reader_cache_reclamation.json": {
+        "sha256": "5a130ab15a2404d95f3f11f7515fb32d1c5518131d462f9f8854267270f5f7ee",
+        "record": {
+          "reason": "Reclaim completed redundant reader Parquet caches on a 32 GiB execution volume; canonical and geography are complete, current downstream code no longer reads these paths. Original raw files, reports, PDF artifacts and published processed tables remain unchanged. A different/incomplete raw resume can regenerate these caches.",
+          "time": 1792345022.1018105,
+          "files": [
+            {
+              "path": "interim/boarding_csv/person_observations.parquet",
+              "bytes": 23867765
+            },
+            {
+              "path": "interim/boarding_csv/schedules.parquet",
+              "bytes": 4686
+            },
+            {
+              "path": "interim/boarding_csv/errors.parquet",
+              "bytes": 2745
+            },
+            {
+              "path": "interim/boarding_csv/identifiers.parquet",
+              "bytes": 33235811
+            },
+            {
+              "path": "interim/boarding_csv/provenance.parquet",
+              "bytes": 41637709
+            },
+            {
+              "path": "interim/boarding_csv/travel_observations.parquet",
+              "bytes": 27361929
+            },
+            {
+              "path": "interim/forum_json/person_observations.parquet",
+              "bytes": 31851410
+            },
+            {
+              "path": "interim/forum_json/schedules.parquet",
+              "bytes": 4686
+            },
+            {
+              "path": "interim/forum_json/errors.parquet",
+              "bytes": 1380
+            },
+            {
+              "path": "interim/forum_json/identifiers.parquet",
+              "bytes": 10325464
+            },
+            {
+              "path": "interim/forum_json/provenance.parquet",
+              "bytes": 110998841
+            },
+            {
+              "path": "interim/forum_json/travel_observations.parquet",
+              "bytes": 148342870
+            },
+            {
+              "path": "interim/pointz_xml/person_observations.parquet",
+              "bytes": 16964011
+            },
+            {
+              "path": "interim/pointz_xml/schedules.parquet",
+              "bytes": 4686
+            },
+            {
+              "path": "interim/pointz_xml/errors.parquet",
+              "bytes": 1380
+            },
+            {
+              "path": "interim/pointz_xml/identifiers.parquet",
+              "bytes": 18313431
+            },
+            {
+              "path": "interim/pointz_xml/provenance.parquet",
+              "bytes": 45551883
+            },
+            {
+              "path": "interim/pointz_xml/travel_observations.parquet",
+              "bytes": 53344853
+            },
+            {
+              "path": "interim/sirena_fixed/person_observations.parquet",
+              "bytes": 37223813
+            },
+            {
+              "path": "interim/sirena_fixed/schedules.parquet",
+              "bytes": 4686
+            },
+            {
+              "path": "interim/sirena_fixed/errors.parquet",
+              "bytes": 1380
+            },
+            {
+              "path": "interim/sirena_fixed/identifiers.parquet",
+              "bytes": 58585339
+            },
+            {
+              "path": "interim/sirena_fixed/provenance.parquet",
+              "bytes": 51228175
+            },
+            {
+              "path": "interim/sirena_fixed/travel_observations.parquet",
+              "bytes": 44713015
+            },
+            {
+              "path": "interim/skyteam_yaml/person_observations.parquet",
+              "bytes": 165342204
+            },
+            {
+              "path": "interim/skyteam_yaml/schedules.parquet",
+              "bytes": 4686
+            },
+            {
+              "path": "interim/skyteam_yaml/errors.parquet",
+              "bytes": 1380
+            },
+            {
+              "path": "interim/skyteam_yaml/identifiers.parquet",
+              "bytes": 238262643
+            },
+            {
+              "path": "interim/skyteam_yaml/provenance.parquet",
+              "bytes": 407567543
+            },
+            {
+              "path": "interim/skyteam_yaml/travel_observations.parquet",
+              "bytes": 321458690
+            },
+            {
+              "path": "interim/boardingpass_xlsx/person_observations.parquet",
+              "bytes": 150296026
+            },
+            {
+              "path": "interim/boardingpass_xlsx/schedules.parquet",
+              "bytes": 4686
+            },
+            {
+              "path": "interim/boardingpass_xlsx/errors.parquet",
+              "bytes": 1380
+            },
+            {
+              "path": "interim/boardingpass_xlsx/identifiers.parquet",
+              "bytes": 178190124
+            },
+            {
+              "path": "interim/boardingpass_xlsx/provenance.parquet",
+              "bytes": 151547462
+            },
+            {
+              "path": "interim/boardingpass_xlsx/travel_observations.parquet",
+              "bytes": 183038152
+            }
+          ],
+          "removed_bytes": 2549286924
+        }
+      },
+      "t13_temporary_reclamation.json": {
+        "sha256": "eb45e7ed595b6296db9ac544d6de3b2152fe83e930ee504ddf9322d1fe1f4ccb",
+        "record": {
+          "reason": "Closed temporary inputs already materialized into DuckDB tables and final outputs; not publication artifacts, no downstream file consumers at segment-building phase.",
+          "time": 1792345729.3302848,
+          "files": [
+            {
+              "path": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/work/t16/processed/.resolution-svogog6z/pair_decisions.parquet",
+              "bytes": 975446688
+            },
+            {
+              "path": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/work/t16/processed/.resolution-svogog6z/components.parquet",
+              "bytes": 20317170
+            },
+            {
+              "path": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/work/t16/processed/.resolution-svogog6z/assignments.parquet",
+              "bytes": 153536455
+            }
+          ]
+        }
+      },
+      "published_cache_reclamation.json": {
+        "sha256": "0a83a8afe3ed811e731da4794e9b072856b0648b3cabf53a5dbf2946ea5347a6",
+        "record": {
+          "snapshot": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/artifacts/core/data-9daf7d3ba35b5972df53",
+          "time": 1792346128.7054768,
+          "cache_restore": {
+            "reason": "Temporary byte-exact compression of redundant derived PDF CSV/JSONL cache to accommodate 32 GiB execution volume. Original raw PDF and all canonical/geography input tables remain unchanged. Restore after T13 before T16 publication.",
+            "files": [
+              {
+                "original": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/work/t16/interim/timetable_pdf/schedules.jsonl",
+                "compressed": "/workspace/scratch/9fa4b63d5b39/reader-cache-backup/schedules.jsonl.gz",
+                "sha256": "c317dd4285123a3928fa9ef0515e1e9cc2e93b5c9db9599f6ed1ae247ea3d359",
+                "size": 2731098956,
+                "compressed_size": 363067968,
+                "compression_and_verify_seconds": 24.04229836000013
+              },
+              {
+                "original": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/work/t16/interim/timetable_pdf/schedules.csv",
+                "compressed": "/workspace/scratch/9fa4b63d5b39/reader-cache-backup/schedules.csv.gz",
+                "sha256": "97966f654ff8ecbd205f5daf420d19c2894cbcabfe33a8c7c44552fb62f69232",
+                "size": 1950640027,
+                "compressed_size": 297753368,
+                "compression_and_verify_seconds": 17.70166607000101
+              }
+            ],
+            "evicted_at": 1792345669.869727,
+            "restored_at": 1792345985.1680317,
+            "restored_sha256_verified": true
+          },
+          "reason": "Complete published T16 snapshot retained; duplicate reader work caches evicted after publication. PDF CSV/JSONL hashes reverified in snapshot. Original seven raw files and all published outputs retained."
+        }
+      },
+      "processed_cache_reclamation.json": {
+        "sha256": "693469d6bfc78fa87839d4dc10fc67b933aaedd64d4353b2daeaacba4f37f02b",
+        "record": {
+          "time": 1792346178.3020825,
+          "snapshot": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/artifacts/core/data-9daf7d3ba35b5972df53",
+          "reason": "Evict duplicate completed processed work cache after full immutable T16 snapshot publication and successful product input verification; original raw files and all snapshot tables remain. Identical raw run reuses snapshot before consulting work cache."
+        }
+      }
+    }
+  },
+  "evidence_files": [
+    {
+      "path": "artifacts/core/data-9daf7d3ba35b5972df53/run_manifest.json",
+      "sha256": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517"
+    },
+    {
+      "path": "artifacts/core/data-9daf7d3ba35b5972df53/input_manifest.json",
+      "sha256": "ba087329389641030fbdf218164b2f7e489a4d390b43037622d83fe27739fb61"
+    },
+    {
+      "path": "artifacts/core/data-9daf7d3ba35b5972df53/environment.json",
+      "sha256": "8b4f3847fd9fb9cac76f03f9ec0eac248bf0ae810319a9228f0f8ad1708f6f41"
+    },
+    {
+      "path": "artifacts/core/data-9daf7d3ba35b5972df53/tables/canonical_report.json",
+      "sha256": "749fb53128c86cb1d0626db0bace0cd588b8d1495339c816c386ebab0f15e75e"
+    },
+    {
+      "path": "artifacts/core/data-9daf7d3ba35b5972df53/tables/geography_report.json",
+      "sha256": "dffc1b4a5161db8fe5b2c60156f504f1289fd863f260e7dd0127e882a4dba05d"
+    },
+    {
+      "path": "artifacts/core/data-9daf7d3ba35b5972df53/tables/resolution_report.json",
+      "sha256": "40e1cf5c110c0979dd10f9485227670ce9f35e4f5395156e9af6f4223d9df3f3"
+    },
+    {
+      "path": "artifacts/core/data-9daf7d3ba35b5972df53/quality.json",
+      "sha256": "09d61f4e4985be067581fcbb761722913c51f735afab48c4bdc6fba19447d608"
+    },
+    {
+      "path": "artifacts/core/data-9daf7d3ba35b5972df53/timings.json",
+      "sha256": "dbf9a2115333f5a18f3e683a3dde5f5b9e83d60f948d04f198eecc4a8a06184f"
+    },
+    {
+      "path": "artifacts/source-product/run_manifest.json",
+      "sha256": "a084d4d9c39d4a74cf32fcab9c3f3058743c86a22480878c474ab3820515d32f"
+    },
+    {
+      "path": "artifacts/source-product/forest.json",
+      "sha256": "1e8c940e1231f6fe013e15546e2053da21f00fbf9414af2a44c7a1feb357db40"
+    },
+    {
+      "path": "artifacts/source-product/evaluation.json",
+      "sha256": "c07f014b615fdb4bd3175e922800b08fa7f1248f59864d35a52a2d4901725cd2"
+    },
+    {
+      "path": "artifacts/source-product-report/report_manifest.json",
+      "sha256": "e471a6510d873b58390a797edf79e07699e8e98b2ee667afa59995be2dfc4691"
+    },
+    {
+      "path": "artifacts/source-product-report/summary.json",
+      "sha256": "929ba374528df6518efc1ec273d8c872cebe1f1e2b8b4a0c1fb757613873a5e2"
+    },
+    {
+      "path": "artifacts/source-product-verification.json",
+      "sha256": "3cf1254c645297f2b80706ae67738e64f580bddd6d11f9afec123256ea4742ee"
+    },
+    {
+      "path": "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780/run_manifest.json",
+      "sha256": "5a518216ab8692db011d1a37bcfb7332f7d08e2235d4f68277f85ccec8df2012"
+    },
+    {
+      "path": "/tmp/yoyoflot-products/source-product-final/run_manifest.json",
+      "sha256": "2cdfca27214f546973bd859bd1a32add18058ed32963d8f7c855165cb9cdb452"
+    },
+    {
+      "path": "/tmp/yoyoflot-products/source-product-final/forest.json",
+      "sha256": "1e8c940e1231f6fe013e15546e2053da21f00fbf9414af2a44c7a1feb357db40"
+    },
+    {
+      "path": "/tmp/yoyoflot-products/source-product-final/graph.json",
+      "sha256": "69c33fb473e8da2477cfd0994abdeb30ca42a1e66e102c5941b2cebe50bde967"
+    },
+    {
+      "path": "/tmp/yoyoflot-products/source-product-final/evaluation.json",
+      "sha256": "c07f014b615fdb4bd3175e922800b08fa7f1248f59864d35a52a2d4901725cd2"
+    },
+    {
+      "path": "/tmp/yoyoflot-products/source-product-final-report/report_manifest.json",
+      "sha256": "8b721baa21801c15a0122ce8b4bf761a3569a6e0e5490c83027f5d8587b1aacc"
+    },
+    {
+      "path": "/tmp/yoyoflot-products/source-product-final-report/summary.json",
+      "sha256": "66a387708777923df4379950ba014c0fba8dab339c5c8e2d4f9ec40694703782"
+    },
+    {
+      "path": "/tmp/yoyoflot-products/source-product-final-verification.json",
+      "sha256": "447ac23629470bf4f85ebabf9e1f8fffb0baeff7033fe0d0d33920f367beee81"
+    },
+    {
+      "path": "final_export_review.json",
+      "sha256": "be5221da3e8207d28b4ec2435d7339dd0617304f042915d29bc78a5973d43a09"
+    },
+    {
+      "path": "final_repeat_run.json",
+      "sha256": "e5bf27aa109caad88ca623391fc902eeab212d6e1a8df56c15ddb49ad015d5fc"
+    },
+    {
+      "path": "audit_serialization_fix.json",
+      "sha256": "d600885f7f84d1dbe6b2555f63654732809a1473fa8cbe6e04c8c464687d6d5e"
+    }
+  ],
+  "remaining_limits": [
+    "Independent identity/pair review and domain signoff remain pending.",
+    "There are no ground-truth class labels; no precision, recall, class probability or proven detection accuracy is claimed.",
+    "The source-date window is observed data, not a guarantee of continuous source coverage.",
+    "Schedule reference associations outside their validity period do not fill historical travel times.",
+    "Four unavailable top50 M01 values remain null with zero contribution; eight routes without complete coordinates remain present.",
+    "Checksums establish content integrity and provenance consistency, not a digital signature or independent source authentication."
+  ],
+  "draft": false,
+  "delivery_acceptance": "automated_backend_accepted",
+  "auxiliary_coverage_repair": {
+    "status": "verified_and_accepted",
+    "reingestion": {
+      "status": "verified",
+      "source_path": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/raw/YourBoardingPassDotAero.zip",
+      "output_path": "/tmp/yoyoflot-xlsx-recovery",
+      "invocation": "yoyoflot.io.ingest(yoyoflot.readers.boardingpass_xlsx.read, original_absolute_path, boardingpass_xlsx, output, batch_size=4000)",
+      "options": {
+        "batch_size": 4000
+      },
+      "source_sha256_before": "b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6",
+      "python": "3.12.14",
+      "parser_and_local_dependencies_sha256_before": {
+        "__init__.py": "03cf612abacaddead89fc311422065172a9abe55402e809c98dce5286d1219a0",
+        "contracts.py": "3b1b7a93a9f6d8b53baaa22b082f38f121bfc96bb9852147f654933628def4eb",
+        "io.py": "eb5789cd40a09954b25afad8f6a72816abf938b7ea249dabe80d120930e19586",
+        "provenance.py": "2f0dcc9964e8e06868f206a72b1a3c0a7a12b9df707f5b754a881b374779ac62",
+        "readers/__init__.py": "2454fd028425b15c6dcbaf96b76ca0f0481ba11f4613de43309948c618aa791a",
+        "readers/boardingpass_xlsx.py": "6c06aa5b1b83658d50b50c8229471f9fa4ec5e28ce80e46e8d54706282a1cdd4",
+        "readers/common.py": "067282ca4a911a5a44676b6b0b6d160cd3a02b0159acf1dac0a5f83a1838f5e5",
+        "readers/xlsx_stream.py": "47c9d48193324b20cc022def5bdb955295dc4e0a5a9e2577a5cfa59810738738"
+      },
+      "dependencies": {
+        "duckdb": "1.5.6",
+        "pyarrow": "26.0.0",
+        "ijson": "3.5.1",
+        "lxml": "6.1.3",
+        "openpyxl": "3.1.5",
+        "pymupdf": "1.28.2",
+        "pyyaml": "6.0.3",
+        "scikit-learn": "1.9.1",
+        "tzdata": "2026.5"
+      },
+      "original_stage_environment": {
+        "pipeline_version": "1.0",
+        "package_version": "0.11.0",
+        "python": "3.12.14",
+        "platform": "Linux",
+        "dependencies": {
+          "duckdb": "1.5.6",
+          "pyarrow": "26.0.0",
+          "ijson": "3.5.1",
+          "lxml": "6.1.3",
+          "openpyxl": "3.1.5",
+          "pymupdf": "1.28.2",
+          "pyyaml": "6.0.3",
+          "scikit-learn": "1.9.1",
+          "tzdata": "2026.5"
+        },
+        "source_files": {
+          "__init__.py": "03cf612abacaddead89fc311422065172a9abe55402e809c98dce5286d1219a0",
+          "contracts.py": "3b1b7a93a9f6d8b53baaa22b082f38f121bfc96bb9852147f654933628def4eb",
+          "io.py": "eb5789cd40a09954b25afad8f6a72816abf938b7ea249dabe80d120930e19586",
+          "provenance.py": "2f0dcc9964e8e06868f206a72b1a3c0a7a12b9df707f5b754a881b374779ac62",
+          "readers/__init__.py": "2454fd028425b15c6dcbaf96b76ca0f0481ba11f4613de43309948c618aa791a",
+          "readers/boardingpass_xlsx.py": "6c06aa5b1b83658d50b50c8229471f9fa4ec5e28ce80e46e8d54706282a1cdd4",
+          "readers/common.py": "067282ca4a911a5a44676b6b0b6d160cd3a02b0159acf1dac0a5f83a1838f5e5",
+          "readers/xlsx_stream.py": "47c9d48193324b20cc022def5bdb955295dc4e0a5a9e2577a5cfa59810738738"
+        },
+        "code_sha256": "ee8858848ef26c01c71d2578d4ceaffcb47e8473cbc759687b2663770007c140",
+        "stage_cache_version": "ingestion:1",
+        "reader": "boardingpass_xlsx"
+      },
+      "parser_and_local_dependencies_match_original": true,
+      "dependency_versions_match_original": true,
+      "python_matches_original": true,
+      "original_source_report_sha256": "692a50fc46821e8028d013aad952fd282d1f35f7c7d1851612186921b5e72645",
+      "original_metadata_inventory_sha256": "3f80764a090cfa49af49764d9ace9d24fb0928f2c3b379208ff0f939f340ba05",
+      "ingestion_seconds": 487.14628703000017,
+      "source_sha256_after": "b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6",
+      "parser_and_local_dependencies_sha256_after": {
+        "__init__.py": "03cf612abacaddead89fc311422065172a9abe55402e809c98dce5286d1219a0",
+        "contracts.py": "3b1b7a93a9f6d8b53baaa22b082f38f121bfc96bb9852147f654933628def4eb",
+        "io.py": "eb5789cd40a09954b25afad8f6a72816abf938b7ea249dabe80d120930e19586",
+        "provenance.py": "2f0dcc9964e8e06868f206a72b1a3c0a7a12b9df707f5b754a881b374779ac62",
+        "readers/__init__.py": "2454fd028425b15c6dcbaf96b76ca0f0481ba11f4613de43309948c618aa791a",
+        "readers/boardingpass_xlsx.py": "6c06aa5b1b83658d50b50c8229471f9fa4ec5e28ce80e46e8d54706282a1cdd4",
+        "readers/common.py": "067282ca4a911a5a44676b6b0b6d160cd3a02b0159acf1dac0a5f83a1838f5e5",
+        "readers/xlsx_stream.py": "47c9d48193324b20cc022def5bdb955295dc4e0a5a9e2577a5cfa59810738738"
+      },
+      "source_and_parser_unchanged": true,
+      "parquet_comparisons": {
+        "person_observations.parquet": {
+          "sha256": "3da5c99e4501920c0cd041be665e7c4b12f6aa3554d91a0a61acd8817c9ec3f6",
+          "canonical_input_sha256": "3da5c99e4501920c0cd041be665e7c4b12f6aa3554d91a0a61acd8817c9ec3f6",
+          "pipeline_state_sha256": "3da5c99e4501920c0cd041be665e7c4b12f6aa3554d91a0a61acd8817c9ec3f6",
+          "exact_match": true,
+          "bytes": 150296026,
+          "rows": 615771,
+          "schema_sha256": "e09c233e5b94ebea9ab8c1964a90b4f7b6ad9421977c8d6f9852a4783df89222"
+        },
+        "travel_observations.parquet": {
+          "sha256": "975c345405f59232172eb11474c97e4ca7199141e9e331bdb6274b43422c5c9c",
+          "canonical_input_sha256": "975c345405f59232172eb11474c97e4ca7199141e9e331bdb6274b43422c5c9c",
+          "pipeline_state_sha256": "975c345405f59232172eb11474c97e4ca7199141e9e331bdb6274b43422c5c9c",
+          "exact_match": true,
+          "bytes": 183038152,
+          "rows": 615771,
+          "schema_sha256": "fc57c7c5aa386b49f17aae02faec2babac9911ef5b0abc08733fb38137bac020"
+        },
+        "identifiers.parquet": {
+          "sha256": "de7ebe465df56dddced2e0bb7995188e99faa52d77f6620fe6f3833d2a5165b0",
+          "canonical_input_sha256": "de7ebe465df56dddced2e0bb7995188e99faa52d77f6620fe6f3833d2a5165b0",
+          "pipeline_state_sha256": "de7ebe465df56dddced2e0bb7995188e99faa52d77f6620fe6f3833d2a5165b0",
+          "exact_match": true,
+          "bytes": 178190124,
+          "rows": 746812,
+          "schema_sha256": "1f9d9d60d150be608d52f69534e9216a54151877dcf67e41fa2c86ebb94e0786"
+        },
+        "provenance.parquet": {
+          "sha256": "007a2cf64c494df8103bd9f51da3662bb124dcbe07ddf2d8b352526719abc89e",
+          "canonical_input_sha256": "007a2cf64c494df8103bd9f51da3662bb124dcbe07ddf2d8b352526719abc89e",
+          "pipeline_state_sha256": "007a2cf64c494df8103bd9f51da3662bb124dcbe07ddf2d8b352526719abc89e",
+          "exact_match": true,
+          "bytes": 151547462,
+          "rows": 1978354,
+          "schema_sha256": "add2ba9af37c5de564398edd3c4fd042e8bab9db8e586578bec88612a30fce40"
+        },
+        "schedules.parquet": {
+          "sha256": "2fe43b0ae75f400244d38d90f93b01e7792dce84525ddabe558695a12c240599",
+          "canonical_input_sha256": "2fe43b0ae75f400244d38d90f93b01e7792dce84525ddabe558695a12c240599",
+          "pipeline_state_sha256": "2fe43b0ae75f400244d38d90f93b01e7792dce84525ddabe558695a12c240599",
+          "exact_match": true,
+          "bytes": 4686,
+          "rows": 0,
+          "schema_sha256": "a0cd01d0365c1cd45cd4dcb7a06456fc2dfc8312377d1606bbbcceb18b471b69"
+        },
+        "errors.parquet": {
+          "sha256": "117da6d5480e7800dd2b7e43d0c68ee70d0f2fae23239d399b6de01b46261f93",
+          "canonical_input_sha256": "117da6d5480e7800dd2b7e43d0c68ee70d0f2fae23239d399b6de01b46261f93",
+          "pipeline_state_sha256": "117da6d5480e7800dd2b7e43d0c68ee70d0f2fae23239d399b6de01b46261f93",
+          "exact_match": true,
+          "bytes": 1380,
+          "rows": 0,
+          "schema_sha256": "a309ff0baccb0c5eff66520360ce4128542f7a7a3b31eb38770c578aa095f105"
+        }
+      },
+      "stable_source_report_equal": true,
+      "source_report_ignored_fields": [
+        "process_peak_rss_mib",
+        "seconds"
+      ],
+      "source_report_differences": {},
+      "fresh_source_report_sha256": "cc36d9a6992dae344d8004c49e0f93932d0ff8c92d6ac0930c0952cd4225d346",
+      "coverage_verification": {
+        "rows": 615771,
+        "unique_keys": 615771,
+        "workbooks": 366,
+        "exact_original_metadata_order": true,
+        "missing_sheet_keys": 0,
+        "extra_sheet_keys": 0,
+        "duplicate_sheet_keys": 0,
+        "status_counts": {
+          "ok": 615771
+        },
+        "counts": {
+          "input_rows": 615771,
+          "accepted_rows": 615771,
+          "errors": 0
+        },
+        "unexpected_rows": [],
+        "source_report_counts_equal": true,
+        "per_workbook_count_matches": true,
+        "sha256": "4b0f7a3761a76b8406e7cf8859ef5c0f76997da551580e12af5a802e44684a7d",
+        "bytes": 47657748
+      },
+      "seconds": 491.83488282799954
+    },
+    "reingestion_evidence": {
+      "path": "xlsx_reingestion_verification.json",
+      "sha256": "4e962984d98af8721c502298445a17c4fa3e49dae9fd0abac463fcca55bc102a"
+    },
+    "relocation": {
+      "source": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/artifacts/core/data-9daf7d3ba35b5972df53",
+      "destination": "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53",
+      "method": "hard-link exactly the declared immutable inventory; no input bytes changed",
+      "files": 61,
+      "parent_manifest_sha256": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+      "unowned_unopened_transient_copies_removed": 13,
+      "transient_bytes_removed": 1396703232,
+      "full_file_hash_validation": "performed next by unchanged repair snapshot validator"
+    },
+    "relocation_evidence": {
+      "path": "core_relocation.json",
+      "sha256": "b3ff8ad731e66e4e5f4a31b2615ca2aa5c28f73cff68424231b04f461c4d0d27"
+    },
+    "relocation_note": "The first repair attempt rejected 13 unmanifested temporary mirror copies. Exactly the declared inventory was hard-linked to a separate location and checked by the unchanged strict validator; no declared source-core bytes or manifest were changed. The cause of the temporary copies is not established by this protocol.",
+    "publication": {
+      "snapshot": "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+      "run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+      "repair_sha256": "22f8459dbbab3342a780eed8944563c96a5e151a8372c52acd986180f6fdf852",
+      "reused": false
+    },
+    "publication_evidence": {
+      "path": "coverage_repair_publication.json",
+      "sha256": "ff22032f92514b74d0657fdfdf4395241a1fc5608618636d3cab69b983ccf59a"
+    },
+    "repair_record": {
+      "version": "workbook-coverage-repair:1",
+      "status": "verified_auxiliary_repair",
+      "scope": "Only workbook coverage is replaced; original reader report and all downstream data bytes retained.",
+      "parent_manifest_sha256": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+      "parent_run_id": "data-9daf7d3ba35b5972df53",
+      "original_request_sha256": "9daf7d3ba35b5972df5347eb8e9c8e87aaa13b482275e77b3b23901c36afd46c",
+      "raw_input": {
+        "path": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/data/raw/YourBoardingPassDotAero.zip",
+        "sha256": "b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6",
+        "bytes": 277220766
+      },
+      "original_coverage_failure": "XLSX coverage: source report total mismatch: workbooks",
+      "old_coverage": {
+        "sha256": "5ed776a189375893703cd84fdb3a85e28a5d0272071143552c9597aaa18a774a",
+        "bytes": 17079015
+      },
+      "new_coverage": {
+        "sha256": "4b0f7a3761a76b8406e7cf8859ef5c0f76997da551580e12af5a802e44684a7d",
+        "bytes": 47657748
+      },
+      "reader_environment": {
+        "pipeline_version": "1.0",
+        "package_version": "0.11.0",
+        "python": "3.12.14",
+        "platform": "Linux",
+        "dependencies": {
+          "duckdb": "1.5.6",
+          "pyarrow": "26.0.0",
+          "ijson": "3.5.1",
+          "lxml": "6.1.3",
+          "openpyxl": "3.1.5",
+          "pymupdf": "1.28.2",
+          "pyyaml": "6.0.3",
+          "scikit-learn": "1.9.1",
+          "tzdata": "2026.5"
+        },
+        "source_files": {
+          "__init__.py": "03cf612abacaddead89fc311422065172a9abe55402e809c98dce5286d1219a0",
+          "contracts.py": "3b1b7a93a9f6d8b53baaa22b082f38f121bfc96bb9852147f654933628def4eb",
+          "io.py": "eb5789cd40a09954b25afad8f6a72816abf938b7ea249dabe80d120930e19586",
+          "provenance.py": "2f0dcc9964e8e06868f206a72b1a3c0a7a12b9df707f5b754a881b374779ac62",
+          "readers/__init__.py": "2454fd028425b15c6dcbaf96b76ca0f0481ba11f4613de43309948c618aa791a",
+          "readers/boardingpass_xlsx.py": "6c06aa5b1b83658d50b50c8229471f9fa4ec5e28ce80e46e8d54706282a1cdd4",
+          "readers/common.py": "067282ca4a911a5a44676b6b0b6d160cd3a02b0159acf1dac0a5f83a1838f5e5",
+          "readers/xlsx_stream.py": "47c9d48193324b20cc022def5bdb955295dc4e0a5a9e2577a5cfa59810738738"
+        },
+        "code_sha256": "ee8858848ef26c01c71d2578d4ceaffcb47e8473cbc759687b2663770007c140",
+        "stage_cache_version": "ingestion:1",
+        "reader": "boardingpass_xlsx"
+      },
+      "fresh_reader_files": {
+        "errors.parquet": {
+          "sha256": "117da6d5480e7800dd2b7e43d0c68ee70d0f2fae23239d399b6de01b46261f93",
+          "bytes": 1380,
+          "rows": 0,
+          "schema_sha256": "a309ff0baccb0c5eff66520360ce4128542f7a7a3b31eb38770c578aa095f105"
+        },
+        "identifiers.parquet": {
+          "sha256": "de7ebe465df56dddced2e0bb7995188e99faa52d77f6620fe6f3833d2a5165b0",
+          "bytes": 178190124,
+          "rows": 746812,
+          "schema_sha256": "1f9d9d60d150be608d52f69534e9216a54151877dcf67e41fa2c86ebb94e0786"
+        },
+        "person_observations.parquet": {
+          "sha256": "3da5c99e4501920c0cd041be665e7c4b12f6aa3554d91a0a61acd8817c9ec3f6",
+          "bytes": 150296026,
+          "rows": 615771,
+          "schema_sha256": "e09c233e5b94ebea9ab8c1964a90b4f7b6ad9421977c8d6f9852a4783df89222"
+        },
+        "provenance.parquet": {
+          "sha256": "007a2cf64c494df8103bd9f51da3662bb124dcbe07ddf2d8b352526719abc89e",
+          "bytes": 151547462,
+          "rows": 1978354,
+          "schema_sha256": "add2ba9af37c5de564398edd3c4fd042e8bab9db8e586578bec88612a30fce40"
+        },
+        "schedules.parquet": {
+          "sha256": "2fe43b0ae75f400244d38d90f93b01e7792dce84525ddabe558695a12c240599",
+          "bytes": 4686,
+          "rows": 0,
+          "schema_sha256": "a0cd01d0365c1cd45cd4dcb7a06456fc2dfc8312377d1606bbbcceb18b471b69"
+        },
+        "travel_observations.parquet": {
+          "sha256": "975c345405f59232172eb11474c97e4ca7199141e9e331bdb6274b43422c5c9c",
+          "bytes": 183038152,
+          "rows": 615771,
+          "schema_sha256": "fc57c7c5aa386b49f17aae02faec2babac9911ef5b0abc08733fb38137bac020"
+        }
+      },
+      "stable_source_report_sha256": "f35082eebe6a02da05643e8b8635277fed469e2b9b0fc05db8f8ca41d382f1c4",
+      "audit_code": {
+        "repair.py": "385ae6454782dda888b93d0fd7b54b688a3cc4ac25838e4ac5d78fbfc8f81373",
+        "coverage.py": "84fbb9561151e6e639fa49538dd318483aa1806be512daa62f5fc95c57bbc017"
+      },
+      "evidence_sha256": {
+        "repair/coverage_validation.json": "6c954b263d226befe31775d51f0b2eb5bc1c78c3ad67305b42b20b9e5fc29060",
+        "repair/parent_run_manifest.json": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+        "repair/audit_code/coverage.py": "84fbb9561151e6e639fa49538dd318483aa1806be512daa62f5fc95c57bbc017",
+        "repair/fresh_source_report.json": "cc36d9a6992dae344d8004c49e0f93932d0ff8c92d6ac0930c0952cd4225d346",
+        "repair/fresh_environment.json": "7b9b8b55dd4c524c314ef4944f4c8ba1606359d0b5e8594b752021f347bdd1c1",
+        "repair/raw_inventory.json": "ebf16fa36e400e7fd3fe98bddf0519cdcbe77b898f1a2ddff68b0cacd27e1de3",
+        "repair/audit_code/repair.py": "385ae6454782dda888b93d0fd7b54b688a3cc4ac25838e4ac5d78fbfc8f81373"
+      },
+      "repair_sha256": "22f8459dbbab3342a780eed8944563c96a5e151a8372c52acd986180f6fdf852",
+      "run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780"
+    },
+    "repair_record_evidence": {
+      "path": "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780/repair_manifest.json",
+      "sha256": "73c254b331fe872f9526da639866873baf686e98988fd3d9b20e51b1bae950df"
+    },
+    "coverage_validation": {
+      "validator_version": "xlsx-coverage:1.0",
+      "status": "passed",
+      "coverage_sha256": "4b0f7a3761a76b8406e7cf8859ef5c0f76997da551580e12af5a802e44684a7d",
+      "coverage_rows": 615771,
+      "workbooks": 366,
+      "sheets": 615771,
+      "input_rows": 615771,
+      "accepted_rows": 615771,
+      "errors": 0,
+      "boarding_card_sheets": 615771,
+      "excluded_rows": 0,
+      "source_sha256": "b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6",
+      "canonical_evidence": null
+    },
+    "raw_inventory": {
+      "version": 1,
+      "status": "passed",
+      "method": "raw_zip_workbook_xml_ordered_keys",
+      "ordered_keys_sha256": "3ff0043268fd8742cb06c5cd7ef52f324ca9ea0671a3f61810812c4d6674f0f2",
+      "rows": 615771,
+      "workbooks": 366,
+      "sheets": 615771
+    },
+    "preserved_parent_manifest_sha256": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+    "standalone_t16_semantic_gate_claimed": false,
+    "semantic_gate_scope": "Product admission and explicit --core-snapshot reuse; this is not claimed for standalone internal T16 execution.",
+    "raw_original_bytes_unchanged": true,
+    "canonical_geography_resolution_bytes_unchanged": true,
+    "hardlinks_note": "Unchanged parent artifacts share physical inodes with the new revision; all snapshots must remain read-only.",
+    "final_product_audit_repeat": "Product complete; numerical audit passed; independent export review passed 53 checks; corrected identical-command repeat passed with all four hashes unchanged."
+  },
+  "historical_pre_repair": {
+    "artifacts": {
+      "core": "artifacts/core/data-9daf7d3ba35b5972df53",
+      "product": "artifacts/source-product",
+      "report": "artifacts/source-product-report",
+      "verification": "artifacts/source-product-verification.json",
+      "core_run_id": "data-9daf7d3ba35b5972df53",
+      "product_run_id": "product-227b9cf551599119ece3",
+      "report_id": "report-b01e0614e43c140923a2",
+      "scope_note": "Historical product/report identifiers before the coverage repair; current accepted identifiers are in the top-level artifacts object.",
+      "repaired_core": "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+      "repaired_core_run_id": "data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780"
+    },
+    "independent_export_consistency_review": {
+      "evidence": {
+        "path": "actual_export_review.json",
+        "sha256": "08f9b2d9a64b86b390468d480e00771a04b5dc39dba21866a75b6ea8249a30a1"
+      },
+      "record": {
+        "review_kind": "independent_read_only_export_consistency_review",
+        "created_at": "2026-10-18T18:00:05.426508+00:00",
+        "status": "passed",
+        "product_run_id": "product-227b9cf551599119ece3",
+        "core_run_id": "data-9daf7d3ba35b5972df53",
+        "product_manifest_sha256": "a084d4d9c39d4a74cf32fcab9c3f3058743c86a22480878c474ab3820515d32f",
+        "report_manifest_sha256": "e471a6510d873b58390a797edf79e07699e8e98b2ee667afa59995be2dfc4691",
+        "counts": {
+          "exported_factors": 150,
+          "exported_segments": 1133,
+          "persons": 840606,
+          "segments": 2979166,
+          "source_evidence_rows": 2025,
+          "top50": 50,
+          "raw_files": 7,
+          "raw_bytes": 1541640375,
+          "if_scored_profiles": 24311
+        },
+        "checks": {
+          "expected_product_run": true,
+          "completed_product_and_report": true,
+          "all_report_run_ids": true,
+          "report_manifest_hashes": true,
+          "product_manifest_hashes": true,
+          "report_source_manifest_hash": true,
+          "report_source_file_inventory": true,
+          "core_provenance_manifests_exact": true,
+          "seven_original_raw_hashes_and_sizes": true,
+          "raw_source_provenance_consistent": true,
+          "forest_complete": true,
+          "fifty_unique_profiles": true,
+          "rank_one_to_fifty": true,
+          "csv_top_ids": true,
+          "three_factors_per_profile": true,
+          "ranking_sort_order": true,
+          "profiles_exact_frozen_top_rows": true,
+          "top_matches_primary_global_ranking": true,
+          "unique_factor_csv_rows": true,
+          "unique_flight_csv_rows": true,
+          "all_profile_segments_match_frozen_rows": true,
+          "all_profile_source_evidence_matches_frozen_rows": true,
+          "all_if_rows_match_frozen_scores": true,
+          "all_factor_evidence_memberships_valid": true,
+          "all_csv_factor_cells_match_profiles": true,
+          "all_csv_flight_cells_match_profiles": true,
+          "all_csv_top_cells_match_profiles": true,
+          "all_coordinates_match_frozen_reference": true,
+          "all_factor_contributions_and_scores_consistent": true,
+          "all_profile_route_balances_consistent": true,
+          "no_flights_dropped": true,
+          "all_evidence_retained": true,
+          "population_factor_coverage_matches_frozen_table": true,
+          "summary_top_rows_exact": true,
+          "summary_top_coverage_exact": true,
+          "honest_independent_review_and_accuracy_limits": true,
+          "human_report_explicit_limitations": true,
+          "all_factor_fields_match_frozen_rows_with_documented_unavailable_value_mask": true,
+          "unavailable_factors_expose_no_usable_value": true
+        },
+        "failures": [],
+        "source_provenance": {
+          "configured_sources": [
+            "boarding_csv",
+            "boardingpass_xlsx",
+            "forum_json",
+            "pointz_xml",
+            "sirena_fixed",
+            "skyteam_yaml",
+            "timetable_pdf"
+          ],
+          "core_run_id": "data-9daf7d3ba35b5972df53",
+          "core_status": "complete_with_limitations",
+          "independent_human_review": "pending",
+          "input_mode": "raw",
+          "origin": "verified_t13",
+          "raw_reingestion_verified": true
+        },
+        "raw_hashes_verified": {
+          "raw:boarding_csv": true,
+          "raw:boardingpass_xlsx": true,
+          "raw:forum_json": true,
+          "raw:pointz_xml": true,
+          "raw:sirena_fixed": true,
+          "raw:skyteam_yaml": true,
+          "raw:timetable_pdf": true
+        },
+        "top50_coverage": {
+          "available_factors": 146,
+          "dated_segments": 1133,
+          "factor_statuses": {
+            "matched": 119,
+            "not_matched": 27,
+            "unavailable": 4
+          },
+          "plottable_segments": 1125,
+          "profiles_with_all_factors": 46,
+          "segments_without_source_links": 0,
+          "source_linked_segments": 1133,
+          "total_factors": 150,
+          "undated_segments": 0,
+          "unplottable_segments": 8
+        },
+        "top50_matched_factor_count_distribution": {
+          "3": 19,
+          "2": 31
+        },
+        "top50_available_factor_count_distribution": {
+          "3": 46,
+          "2": 4
+        },
+        "factor_variety": {
+          "M02": {
+            "statuses": {
+              "matched": 50
+            },
+            "availability_reasons": {},
+            "distinct_non_null_values": 22,
+            "value_range": [
+              0.07142857142857142,
+              0.2222222222222222
+            ],
+            "distinct_contributions": 21
+          },
+          "M03": {
+            "statuses": {
+              "matched": 49,
+              "not_matched": 1
+            },
+            "availability_reasons": {},
+            "distinct_non_null_values": 33,
+            "value_range": [
+              0.0714285714285714,
+              0.4
+            ],
+            "distinct_contributions": 30
+          },
+          "M01": {
+            "statuses": {
+              "matched": 20,
+              "not_matched": 26,
+              "unavailable": 4
+            },
+            "availability_reasons": {
+              "Есть неоднозначные сегменты": 4
+            },
+            "distinct_non_null_values": 20,
+            "value_range": [
+              0.9836065573770492,
+              2.7049180327868854
+            ],
+            "distinct_contributions": 8
+          }
+        },
+        "flight_status_counts": {
+          "identity_status": {
+            "accepted": 1133
+          },
+          "resolution_status": {
+            "resolved": 1125,
+            "ambiguous": 8
+          },
+          "participation_status": {
+            "reported_only": 1068,
+            "boarding_record_present": 65
+          },
+          "departure_precision": {
+            "date": 1068,
+            "minute": 65
+          },
+          "arrival_precision": {
+            "null": 1133
+          }
+        },
+        "unknown_coordinate_endpoint_counts": {
+          "destination": 3,
+          "origin": 5
+        },
+        "source_evidence_counts": {
+          "forum_json": 583,
+          "skyteam_yaml": 1099,
+          "pointz_xml": 278,
+          "boardingpass_xlsx": 65
+        },
+        "model_status": {
+          "forest": "complete",
+          "training_rows": 14473,
+          "calibration_rows": 4907,
+          "graph": "complete"
+        },
+        "limitations": [
+          "Technical consistency review only; no independent human truth labels or identity/pair signoff.",
+          "Full core data tables were not reprocessed or fully rehashed by this review; product files, report files, copied core manifests and all seven raw files were independently hashed.",
+          "Unknown coordinate and availability states are preserved, not imputed.",
+          "No precision, recall, class probability or proven detection accuracy is asserted."
+        ],
+        "findings": [
+          "All selected profiles and all exported factors, segments and source evidence were compared against immutable product tables.",
+          "CSV cells were checked against raw JSON with presentation-only formula protection; raw JSON was checked against immutable product data.",
+          "Four unavailable M01 factors intentionally mask intermediate table values as null through the ProductStore contract; all other persisted factor fields match exactly."
+        ],
+        "unavailable_value_presentation": {
+          "count": 4,
+          "criterion_id": "M01",
+          "behavior": "ProductStore masks the intermediate table value as null for unavailable factors; CSV is blank. Zero contribution and the availability reason are retained.",
+          "source_table_values_modified": false
+        }
+      }
+    },
+    "repeat_run": {
+      "exit_code": 0,
+      "elapsed_seconds": 66.88933231800002,
+      "before": {
+        "core_manifest": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+        "product_manifest": "a084d4d9c39d4a74cf32fcab9c3f3058743c86a22480878c474ab3820515d32f",
+        "report_manifest": "e471a6510d873b58390a797edf79e07699e8e98b2ee667afa59995be2dfc4691",
+        "verification": "3cf1254c645297f2b80706ae67738e64f580bddd6d11f9afec123256ea4742ee"
+      },
+      "after": {
+        "core_manifest": "1127a6785ea39c73e4448cb499f35c27a468b80463a3ce6ea39aec97a6814517",
+        "product_manifest": "a084d4d9c39d4a74cf32fcab9c3f3058743c86a22480878c474ab3820515d32f",
+        "report_manifest": "e471a6510d873b58390a797edf79e07699e8e98b2ee667afa59995be2dfc4691",
+        "verification": "3cf1254c645297f2b80706ae67738e64f580bddd6d11f9afec123256ea4742ee"
+      },
+      "manifests_and_verification_byte_identical": true,
+      "core_snapshot_reused": true,
+      "core_last_run": {
+        "status": "complete_with_limitations",
+        "snapshot": "/workspace/scratch/9fa4b63d5b39/YoYoFlot/artifacts/core/data-9daf7d3ba35b5972df53",
+        "request_sha256": "9daf7d3ba35b5972df5347eb8e9c8e87aaa13b482275e77b3b23901c36afd46c",
+        "reused_snapshot": true,
+        "seconds": 13.83
+      },
+      "command": "./build_and_run.sh --archive <original archive> --work-dir data/work/t16",
+      "scope_note": "This repeat verifies the recorded pre-repair snapshot; it does not establish complete workbook coverage or final acceptance."
+    }
+  },
+  "final_product_run": {
+    "record": {
+      "command": [
+        "./build_and_run.sh",
+        "--archive",
+        "/workspace/scratch/9fa4b63d5b39/source_download/Airlines-All.zip",
+        "--core-snapshot",
+        "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+        "--output",
+        "/tmp/yoyoflot-products/source-product-final",
+        "--report-output",
+        "/tmp/yoyoflot-products/source-product-final-report"
+      ],
+      "exit_code": 0,
+      "seconds": 254.37450475300102,
+      "core_snapshot": "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+      "product": "/tmp/yoyoflot-products/source-product-final",
+      "report": "/tmp/yoyoflot-products/source-product-final-report",
+      "verification": "/tmp/yoyoflot-products/source-product-final-verification.json"
+    },
+    "evidence": {
+      "path": "build-and-run-final.json",
+      "sha256": "71eedeec21eebae5f609dfef263415354bd43eda4c1549d96c34eb9d8fe9ee23"
+    },
+    "log_evidence": {
+      "path": "build-and-run-final.log",
+      "sha256": "bd380ca42ce0e5b2df2051a5bdb64578c5443028473547bc43054d21da3790bb"
+    }
+  },
+  "repeat_attempt_before_serialization_fix": {
+    "record": {
+      "command": [
+        "./build_and_run.sh",
+        "--archive",
+        "/workspace/scratch/9fa4b63d5b39/source_download/Airlines-All.zip",
+        "--core-snapshot",
+        "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+        "--output",
+        "/tmp/yoyoflot-products/source-product-final",
+        "--report-output",
+        "/tmp/yoyoflot-products/source-product-final-report"
+      ],
+      "exit_code": 0,
+      "seconds": 122.95856223900046,
+      "before": {
+        "core_manifest": "5a518216ab8692db011d1a37bcfb7332f7d08e2235d4f68277f85ccec8df2012",
+        "product_manifest": "2cdfca27214f546973bd859bd1a32add18058ed32963d8f7c855165cb9cdb452",
+        "report_manifest": "8b721baa21801c15a0122ce8b4bf761a3569a6e0e5490c83027f5d8587b1aacc",
+        "verification": "e1af3f8c768635dd28fe5bacaff5be2ab9026943536ae09125d19a8f55557d5c"
+      },
+      "after": {
+        "core_manifest": "5a518216ab8692db011d1a37bcfb7332f7d08e2235d4f68277f85ccec8df2012",
+        "product_manifest": "2cdfca27214f546973bd859bd1a32add18058ed32963d8f7c855165cb9cdb452",
+        "report_manifest": "8b721baa21801c15a0122ce8b4bf761a3569a6e0e5490c83027f5d8587b1aacc",
+        "verification": "7bab1de06a9cccf85c3e49347c1295ed998fa3900002284620af50731e916fb0"
+      },
+      "byte_identical": false
+    },
+    "evidence": {
+      "path": "final_repeat_run_before_serialization_fix.json",
+      "sha256": "159694a0755d60a9757f6a4487fd1d1573549dea7794b14603fcdc3ca13f7295"
+    },
+    "status": "serialization_order_issue_identified",
+    "findings": [
+      "The command exited 0 and core/product/report manifests remained byte-identical.",
+      "The numerical verification JSON contained the same values, but if_roles object insertion order differed because its GROUP BY query had no ORDER BY. This attempt did not satisfy four-file byte identity."
+    ],
+    "correction": "Only scripts/verify_source_product.py was changed: explicit ORDER BY role and deterministic JSON serialization with sort_keys=True and allow_nan=False. An insertion-order regression was added. Source package and model artifacts were unchanged.",
+    "final_repeat_after_correction": "passed; all four control files byte-identical in final_repeat_run.json",
+    "focused_regression_status": "4 passed in 12.19 seconds",
+    "numeric_reverification_status": "passed; all semantic values identical",
+    "corrected_verification_baseline_sha256": "447ac23629470bf4f85ebabf9e1f8fffb0baeff7033fe0d0d33920f367beee81"
+  },
+  "audit_serialization_fix": {
+    "record": {
+      "issue": "Unordered SQL groups changed JSON object key order; all semantic values and model/report/core bytes unchanged",
+      "old_repeat": {
+        "command": [
+          "./build_and_run.sh",
+          "--archive",
+          "/workspace/scratch/9fa4b63d5b39/source_download/Airlines-All.zip",
+          "--core-snapshot",
+          "/tmp/yoyoflot-core/data-9daf7d3ba35b5972df53-coverage-22f8459dbbab3342a780",
+          "--output",
+          "/tmp/yoyoflot-products/source-product-final",
+          "--report-output",
+          "/tmp/yoyoflot-products/source-product-final-report"
+        ],
+        "exit_code": 0,
+        "seconds": 122.95856223900046,
+        "before": {
+          "core_manifest": "5a518216ab8692db011d1a37bcfb7332f7d08e2235d4f68277f85ccec8df2012",
+          "product_manifest": "2cdfca27214f546973bd859bd1a32add18058ed32963d8f7c855165cb9cdb452",
+          "report_manifest": "8b721baa21801c15a0122ce8b4bf761a3569a6e0e5490c83027f5d8587b1aacc",
+          "verification": "e1af3f8c768635dd28fe5bacaff5be2ab9026943536ae09125d19a8f55557d5c"
+        },
+        "after": {
+          "core_manifest": "5a518216ab8692db011d1a37bcfb7332f7d08e2235d4f68277f85ccec8df2012",
+          "product_manifest": "2cdfca27214f546973bd859bd1a32add18058ed32963d8f7c855165cb9cdb452",
+          "report_manifest": "8b721baa21801c15a0122ce8b4bf761a3569a6e0e5490c83027f5d8587b1aacc",
+          "verification": "7bab1de06a9cccf85c3e49347c1295ed998fa3900002284620af50731e916fb0"
+        },
+        "byte_identical": false
+      },
+      "semantic_equality_before_after_fix": true,
+      "original_before_bytes_reconstructed_sha256": "e1af3f8c768635dd28fe5bacaff5be2ab9026943536ae09125d19a8f55557d5c",
+      "fix": "ORDER BY role and deterministic JSON sort_keys=True; nonfinite JSON numbers forbidden",
+      "focused_tests": {
+        "passed": 4,
+        "seconds": 12.19,
+        "new_regression_tests": 1
+      }
+    },
+    "evidence": {
+      "path": "audit_serialization_fix.json",
+      "sha256": "d600885f7f84d1dbe6b2555f63654732809a1473fa8cbe6e04c8c464687d6d5e"
+    }
+  },
+  "blockers": [],
+  "resolved_findings": [
+    {
+      "id": "boardingpass_workbook_coverage_incomplete",
+      "status": "resolved_by_audited_republication_and_final_repeat",
+      "coverage_path": "artifacts/core/data-9daf7d3ba35b5972df53/sources/boardingpass_xlsx/workbook_coverage.csv",
+      "coverage_sha256": "5ed776a189375893703cd84fdb3a85e28a5d0272071143552c9597aaa18a774a",
+      "coverage_bytes": 17079015,
+      "actual_coverage_rows": 220726,
+      "actual_coverage_workbooks": 137,
+      "source_report_sheets": 615771,
+      "source_report_workbooks": 366,
+      "sheet_record_deficit": 395045,
+      "workbook_deficit": 229,
+      "checks": {
+        "csv_parses_cleanly": true,
+        "unique_workbook_sheet_keys": true,
+        "all_rows_status_ok": true,
+        "coverage_hash_matches_published_manifest": true,
+        "writer_granularity_one_row_per_boarding_card_sheet": true
+      },
+      "interpretation": "The original published CSV was semantically incomplete despite matching its manifest. A fresh frozen-reader ingestion reproduced all six original reader Parquet hashes; full workbook/sheet coverage was published as a separate audited core revision. Final product, numeric audit, 53-check export review and identical-command repeat all passed. Original artifacts and repair history are retained."
+    },
+    {
+      "id": "numeric_audit_json_key_order",
+      "status": "resolved_by_deterministic_serialization_and_final_repeat",
+      "issue": "First post-repair repeat changed only if_roles JSON key order; semantic values and core/product/report manifests were identical.",
+      "fix": "SQL ORDER BY role; JSON sort_keys=True and allow_nan=False. Four focused tests passed, including one new regression.",
+      "evidence": {
+        "path": "audit_serialization_fix.json",
+        "sha256": "d600885f7f84d1dbe6b2555f63654732809a1473fa8cbe6e04c8c464687d6d5e"
+      },
+      "final_repeat_evidence": {
+        "path": "final_repeat_run.json",
+        "sha256": "e5bf27aa109caad88ca623391fc902eeab212d6e1a8df56c15ddb49ad015d5fc"
+      }
+    }
+  ],
+  "known_blockers": []
+}

@@ -80,7 +80,7 @@
 | departure_local | string | да | ISO-строка локального времени с точностью источника, в schedules только HH:MM. |
 | arrival_local | string | да | ISO-строка локального времени с точностью источника, в schedules только HH:MM. |
 | arrival_day_offset | int64 | да | Явный +N из расписания; без маркера null, не ноль. |
-| days_of_week | string | да | Дни 1–7 из расписания, пробелы удалены. |
+| days_of_week | string | да | Дни 1–7 SkyTeam: 1=воскресенье, 2=понедельник, …, 7=суббота (легенда PDF, страница 3); цифры источника сохранены, пробелы удалены. |
 | valid_from | string | да | Начало действия YYYY-MM-DD, год только из однозначного периода обложки. |
 | valid_to | string | да | Конец действия YYYY-MM-DD; null при неизвестном/неоднозначном периоде. |
 | source_page | int64 | да | Физическая страница PDF, начиная с 1. |
@@ -122,11 +122,13 @@
 | reason | string | нет | Машинно-читаемая причина ошибки, исключения или ограничения. |
 | severity | string | нет | info (пустые/служебные записи), warning (ограничение), error (потеря/ошибка). |
 
-## T11: дополнительные таблицы geography 1.0
+## T11: дополнительные таблицы geography 2.0
 
 Базовые схемы readers выше не меняются. Метаданные/типы дополнительных полей
-заданы в `src/yoyoflot/normalize/geography.py`; все дополнительные поля nullable,
-булевы quality flags в travel_geography заполняются для каждой строки.
+заданы в `src/yoyoflot/normalize/geography.py`; Arrow metadata содержит
+`geography_contract_version=2.0`, `rule_version=airports:1.1`. Nullable-типы
+не отменяют обязательность ключей/счётчиков по контракту; булевы quality flags
+и `schedule_reference_count` в travel_geography заполняются для каждой строки.
 
 ### travel_geography
 
@@ -152,6 +154,8 @@
 | departure_iana_timezone, arrival_iana_timezone | string | Пояс аэропорта, использованный/проверенный при UTC-конверсии |
 | schedule_match_status | string | matched / ambiguous / temporal_unknown / reference_only / unresolved |
 | schedule_id_used | string | Единственная разрешённая строка расписания, иначе null |
+| schedule_reference_group_id | string | FK общей группы справочных кандидатов вне периода, null при отсутствии |
+| schedule_reference_count | int64 | Число кандидатов в этой группе; 0 при null group_id |
 | geography_rule_version, geography_reference_version | string | Версия алгоритма и снимка справочника |
 | inferred_fields_json | string | JSON-объект всех полей, заполненных из расписания; {} если таких нет |
 | geography_complete, geography_inferred | bool | Известны обе точки; есть точка, выведенная по расписанию |
@@ -166,6 +170,10 @@ origin/destination и origin_city/origin_country остаются без изм�
 
 ### schedule_links
 
+По умолчанию содержит отдельные связи, кроме вынесенных в общие группы
+справочных `outside_period`. Явный плотный режим Python-API сохраняет все связи
+здесь и оставляет групповые таблицы пустыми. Логическая схема обеих форм одинакова.
+
 Все поля string: travel_id, source_id/source_record_id/locator исходной поездки;
 schedule_id, schedule_source_id/schedule_source_record_id/schedule_locator строки
 расписания; status (matched/ambiguous/temporal_unknown/reference_only),
@@ -174,6 +182,28 @@ filled_fields_json и evidence_json. Свидетельство содержит
 период, дни, локальные часы, +N и locator кандидата. filled_fields_json непустой
 только у единственного разрешённого кандидата, который действительно что-то
 дополнил. У ambiguous кандидатов он всегда {}.
+
+### schedule_reference_groups
+
+| Поле | Тип | Смысл |
+| --- | --- | --- |
+| group_id | string | Стабильный ID набора schedule_id, PK |
+| member_count | int64 | Число строк группы в schedule_reference_members |
+| status | string | Всегда reference_only |
+| temporal_coverage | string | Всегда outside_period |
+| rule_id | string | airports:1.1:unique_flight_route_date_days |
+| reason | string | Всегда outside_schedule_period |
+| filled_fields_json | string | Всегда `{}`: справочная группа не заполняет наблюдение |
+
+### schedule_reference_members
+
+`group_id` и `schedule_id` — string; пара образует уникальный ключ. Первый
+ссылается на schedule_reference_groups, второй — на schedule_geography.
+Повторяющиеся наборы не копируются для каждого travel_id. Полная связь
+восстанавливается через группу поездки с provenance обеих исходных сторон
+и прежним `evidence_json`; потоковый API — `normalize.geography.iter_schedule_links`.
+`counts.logical_schedule_links` в geography_report равен числу физических
+schedule_links плюс сумме schedule_reference_count по поездкам.
 
 ### place_inventory
 

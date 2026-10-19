@@ -42,22 +42,26 @@ COVER_RE = re.compile(
     r"Covers period:\s*(\d{2}) ([A-Z][a-z]{2}) (\d{4})\s*through\s*(\d{2}) ([A-Z][a-z]{2}) (\d{4})"
 )
 SECTION_RE = re.compile(
-    r"FROM:\s*(?P<ocity>[A-Za-z .'-]+?)\s*,\s*(?P<ocountry>[A-Za-z .'-]+?)(?P<oiata>[A-Z]{3})\s*"
-    r"TO:\s*(?P<dcity>[A-Za-z .'-]+?)\s*,\s*(?P<dcountry>[A-Za-z .'-]+?)(?P<diata>[A-Z]{3})"
+    r"FROM:\s*(?P<ocity>[A-Za-z /().'-]+?)"
+    r"(?:\s*,\s*(?P<ocountry>[A-Za-z ,/().'-]*?))?\s*(?P<oiata>[A-Z]{3})\s*"
+    r"TO:\s*(?P<dcity>[A-Za-z /().'-]+?)"
+    r"(?:\s*,\s*(?P<dcountry>[A-Za-z ,/().'-]*?))?\s*(?P<diata>[A-Z]{3})"
+    r"(?=\s*(?:Validity\b|\d{2} [A-Z][a-z]{2}\s*-|Consult your travel agent|FROM:|$))"
 )
 ROW_RE = re.compile(
     r"(?P<valid>\d{2} [A-Z][a-z]{2}\s*-\s*\d{2} [A-Z][a-z]{2})\s*"
     r"(?P<days>[1-7](?: ?[1-7]){0,6})(?=\s?\d{2}:\d{2})\s*"
     r"(?P<dep>\d{2}:\d{2})\s*"
-    r"(?P<arr>\d{2}:\d{2})(?P<offset>\+\d)?\s*"
+    r"(?P<arr>\d{2}:\d{2})(?P<offset>\+-?\d)?\s*"
     r"(?P<flight>[A-Z]{2} ?\d{1,4})(?P<star>\*?)\s*"
     r"(?P<aircraft>[A-Z0-9]{3})\s*"
     r"(?P<travel>\d+ ?H ?\d+ ?M)"
 )
 OPERATED_RE = re.compile(
-    r"Operated by:\s*(?P<op>[A-Za-z .'-]+?)"
+    r"Operated by:\s*(?P<op>[A-Za-z .'/()!&-]+?)"
     r"(?=\s*(?:FROM:|TO:|Operated by:|\d{2} [A-Z][a-z]{2}\s*-|\d{2}:\d{2})|\s*$)"
 )
+OPERATOR_NOTES_RE = re.compile(r"(?:\s*Operated by:\s*[A-Za-z .'/()!&-]+)+\s*")
 
 OK_TYPES = {
     "cover",
@@ -164,17 +168,28 @@ def parse_page(
     else:
         text = normalize_ws(text)
     rows, errors = [], []
+    sections = list(SECTION_RE.finditer(text))
     secs = [
         (m.start(), {**m.groupdict(), "page": page_no})
-        for m in SECTION_RE.finditer(text)
+        for m in sections
     ]
+    # An unsupported explicit header is a boundary, never permission to reuse
+    # the previous route. Otherwise a header typo silently changes row routes.
+    for header in re.finditer(r"FROM:", text):
+        if not any(m.start() == header.start() for m in sections):
+            errors.append(
+                dict(page=page_no, reason="unparsed_section", sample=text[header.start():header.start() + 200])
+            )
+            secs.append((header.start(), None))
+    secs.sort(key=lambda item: item[0])
     matches = list(ROW_RE.finditer(text))
 
     for i, rm in enumerate(matches):
         nxt = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        nxt = min(nxt, next((p for p, _ in secs if p > rm.start()), len(text)))
         operated = OPERATED_RE.search(text, rm.end(), nxt)
-        on_page = next((d for p, d in reversed(secs) if p < rm.start()), None)
-        sec = on_page or carried
+        on_page = next(((p, d) for p, d in reversed(secs) if p < rm.start()), None)
+        sec = on_page[1] if on_page is not None else carried
         if sec is None:
             src = None
             errors.append(
@@ -188,6 +203,10 @@ def parse_page(
             src = "page"
         else:
             src = f"carried:{sec['page']}"
+        parse_status = "ok" if sec else "row_without_section"
+        if sec and src.startswith("carried") and sec.get("_unverified_since"):
+            parse_status = "unverified_carry_after_unreadable_page"
+            errors.append(dict(page=page_no, reason=parse_status, sample=rm.group(0)[:200]))
         vd, vto = re.split(r"\s*-\s*", rm["valid"])
         fd, fmon = vd.split()[0], vd.split()[1]
         td, tmon = vto.split()[0], vto.split()[1]
@@ -199,17 +218,17 @@ def parse_page(
                 "destination": sec["diata"] if sec else None,
                 "departure_local": rm["dep"],
                 "arrival_local": rm["arr"],
-                "arrival_day_offset": int(rm["offset"]) if rm["offset"] else None,
+                "arrival_day_offset": int(rm["offset"][1:]) if rm["offset"] else None,
                 "days_of_week": rm["days"].replace(" ", ""),
                 "valid_from": iso_date(fd, fmon, cover),
                 "valid_to": iso_date(td, tmon, cover),
                 "source_page": page_no,
-                "parse_status": "ok" if sec else "row_without_section",
+                "parse_status": parse_status,
                 "section_source": src,
                 "origin_city": sec["ocity"].strip() if sec else None,
-                "origin_country": sec["ocountry"].strip() if sec else None,
+                "origin_country": (sec["ocountry"] or "").strip() or None if sec else None,
                 "dest_city": sec["dcity"].strip() if sec else None,
-                "dest_country": sec["dcountry"].strip() if sec else None,
+                "dest_country": (sec["dcountry"] or "").strip() or None if sec else None,
                 "validity_raw": rm["valid"],
                 "days_raw": rm["days"],
                 "aircraft": rm["aircraft"],
@@ -247,6 +266,9 @@ def parse_page(
         ptype = "consult" if "Consult your travel agent" in text else "header_only"
     elif "Contact To book" in text or "How to use" in text or "Aircraft Types" in text:
         ptype = "notes"
+    elif OPERATOR_NOTES_RE.fullmatch(text):
+        # These are real spillover notes; the complete page remains in page_text.zip.
+        ptype = "notes"
     elif not text.strip():
         ptype = "blank"
     else:
@@ -269,7 +291,7 @@ def parse_page(
     coverage = {
         "page": page_no,
         "type": ptype,
-        "sections": len(secs),
+        "sections": len(sections),
         "rows_found": max(len(matches), len(candidates)),
         "rows_parsed": sum(1 for r in rows if r["parse_status"] == "ok"),
         "carry_used": carry_used,
@@ -290,6 +312,75 @@ class PageExtractionError(ValueError):
     def __init__(self, reason, message):
         super().__init__(message)
         self.reason = reason
+
+
+def parse_pdf_page(page, text, page_no, cover, carried=None):
+    """Keep the two physical timetable columns' route continuations separate.
+
+    The source's left and right columns contain opposite directions. A single
+    last-header carry assigns the left continuation to the right-hand route.
+    The archived text and left-to-right row order stay unchanged.
+    """
+    midpoint = (page.rect.x0 + page.rect.x1) / 2
+    column_carry = carried.get("_columns") if carried else None
+    if column_carry is None:
+        headers = [block for block in page.get_text("blocks") if str(block[4]).startswith("FROM:")]
+        if not (
+            any(block[0] < midpoint and block[2] <= midpoint for block in headers)
+            and any(block[0] >= midpoint for block in headers)
+        ):
+            return parse_page(text, page_no, cover, carried, keep_raw=True)
+        column_carry = {"left": None, "right": None}
+    left, right = pymupdf.Rect(page.rect), pymupdf.Rect(page.rect)
+    left.x1 = right.x0 = midpoint
+    texts = [page.get_text("text", clip=rect) for rect in (left, right)]
+    if normalize_ws("".join(texts)).strip() != normalize_ws(text).strip():
+        raise PageExtractionError(
+            "unsupported_column_layout",
+            f"Page {page_no}: column text does not preserve the complete original extraction order",
+        )
+    rows, errors, coverages, next_carry = [], [], [], {}
+    for name, column_text in zip(("left", "right"), texts):
+        parsed, coverage, problems, next_carry[name] = parse_page(
+            column_text, page_no, cover, column_carry[name], keep_raw=True
+        )
+        for row in parsed:
+            row["schedule_id"] = f"TT-{page_no:05d}-{len(rows):04d}"
+            if row["section_source"]:
+                row["section_source"] += f"/column:{name}"
+            rows.append(row)
+        errors.extend(problems)
+        coverages.append(coverage)
+    sections = sum(c["sections"] for c in coverages)
+    if rows:
+        ptype = "table" if sections else "continuation"
+    elif sections:
+        ptype = "consult" if "Consult your travel agent" in text else "header_only"
+    elif not text.strip():
+        ptype = "blank"
+    elif all(c["type"] in ("notes", "blank") for c in coverages):
+        ptype = "notes"
+    else:
+        ptype = "unknown"
+    coverage = dict(
+        page=page_no,
+        type=ptype,
+        sections=sections,
+        rows_found=sum(c["rows_found"] for c in coverages),
+        rows_parsed=sum(c["rows_parsed"] for c in coverages),
+        carry_used=sum(c["carry_used"] for c in coverages),
+        status="excluded" if errors else "ok",
+        reason=";".join(sorted({e["reason"] for e in errors})),
+    )
+    return rows, coverage, errors, {"_columns": next_carry}
+
+
+def _unverified_carry(carry, page_no):
+    if not carry:
+        return None
+    if "_columns" in carry:
+        return {"_columns": {key: _unverified_carry(value, page_no) for key, value in carry["_columns"].items()}}
+    return dict(carry, _unverified_since=page_no)
 
 
 def _write_part(path, payload):
@@ -343,10 +434,53 @@ def write_summary(out, report, elapsed, reused=False):
     return text
 
 
+def _verified_header_only(page):
+    """Recognize a repeated timetable masthead, never an arbitrary image page.
+
+    Some source pages contain only the same logo/banner as populated tables.
+    Require matching image content and placement from a text-bearing table,
+    no other painted objects, and an entirely white rendered page body.
+    """
+    images = page.get_image_info(hashes=True)
+    header_bottom = page.rect.y0 + page.rect.height * 0.1
+    if not images or any(image["bbox"][3] > header_bottom for image in images):
+        return False
+    if any(
+        drawing["type"] != "f"
+        or drawing.get("fill") != (1.0, 1.0, 1.0)
+        or drawing["rect"].y1 > header_bottom
+        for drawing in page.get_drawings()
+    ) or next(page.annots(), None) is not None:
+        return False
+
+    def image_identity(image):
+        return image["digest"], image["bbox"], image["transform"]
+
+    expected = sorted(image_identity(image) for image in images)
+    for index in range(min(10, page.parent.page_count)):
+        reference = page.parent[index]
+        if reference.rect != page.rect or not SECTION_RE.search(
+            normalize_ws(reference.get_text("text"))
+        ):
+            continue
+        reference_images = reference.get_image_info(hashes=True)
+        header_images = [
+            image for image in reference_images if image["bbox"][3] <= header_bottom
+        ]
+        if sorted(image_identity(image) for image in header_images) == expected:
+            body = pymupdf.Rect(page.rect)
+            body.y0 = header_bottom
+            raster = page.get_pixmap(clip=body, colorspace=pymupdf.csRGB, alpha=False)
+            return all(value == 255 for value in raster.samples)
+    return False
+
+
 def _extract(page, ocr=False):
     # Preserve the original working reader's extraction order exactly.
     content = page.get_text("text")
     if not content.strip() and page.get_images():
+        if _verified_header_only(page):
+            return content
         if not ocr:
             raise PageExtractionError(
                 "image_without_text",
@@ -406,13 +540,13 @@ def process(
         print(f"Эталон первого парсера сохранён: {reference}", flush=True)
     signature = dict(
         sha256=e.version,
-        parser_version="2.0",
+        parser_version="2.1",
         contract_version="1.0",
         source_id=source_id,
         chunk_pages=chunk_pages,
         limit_pages=limit_pages,
         ocr=ocr,
-        extraction_mode="legacy_text",
+        extraction_mode="column_carry_original_text",
     )
     checkpoint_file = state / "checkpoint.json"
     ck = (
@@ -515,12 +649,10 @@ def process(
             carry = ck["carry"]
             for p in range(start, end):
                 page = doc[p]
-                incoming_carry = carry
+                original = ""
                 try:
                     original = _extract(page, ocr)
-                    r, c, err, carry = parse_page(
-                        original, p + 1, ck["cover"], carry, keep_raw=True
-                    )
+                    r, c, err, carry = parse_pdf_page(page, original, p + 1, ck["cover"], carry)
                     c["extraction_method"] = (
                         "ocr"
                         if ocr
@@ -528,11 +660,14 @@ def process(
                         and page.get_images()
                         else "text"
                     )
+                    if not original.strip() and page.get_images():
+                        c["type"] = "header_only"
+                        c["extraction_method"] = "verified_header_only"
                 except PageExtractionError as exc:
-                    original, r = "", []
+                    r = []
                     # Retain the old parser's route candidates, but explicitly
                     # flag their uncertainty after an unreadable page.
-                    carry = dict(carry, _unverified_since=p + 1) if carry else None
+                    carry = _unverified_carry(carry, p + 1)
                     c = dict(
                         page=p + 1,
                         type=exc.reason,
@@ -560,20 +695,6 @@ def process(
                 page_text = state / f"page_{p + 1:06d}.txt"
                 texts[page_text.name] = original
                 for i, row in enumerate(r):
-                    if (
-                        incoming_carry
-                        and incoming_carry.get("_unverified_since")
-                        and str(row.get("section_source")).startswith("carried")
-                    ):
-                        row["parse_status"] = "unverified_carry_after_unreadable_page"
-                        err.append(
-                            dict(
-                                page=p + 1,
-                                reason=row["parse_status"],
-                                sample=row["raw_line"][:200],
-                            )
-                        )
-                        c["status"], c["reason"] = "excluded", row["parse_status"]
                     locator = f"page:{p + 1}/schedule:{i + 1}"
                     row.update(
                         e.base(
@@ -714,7 +835,7 @@ def process(
                             "raw_json": "null",
                             "entity_table": "schedules",
                             "entity_id": row["schedule_id"],
-                            "transformation": "reader:2.0",
+                            "transformation": "reader:2.1",
                         }
                     )
                     stats["rows_ok"] += row["parse_status"] == "ok"

@@ -110,11 +110,39 @@ def build_blocks(db, observations, identifiers, rules, staging, progress):
 def candidate_rows(db, batch_size):
     names = ('observation_id','source_id','source_record_id','locator','name_raw','name_comparison',
              'name_latin_comparison','birth_date','documents_json','identifiers_json')
-    columns = ','.join(f'{side}.{name} {prefix}_{name}' for side,prefix in [('a','left'),('b','right')] for name in names)
-    cursor = db.execute('SELECT c.*,'+columns+''' FROM candidates c JOIN nodes a ON a.nid=c.left_n
-        JOIN nodes b ON b.nid=c.right_n ORDER BY CASE WHEN document_match THEN 0 WHEN card_match THEN 1
-        WHEN source_document_match THEN 2 ELSE 3 END,c.left_n,c.right_n''')
-    reader = getattr(cursor, 'to_arrow_reader', cursor.fetch_record_batch)(batch_size)
-    for batch in reader:
-        for row in batch.to_pylist():
-            yield row,{k:row['left_'+k] for k in names},{k:row['right_'+k] for k in names}
+    # nid originates from row_number() in build_blocks, so one node per nid is
+    # an invariant. ART lookups avoid scanning all nodes for each pair batch.
+    db.execute('CREATE UNIQUE INDEX IF NOT EXISTS candidate_nodes_nid ON nodes(nid)')
+    # Sort only pair evidence. Sorting the two expanded node payloads as well
+    # duplicates large identifier lists and can spill many GB before yielding.
+    cursor = db.cursor()
+    reader = None
+    try:
+        cursor.execute('''SELECT * FROM candidates ORDER BY
+            CASE WHEN document_match THEN 0 WHEN card_match THEN 1
+            WHEN source_document_match THEN 2 ELSE 3 END,left_n,right_n''')
+        reader = getattr(cursor, 'to_arrow_reader', cursor.fetch_record_batch)(batch_size)
+        for batch in reader:
+            pairs = batch.to_pylist()
+            ids = sorted({row[side] for row in pairs for side in ('left_n','right_n') if row[side] is not None})
+            nodes = {}
+            # Keep IN filters below DuckDB's default index-scan threshold even
+            # when the caller requests a large output batch. Querying a join
+            # against a batch relation can instead trigger a full table scan.
+            for start in range(0, len(ids), 1024):
+                selected = ids[start:start+1024]
+                query = 'SELECT nid,' + ','.join(names) + ' FROM nodes WHERE nid IN (' + ','.join('?' for _ in selected) + ')'
+                for values in db.execute(query, selected).fetchall():
+                    nodes[values[0]] = dict(zip(names, values[1:]))
+            for row in pairs:
+                left, right = nodes.get(row['left_n']), nodes.get(row['right_n'])
+                # Preserve the former inner-join behavior for missing nodes.
+                if left is None or right is None:
+                    continue
+                row.update(('left_'+name, left[name]) for name in names)
+                row.update(('right_'+name, right[name]) for name in names)
+                yield row,left.copy(),right.copy()
+    finally:
+        if reader is not None:
+            reader.close()
+        cursor.close()

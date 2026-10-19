@@ -16,6 +16,7 @@ from ..normalize.geography import EXTRA_FIELDS
 from ..normalize.locking import OutputLock
 from ..normalize.values import file_hash
 from . import VERSION
+from .geography_validation import T11_FILES, validate_reference_artifacts
 from .blocking import build_blocks, candidate_rows
 from .common import AGGREGATION_GROUPS, Rules, Progress, Writer, SCHEMAS, arrow_query, conflict, dumps, stable_id
 from .matching import Components, assess_pair
@@ -30,7 +31,7 @@ def verify_inputs(root, rules, progress):
     files, fingerprints, reports = {}, {str(rules.path.resolve()):rules.sha256}, {}
     for manifest_name, names in (
         ('canonical_manifest.json',('observations.parquet','identifiers.parquet','travel_observations.parquet','canonical_report.json')),
-        ('t11_manifest.json',('travel_geography.parquet','geography_report.json'))):
+        ('t11_manifest.json',tuple(sorted(T11_FILES)))):
         path = root/manifest_name
         manifest = json.loads(path.read_text(encoding='utf-8'))
         fingerprints[str(path)] = file_hash(path)
@@ -54,7 +55,7 @@ def verify_inputs(root, rules, progress):
         if reports['canonical_report.json'].get('counts',{}).get(table) != pq.ParquetFile(files[table+'.parquet']).metadata.num_rows:
             raise ValueError('Canonical report row count mismatch: '+table)
     geo = pq.read_schema(files['travel_geography.parquet'])
-    if (geo.metadata or {}).get(b'geography_contract_version') != b'1.0':
+    if (geo.metadata or {}).get(b'geography_contract_version') != b'2.0':
         raise ValueError('Unsupported T11 geography contract')
     for field in CANONICAL_SCHEMAS['travel_observations']:
         if field.name not in geo.names or geo.field(field.name).type != field.type:
@@ -269,6 +270,7 @@ def run(input_path, output, config, review_output=None, batch_size=4000, memory_
                 db.execute('SET temp_directory=?',[str(staging/'spill')])
                 meter.phase('проверка ключей и соответствия T11/T12')
                 validate_relations(db,files)
+                validate_reference_artifacts(files,reports['geography_report.json'],db)
                 present={r[0] for r in db.execute('SELECT DISTINCT source_id FROM input_observations').fetchall()}
                 missing=sorted(SOURCES-present)
                 if require_all and missing:raise ValueError('Missing personal sources: '+', '.join(missing))

@@ -38,6 +38,16 @@ from .resolve.pipeline import run as resolve
 from .resolve.pipeline import verify_inputs
 
 VERSION = "1.0"
+# Bump this whenever ingestion orchestration, validation or publication semantics
+# change. Reader implementation changes are independently included below.
+STAGE_CACHE_VERSION = "ingestion:1"
+CORE_STAGE_CACHE_VERSION = "core-stage:1"
+# The immediate predecessor has identical ingestion orchestration. Its only
+# migration is from the whole-core environment key to reader-scoped keys.
+LEGACY_INGEST_PIPELINE_SHA256 = "cc305b6740406448cdbbddcd5f525c5ceedbf30e94cf35190bece5a4f5903147"
+# This predecessor already stored the full environment for T11--T14. Its
+# canonical/geography/resolution/quality invocation semantics are unchanged.
+LEGACY_CORE_PIPELINE_SHA256 = "3911e61652661b99195a248e6e1f5a89da16d0d3d4a9a1207acfc1e4772a5ea9"
 ROOT = Path(__file__).resolve().parents[2]
 SOURCES = (
     "boarding_csv", "forum_json", "pointz_xml", "sirena_fixed",
@@ -49,6 +59,7 @@ CANONICAL_FILES = tuple(f"{name}.parquet" for name in CANONICAL_SCHEMAS) + (
 )
 GEOGRAPHY_FILES = (
     "travel_geography.parquet", "schedule_geography.parquet", "schedule_links.parquet",
+    "schedule_reference_groups.parquet", "schedule_reference_members.parquet",
     "place_inventory.parquet", "geography_report.json", "geography_summary.txt",
 )
 RESOLUTION_FILES = tuple(f"{name}.parquet" for name in RESOLUTION_SCHEMAS) + (
@@ -58,6 +69,27 @@ PUBLISHED = {
     "canonical_manifest.json": CANONICAL_FILES,
     "t11_manifest.json": GEOGRAPHY_FILES,
     "resolution_manifest.json": RESOLUTION_FILES,
+}
+
+# Keep these explicit transitive imports in sync with each stage implementation.
+# Input/config/reference bytes are separate signature inputs. Pipeline-level
+# invocation or validation changes require a cache version bump as well.
+_CORE_COMMON_FILES = {
+    "__init__.py", "contracts.py", "io.py", "provenance.py",
+    "normalize/__init__.py", "normalize/locking.py",
+}
+_CANONICAL_SOURCE_FILES = _CORE_COMMON_FILES | {"normalize/canonical.py", "normalize/values.py"}
+CORE_STAGE_SOURCE_FILES = {
+    "canonical": _CANONICAL_SOURCE_FILES,
+    "geography": _CORE_COMMON_FILES | {
+        "normalize/geography.py", "normalize/airports.py", "resolve/__init__.py", "resolve/geography_validation.py",
+    },
+    "resolution": _CANONICAL_SOURCE_FILES | {
+        "normalize/geography.py", "normalize/airports.py", "resolve/__init__.py",
+        "resolve/pipeline.py", "resolve/common.py", "resolve/blocking.py", "resolve/matching.py",
+        "resolve/review.py", "resolve/segments.py", "resolve/geography_validation.py",
+    },
+    "quality": _CANONICAL_SOURCE_FILES | {"quality.py"},
 }
 
 
@@ -100,10 +132,76 @@ def _environment():
         except importlib.metadata.PackageNotFoundError:
             versions[name] = None
     package = Path(__file__).parent
-    code = {str(p.relative_to(package)): fingerprint(p) for p in sorted(package.rglob("*.py"))}
+    # Analytical/report/UI changes cannot affect the data core. Restrict its
+    # cache identity to the actual implementation dependencies so that fixing
+    # an export does not force a multi-million-row source ingestion again.
+    core_modules = {
+        "__init__.py", "config.py", "contracts.py", "io.py", "pipeline.py",
+        "provenance.py", "quality.py",
+    }
+    core_packages = {"readers", "normalize", "resolve"}
+    code = {
+        p.relative_to(package).as_posix(): fingerprint(p)
+        for p in sorted(package.rglob("*.py"))
+        if p.relative_to(package).as_posix() in core_modules
+        or p.relative_to(package).parts[0] in core_packages
+    }
     return {"pipeline_version": VERSION, "package_version": __version__,
             "python": platform.python_version(), "platform": platform.system(),
             "dependencies": versions, "source_files": code, "code_sha256": _signature(code)}
+
+
+def _stage_environment(name, environment):
+    """Fingerprint the static implementation dependencies of one data stage.
+
+    All runtime and third-party versions remain conservative dependencies.
+    Missing code evidence fails closed rather than shrinking the dependency set.
+    Unknown non-reader stages retain the full core environment.
+    """
+    if name.startswith("ingest:"):
+        reader = name.removeprefix("ingest:")
+        if reader not in SOURCES:
+            raise ValueError("Unknown ingestion stage: " + name)
+        required = {"__init__.py", "contracts.py", "io.py", "provenance.py",
+                    "readers/__init__.py", "readers/common.py", f"readers/{reader}.py"}
+        if reader == "boardingpass_xlsx":
+            required.add("readers/xlsx_stream.py")
+        elif reader == "timetable_pdf":
+            required.add("readers/pdf_reference.py")
+        metadata = {"stage_cache_version": STAGE_CACHE_VERSION, "reader": reader}
+    elif name in CORE_STAGE_SOURCE_FILES:
+        required = CORE_STAGE_SOURCE_FILES[name]
+        metadata = {"stage_cache_version": CORE_STAGE_CACHE_VERSION, "stage": name}
+    else:
+        return environment
+    source_files = environment.get("source_files")
+    if not isinstance(source_files, dict) or _signature(source_files) != environment.get("code_sha256"):
+        raise ValueError("Invalid stage source environment")
+    if not required <= source_files.keys():
+        raise ValueError("Missing stage implementation evidence: " + ", ".join(sorted(required - source_files.keys())))
+    code = {name: source_files[name] for name in sorted(required)}
+    return {**environment, "source_files": code, "code_sha256": _signature(code), **metadata}
+
+
+def _legacy_environment(environment, pipeline_digest):
+    """Only the reviewed predecessor may cross the cache-key migration."""
+    if not isinstance(environment, dict) or "stage_cache_version" in environment:
+        return False
+    files = environment.get("source_files")
+    return (isinstance(files, dict)
+            and files.get("pipeline.py") == pipeline_digest
+            and environment.get("code_sha256") == _signature(files))
+
+
+def _legacy_ingest_environment(environment):
+    return _legacy_environment(environment, LEGACY_INGEST_PIPELINE_SHA256)
+
+
+def _legacy_stage_environment(name, environment):
+    if name.startswith("ingest:"):
+        return _legacy_ingest_environment(environment)
+    return (name in CORE_STAGE_SOURCE_FILES
+            and _legacy_environment(environment, LEGACY_CORE_PIPELINE_SHA256))
 
 
 class _Log:
@@ -156,16 +254,53 @@ class _Stages:
         if self.state.get("version") != VERSION or not isinstance(self.state.get("stages"), dict):
             self.state = {"version": VERSION, "stages": {}}
 
+    def attach_legacy_environment(self, environment, requests):
+        """Attach recovered evidence only after all seven old keys agree.
+
+        This does not mark any stage reusable or rewrite its signature. Each
+        run still requires unchanged relevant code, inputs, options and the
+        exact expected output inventory with matching content hashes.
+        """
+        names = {"ingest:" + name for name in SOURCES}
+        if not _legacy_ingest_environment(environment) or set(requests) != names:
+            raise ValueError("Incomplete or unsupported legacy ingestion environment")
+        for name in sorted(names):
+            request = requests[name]
+            if not isinstance(request, dict) or set(request) != {"inputs", "options"}:
+                raise ValueError("Invalid legacy stage request: " + name)
+            _stage_environment(name, environment)
+            previous = self.state["stages"].get(name)
+            key = _signature({"environment": environment, **request})
+            if (not isinstance(previous, dict) or previous.get("signature") != key
+                    or "environment" in previous):
+                raise ValueError("Legacy stage signature does not match recovered evidence: " + name)
+        for name in names:
+            self.state["stages"][name]["environment"] = environment
+        atomic_json(self.path, self.state)
+        self.log.event("legacy_stage_environment_verified", stages=sorted(names))
+
     def run(self, name, inputs, options, action, outputs):
         self.current = name
         started = time.perf_counter()
-        key = _signature({"environment": self.environment, "inputs": inputs, "options": options})
+        environment = _stage_environment(name, self.environment)
+        key = _signature({"environment": environment, "inputs": inputs, "options": options})
         previous = self.state["stages"].get(name, {})
         if not isinstance(previous, dict):
             previous = {}
+        legacy_environment = previous.get("environment")
+        migrate = False
+        if previous.get("status") == "complete" and _legacy_stage_environment(name, legacy_environment):
+            old_key = _signature({"environment": legacy_environment, "inputs": inputs, "options": options})
+            try:
+                migrate = (previous.get("signature") == old_key
+                           and _stage_environment(name, legacy_environment) == environment)
+            except ValueError:
+                # A newly introduced dependency is absent from historical
+                # evidence. Recompute the stage instead of migrating its key.
+                migrate = False
         self.log.message(f"T16: {name} — проверка/запуск")
         with _Heartbeat(self.log, name):
-            if previous.get("status") == "complete" and previous.get("signature") == key:
+            if previous.get("status") == "complete" and (previous.get("signature") == key or migrate):
                 try:
                     cached = previous.get("outputs", {})
                     expected = {str(p.resolve()) for p in outputs()}
@@ -173,17 +308,26 @@ class _Stages:
                 except (OSError, ValueError, TypeError, AttributeError):
                     valid = False
                 if valid:
+                    if migrate:
+                        self.log.event("stage_cache_key_migrated", stage=name)
+                    # Keep the actual request evidence with both newly executed
+                    # and verified reused stages, including migrated old caches.
+                    previous.update(signature=key, environment=environment, inputs=inputs, options=options)
+                    atomic_json(self.path, self.state)
                     self.timings[name] = {"action": "reused", "seconds": round(time.perf_counter() - started, 3)}
                     self.log.message(f"T16: {name} — готовый этап подтверждён по SHA-256")
                     return cached
-            self.state["stages"][name] = {"status": "running", "signature": key}
+            self.state["stages"][name] = {"status": "running", "signature": key, "environment": environment,
+                                          "inputs": inputs, "options": options}
             atomic_json(self.path, self.state)
             try:
                 action()
                 files = _inventory(outputs())
                 if not files:
                     raise RuntimeError(f"Stage produced no files: {name}")
-                self.state["stages"][name] = {"status": "complete", "signature": key, "outputs": files}
+                self.state["stages"][name] = {"status": "complete", "signature": key,
+                                              "environment": environment, "inputs": inputs,
+                                              "options": options, "outputs": files}
                 atomic_json(self.path, self.state)
             except BaseException as exc:
                 self.state["stages"][name].update(

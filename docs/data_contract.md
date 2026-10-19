@@ -122,18 +122,20 @@ validation/real_runs.json (121.2–210.9 МиБ RSS, отдельные проц
 process_peak_rss_mib — пик процесса, включая импорт библиотек; при ingest all
 он включает предыдущие readers. На Windows resource недоступен: RSS=null.
 
-## Дополнение T11: geography 1.0
+## Дополнение T11: geography 2.0
 
 Контракт readers 1.0 и их таблицы остаются неизменными. T11 создаёт отдельные
-travel_geography, schedule_geography, schedule_links и place_inventory.
+travel_geography, schedule_geography, schedule_links, schedule_reference_groups,
+schedule_reference_members и place_inventory.
 Авторитетные дополнительные Arrow-схемы — `normalize/geography.py` (META,
-EXTRA_FIELDS, LINK_SCHEMA, INVENTORY_SCHEMA); правила — `normalize/airports.py`.
-Metadata этих файлов: geography_contract_version=1.0, rule_version=airports:1.1.
+EXTRA_FIELDS, LINK_SCHEMA, REFERENCE_GROUP_SCHEMA, REFERENCE_MEMBER_SCHEMA,
+INVENTORY_SCHEMA); правила — `normalize/airports.py`.
+Metadata этих файлов: geography_contract_version=2.0, rule_version=airports:1.1.
 В правилах 1.1 проверенные варианты страны при явном коде аэропорта имеют
 status=corrected, reason=verified_country_alias. В *_override_json сохраняется
 объект с country_aliases (массив полных правил); при совместном исправлении
 кода исходное правило находится в airport_override. Без country alias формат
-прежнего одиночного правила сохраняется. Базовая Arrow-схема не изменилась.
+прежнего одиночного правила сохраняется. Базовые исходные Arrow-колонки не изменились.
 
 Все исходные колонки сохраняют типы и значения; дополнительные колонки T12
 пропускаются через pa.unify_schemas при совместимых типах. Неизвестная форма
@@ -141,7 +143,24 @@ status=corrected, reason=verified_country_alias. В *_override_json сохран
 не объединяет пассажиров и не считает schedules наблюдением поездки.
 Ключи travel_id/schedule_id не меняются; повторный вход с тем же ключом запрещён.
 Строка travel_geography соответствует ровно одной исходной travel_observations.
-Для schedule_links ключ пары travel_id + schedule_id уникален в одном запуске.
+В полном логическом отношении ссылок пара travel_id + schedule_id уникальна
+в одном запуске. По умолчанию schedule_links содержит отдельные связи,
+кроме справочных outside_period. Последние представлены ссылкой
+travel_geography.schedule_reference_group_id на schedule_reference_groups
+и парами group_id + schedule_id в schedule_reference_members. Число членов
+группы и schedule_reference_count у каждой ссылающейся поездки совпадают.
+Без групповой ссылки ID равен null, count равен 0. Групповые файлы обязательны
+в контракте 2.0 даже при отсутствии строк.
+
+Все исходные строки расписания и их provenance сохраняются в schedule_geography.
+Полное отношение, включая byte-exact evidence_json, восстанавливает
+`normalize.geography.iter_schedule_links`: группировка не удаляет кандидатов.
+Группы имеют только status=reference_only, temporal_coverage=outside_period,
+reason=outside_schedule_period и пустой filled_fields_json. Неизвестный период
+не является outside_period и остаётся отдельным кандидатом.
+counts.schedule_links — физическое число строк; counts.logical_schedule_links
+равно этому числу плюс сумме schedule_reference_count. Все групповые файлы
+включаются в SHA-256-манифест T11 и в полный снимок T16.
 
 Связь содержит provenance обеих сторон и JSON заполненных полей. Статус
 inferred_from_schedule хранится у выведенной точки и/или времени; исходные raw и
