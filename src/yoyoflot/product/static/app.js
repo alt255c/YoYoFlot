@@ -280,7 +280,7 @@ function pointInView(point, margin = 18) {
 }
 function animateMosquito(mosquito, from, to, control, size, segmentId) {
   const started = performance.now();
-  const speed = 8; // map units per second: deliberately calm and distance-independent
+  const speed = 4; // map units per second: deliberately calm and distance-independent
   let routeLength = 0;
   let previous = from;
   for (let step = 1; step <= 32; step += 1) {
