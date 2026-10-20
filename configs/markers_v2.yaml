@@ -5,7 +5,7 @@ score_purpose: existing_behavioral_ranking_with_document_conflicts_and_weak_sign
 ground_truth_labels_available: false
 weight_method: preserve_baseline_and_explicit_new_marker_policy
 group_aggregation: max
-strong_total_contribution_cap: 20.0
+strong_total_contribution_cap: 2.0
 baseline_total_contribution_cap: 10.5
 weak_total_contribution_cap: 0.06
 ranking_order:
@@ -24,10 +24,10 @@ criteria:
     role: strong
     enabled: true
     status: specified_not_implemented
-    weight: 20.0
+    weight: 2.0
     value_type: binary
     threshold: 1
-    contribution_cap: 20.0
+    contribution_cap: 2.0
     required:
       - exact_document_value_within_same_namespace
       - at_least_two_distinct_valid_birth_dates

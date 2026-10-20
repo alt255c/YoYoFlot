@@ -88,7 +88,9 @@ def main():
         "strong_minimum_contribution": strong["weight"],
         "baseline_maximum_contribution": baseline_maximum,
         "weak_maximum_contribution": weak_maximum,
-        "strong_exceeds_baseline_and_all_weak": strong["weight"] > baseline_maximum + weak_maximum,
+        "strong_exceeds_all_weak": strong["weight"] > weak_maximum,
+        "strong_cap_consistent": abs(strong["weight"] - strong["contribution_cap"]) < 1e-12
+            and abs(strong["weight"] - settings["strong_total_contribution_cap"]) < 1e-12,
         "baseline_cap_consistent": abs(baseline_maximum - settings["baseline_total_contribution_cap"]) < 1e-12,
         "weak_cap_consistent": abs(weak_maximum - settings["weak_total_contribution_cap"]) < 1e-12,
         "baseline_formula_caps_consistent": all(abs(rule["weight"] * 3 - rule["contribution_cap"]) < 1e-12

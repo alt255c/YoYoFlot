@@ -234,7 +234,7 @@
       "source_id": "boarding_csv"
     }
   ],
-  "generated_at_utc": "2026-10-20T10:02:58.539845+00:00",
+  "generated_at_utc": "2026-10-20T10:15:30.860058+00:00",
   "input_sha256": {
     "artifacts\\source-product\\product.yaml": "37230f5a6243313751293ee7460e41ea0b9ad30f885caf51582637dc0de620d6",
     "artifacts\\source-product\\rules.json": "93342b5aec74d87c4924bd2f1155b02099b63352801e183b46c37d80969e3612",
@@ -242,7 +242,7 @@
     "artifacts\\source-product\\tables\\persons.parquet": "2fcec8f4dce8c01bc9cb5551f289f5f65eb64db4f06db7505385ff9c8f7d8661",
     "artifacts\\source-product\\tables\\rankings.parquet": "9664103ad4a85c6512c1fe6306e9bbed08a57f6986999b34070a7c2e4e4adbb1",
     "artifacts\\source-product\\tables\\segments.parquet": "3367887c924c39ff38dd443a41f257cb7e38c0f55b44050a323ecc4244502ae3",
-    "configs\\markers_v2.yaml": "216a9aa39bcbb98a8882225ae4986cc1d99b3cd41eebc58eb9de15f7c7c04272",
+    "configs\\markers_v2.yaml": "d12b8d2e0c9ec31bc29c081a1b3790dd7614cbf9ea80f80b3c6d3990c1a304b1",
     "configs\\product.yaml": "37230f5a6243313751293ee7460e41ea0b9ad30f885caf51582637dc0de620d6",
     "configs\\sirena_columns.yaml": "3d4b0259fdae7674aca1ba5887b2f6dd733d1e05d9b1d50b54b2b37cd9104b70",
     "data\\Airlines-All.zip": "ce8aac0806d8c001fe1a4253176ad826ebf3f1487e54b8c6bcf46fa5848bcc1b",
@@ -251,7 +251,7 @@
     "data\\processed\\t14_canonical_20261017\\identifiers.parquet": "7f0619885b63af5f00be1d009cbfe51979224790f2c57029989315d4fa5f9fdf",
     "data\\processed\\t14_canonical_20261017\\observations.parquet": "cbcc50f12b6633f1d8eeb572201c9ff636e83461165e3c02d1bee5773f6b33ad",
     "data\\processed\\t14_canonical_20261017\\travel_observations.parquet": "385ae55544884f8008eaf9a0d0014e4e601704ca3391d4d0e23b2554d95b22c7",
-    "scripts\\audit_marker_baseline.py": "af6c32fe713caacc6c481660c74878c05de59ee89ae8d26d436b841a2cbfe9d8",
+    "scripts\\audit_marker_baseline.py": "de2522b4bebd50bb76db8867172dbdd4fa214db871d5e4dee4f75257f04df158",
     "scripts\\dataset_manifest.json": "a0c13c415416ab6b5f6c68a5342bd2b9f8eac2c325938047332c1948660bd15d"
   },
   "limitations": [
@@ -462,7 +462,7 @@
   ],
   "target_weights": {
     "B01": 0.01,
-    "D01": 20.0,
+    "D01": 2.0,
     "D02": 0.01,
     "L01": 0.01,
     "M01": 1.0,
@@ -551,9 +551,10 @@
     "forest_kept_separate": true,
     "no_show_unavailable_instead_of_inferred": true,
     "original_baseline_group_count_preserved": true,
-    "strong_exceeds_baseline_and_all_weak": true,
+    "strong_cap_consistent": true,
+    "strong_exceeds_all_weak": true,
     "strong_groups_sorted_first": true,
-    "strong_minimum_contribution": 20.0,
+    "strong_minimum_contribution": 2.0,
     "weak_cap_consistent": true,
     "weak_maximum_contribution": 0.06
   },
