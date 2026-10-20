@@ -1,0 +1,601 @@
+{
+  "all_inputs_unchanged": true,
+  "canonical_acceptance": "pending_real_data_review",
+  "canonical_status": "complete_with_errors",
+  "cross_source_display_bundles": 1,
+  "current_ranking_population": [
+    {
+      "eligibility_status": "eligible",
+      "profiles": 5346
+    },
+    {
+      "eligibility_status": "insufficient_data",
+      "profiles": 798450
+    },
+    {
+      "eligibility_status": "no_matches",
+      "profiles": 36810
+    }
+  ],
+  "document_counts_by_source": [
+    {
+      "document_rows": 155147,
+      "document_values": 73263,
+      "source_id": "boarding_csv"
+    },
+    {
+      "document_rows": 155757,
+      "document_values": 83217,
+      "source_id": "sirena_fixed"
+    }
+  ],
+  "document_values": [
+    "8248 013778"
+  ],
+  "evidence": [
+    {
+      "birth_date": "1982-12-31",
+      "birth_date_raw": "12/31/1982",
+      "identifier_id": "cae3469c14c8b714be1520ce84c8395cd8ac904c46cd78808d4bfd25812c18ea",
+      "identifier_locator": "line:134535-134535/document",
+      "identifier_namespace": "[\"document\",\"source\",\"boarding_csv\"]",
+      "identifier_source_record_id": "a7b568fa37e00d9188af0575f6108b8a7404cc700871446d3053fc5a46d391de",
+      "locator": "line:134535-134535",
+      "name_latin_comparison": "glebov gordei makarevich",
+      "name_normalized": "glebov gordei makarevich",
+      "name_raw": "GLEBOV GORDEI MAKAREVICH",
+      "namespace_status": "source_scoped",
+      "observation_id": "3bcb3cd577cdeb5452935ad4ad77cfb1ecc76f3f6b9ad0f3abbe537d8813ce32",
+      "source_id": "boarding_csv",
+      "source_record_id": "342bfd061d3ed13d172eb22a3278249ccf7d7d337a4af79e7c1370f351e5d78b",
+      "value": "8248 013778",
+      "value_normalized": "8248 013778"
+    },
+    {
+      "birth_date": "1995-08-24",
+      "birth_date_raw": "08/24/1995",
+      "identifier_id": "2a21f306f073902a87548c2207c67cd629054846b4c98fe2a26d329a2809a231",
+      "identifier_locator": "line:150154-150154/document",
+      "identifier_namespace": "[\"document\",\"source\",\"boarding_csv\"]",
+      "identifier_source_record_id": "4ed3eb89879a2c781408b475021ca03df239927a4a2213d37254de9ca666cf70",
+      "locator": "line:150154-150154",
+      "name_latin_comparison": "burov ramil albertovich",
+      "name_normalized": "burov ramil albertovich",
+      "name_raw": "BUROV RAMIL ALBERTOVICH",
+      "namespace_status": "source_scoped",
+      "observation_id": "13dee25332d70bef41ebdae30d2612d35531dd34cbb2156110e4ee2b18cff5a0",
+      "source_id": "boarding_csv",
+      "source_record_id": "3bfcf5de5156af8eda83cf875883676a7db0081b7c36bd9c709a44e1a0946d97",
+      "value": "8248 013778",
+      "value_normalized": "8248 013778"
+    },
+    {
+      "birth_date": "1982-12-31",
+      "birth_date_raw": "12/31/1982",
+      "identifier_id": "de0eff6a09efbf45870d66ab368b6f57a3f87e40200047af74cee12891a21ee3",
+      "identifier_locator": "line:83249-83249/document",
+      "identifier_namespace": "[\"document\",\"source\",\"boarding_csv\"]",
+      "identifier_source_record_id": "7db4d45c1a87384c6ab04b19ddf0a6a066f9f5e3e543d8eb32e97149f5effcfa",
+      "locator": "line:83249-83249",
+      "name_latin_comparison": "glebov gordei m.",
+      "name_normalized": "glebov gordei m.",
+      "name_raw": "GLEBOV GORDEI M.",
+      "namespace_status": "source_scoped",
+      "observation_id": "2c46c1cae4d416418b6e902952062ec53b2627403f5eda7a6ebf0479f3b14c58",
+      "source_id": "boarding_csv",
+      "source_record_id": "65e2df7ae3f233cbba88e58458b15e2498600c7ba6bd0b32e944f91c4cd9006d",
+      "value": "8248 013778",
+      "value_normalized": "8248 013778"
+    },
+    {
+      "birth_date": "1982-12-31",
+      "birth_date_raw": "12/31/1982",
+      "identifier_id": "fee407b388d4a549ca22aea10ca67bb7b16f83e7c34cf18812fac00bd0f5a94a",
+      "identifier_locator": "line:92877-92877/document",
+      "identifier_namespace": "[\"document\",\"source\",\"boarding_csv\"]",
+      "identifier_source_record_id": "edf926db2b19a217c2a467be647f1617fd0fd89200b572f7b76054e348ca684e",
+      "locator": "line:92877-92877",
+      "name_latin_comparison": "glebov gordei m.",
+      "name_normalized": "glebov gordei m.",
+      "name_raw": "GLEBOV GORDEI M.",
+      "namespace_status": "source_scoped",
+      "observation_id": "ce8372f8cdce8661cdad189d8c6c929b0ccfc5238118172a9b8f0a5366d8eeb5",
+      "source_id": "boarding_csv",
+      "source_record_id": "c75a6c3d66b28031acb36d8ce56dd1a1ee12a5ddf3401c2a27dab34509dbbc25",
+      "value": "8248 013778",
+      "value_normalized": "8248 013778"
+    },
+    {
+      "birth_date": "1995-08-24",
+      "birth_date_raw": "1995-08-24",
+      "identifier_id": "68ff322d191c01d1007b5483f2614bef5e937444f20ffcf60f718c720eddd062",
+      "identifier_locator": "line:150694/document",
+      "identifier_namespace": "[\"document\",\"source\",\"sirena_fixed\"]",
+      "identifier_source_record_id": "eaec034db5a25450fa87bf3964f26793285744c411a0c0927d0f47aec3270df9",
+      "locator": "line:150694",
+      "name_latin_comparison": "burov ramil albertovich",
+      "name_normalized": "буров рамиль альбертович",
+      "name_raw": "БУРОВ РАМИЛЬ АЛЬБЕРТОВИЧ",
+      "namespace_status": "source_scoped",
+      "observation_id": "18a39cbf56474bc693a033b370dd2f42c6773bcddfaa00e90ffbbbf98a5d94d5",
+      "source_id": "sirena_fixed",
+      "source_record_id": "888f53d5787c42a193bcd490067f090447a9d94699c609d66f99b507876a1e42",
+      "value": "8248 013778",
+      "value_normalized": "8248 013778"
+    },
+    {
+      "birth_date": "1982-12-31",
+      "birth_date_raw": "1982-12-31",
+      "identifier_id": "da4c2ad92827e42cfa352c3ec8b97d298c4c38a9ce6a14fa1e28ab7125dcafe4",
+      "identifier_locator": "line:93154/document",
+      "identifier_namespace": "[\"document\",\"source\",\"sirena_fixed\"]",
+      "identifier_source_record_id": "f95009623cce2e59ec905a9acbbbbb6ed2b7a805622ead7f6ad966a112570288",
+      "locator": "line:93154",
+      "name_latin_comparison": "glebov gordey makarevich",
+      "name_normalized": "глебов гордей макаревич",
+      "name_raw": "ГЛЕБОВ ГОРДЕЙ МАКАРЕВИЧ",
+      "namespace_status": "source_scoped",
+      "observation_id": "702717fb599ea1bb6c8abd06a00b078b7bf5e2ae26455b1a6a1a212bf1ad2fd1",
+      "source_id": "sirena_fixed",
+      "source_record_id": "7c9df957828c18ef67508342c16e7e318fab189650580a932a2865cdf843cf28",
+      "value": "8248 013778",
+      "value_normalized": "8248 013778"
+    }
+  ],
+  "evidence_without_exact_product_anchor": [
+    "18a39cbf56474bc693a033b370dd2f42c6773bcddfaa00e90ffbbbf98a5d94d5",
+    "702717fb599ea1bb6c8abd06a00b078b7bf5e2ae26455b1a6a1a212bf1ad2fd1"
+  ],
+  "exact_anchor_profiles": [
+    {
+      "anchor_observation_id": "3bcb3cd577cdeb5452935ad4ad77cfb1ecc76f3f6b9ad0f3abbe537d8813ce32",
+      "birth_date": "1982-12-31",
+      "display_name": "GLEBOV GORDEI MAKAREVICH",
+      "eligibility_status": "insufficient_data",
+      "graph_eligible": false,
+      "identity_status": "ambiguous",
+      "observation_count": 1,
+      "person_id": "person_085934b191ca30c2d2f088dde1c9e4663db661dabc5565546d5395716c79a7a0",
+      "rank": null,
+      "rule_id": "identity.source_observation",
+      "source_count": 1
+    },
+    {
+      "anchor_observation_id": "13dee25332d70bef41ebdae30d2612d35531dd34cbb2156110e4ee2b18cff5a0",
+      "birth_date": "1995-08-24",
+      "display_name": "BUROV RAMIL ALBERTOVICH",
+      "eligibility_status": "insufficient_data",
+      "graph_eligible": false,
+      "identity_status": "ambiguous",
+      "observation_count": 1,
+      "person_id": "person_3974a2472ec280384722ea277158febb6e369df71aaa99fb8816d56ae75ba37c",
+      "rank": null,
+      "rule_id": "identity.source_observation",
+      "source_count": 1
+    },
+    {
+      "anchor_observation_id": "2c46c1cae4d416418b6e902952062ec53b2627403f5eda7a6ebf0479f3b14c58",
+      "birth_date": "1982-12-31",
+      "display_name": "GLEBOV GORDEI M.",
+      "eligibility_status": "insufficient_data",
+      "graph_eligible": false,
+      "identity_status": "ambiguous",
+      "observation_count": 1,
+      "person_id": "person_65ac0c5514d4c404cc6b19d34a17ef4f19499e93858f23889c16db73a59042fb",
+      "rank": null,
+      "rule_id": "identity.source_observation",
+      "source_count": 1
+    },
+    {
+      "anchor_observation_id": "ce8372f8cdce8661cdad189d8c6c929b0ccfc5238118172a9b8f0a5366d8eeb5",
+      "birth_date": "1982-12-31",
+      "display_name": "GLEBOV GORDEI M.",
+      "eligibility_status": "insufficient_data",
+      "graph_eligible": false,
+      "identity_status": "ambiguous",
+      "observation_count": 1,
+      "person_id": "person_8645356783fdb3cd29032801cdf4df0ffe1f38bb46cfe4662488729dae89c18a",
+      "rank": null,
+      "rule_id": "identity.source_observation",
+      "source_count": 1
+    }
+  ],
+  "exact_segment_anchor_links": [
+    {
+      "anchor_travel_id": "f80b19382b5328f91c50f9e3eaff79e5c91091e4d3add7486391a25284101c0f",
+      "locator": "line:134535-134535/travel",
+      "observation_id": "3bcb3cd577cdeb5452935ad4ad77cfb1ecc76f3f6b9ad0f3abbe537d8813ce32",
+      "person_id": "person_085934b191ca30c2d2f088dde1c9e4663db661dabc5565546d5395716c79a7a0",
+      "segment_id": "segment_7a0de5dc0c84040406f275a29b06fe5e5dcf4396fca6ed2822104ead2153b120",
+      "source_id": "boarding_csv"
+    },
+    {
+      "anchor_travel_id": "92fa23ea1ae2867214b5b45994196a1509434cf1d94249c41e652701cc4e3cec",
+      "locator": "line:150154-150154/travel",
+      "observation_id": "13dee25332d70bef41ebdae30d2612d35531dd34cbb2156110e4ee2b18cff5a0",
+      "person_id": "person_3974a2472ec280384722ea277158febb6e369df71aaa99fb8816d56ae75ba37c",
+      "segment_id": "segment_623383949186ff427424eedc3377024f8826dbd26638b598876ae8edbc45b1f2",
+      "source_id": "boarding_csv"
+    },
+    {
+      "anchor_travel_id": "3c0b5907f804e110c1b4a8e1cb877f448645f8d7e19e0bdb1f473361bbc49415",
+      "locator": "line:83249-83249/travel",
+      "observation_id": "2c46c1cae4d416418b6e902952062ec53b2627403f5eda7a6ebf0479f3b14c58",
+      "person_id": "person_65ac0c5514d4c404cc6b19d34a17ef4f19499e93858f23889c16db73a59042fb",
+      "segment_id": "segment_cd39adfa44a20c07c0a0c1f6afef766b9521a6138fe8cbbac80ce4b51927c399",
+      "source_id": "boarding_csv"
+    },
+    {
+      "anchor_travel_id": "7c76cd8103218cb01839f748589d871329cde8756ce9ecb97063208e8cfb198d",
+      "locator": "line:92877-92877/travel",
+      "observation_id": "ce8372f8cdce8661cdad189d8c6c929b0ccfc5238118172a9b8f0a5366d8eeb5",
+      "person_id": "person_8645356783fdb3cd29032801cdf4df0ffe1f38bb46cfe4662488729dae89c18a",
+      "segment_id": "segment_31ffc7a1aacaec1637f2785740bec1effb44f89cd0da2201d69fe757f6d99772",
+      "source_id": "boarding_csv"
+    }
+  ],
+  "generated_at_utc": "2026-10-20T10:15:30.860058+00:00",
+  "input_sha256": {
+    "artifacts\\source-product\\product.yaml": "37230f5a6243313751293ee7460e41ea0b9ad30f885caf51582637dc0de620d6",
+    "artifacts\\source-product\\rules.json": "93342b5aec74d87c4924bd2f1155b02099b63352801e183b46c37d80969e3612",
+    "artifacts\\source-product\\run_manifest.json": "5e5e8046fb63ef35574da83f26f859be7195a418cd3858a9966f9f8fcad5cb44",
+    "artifacts\\source-product\\tables\\persons.parquet": "2fcec8f4dce8c01bc9cb5551f289f5f65eb64db4f06db7505385ff9c8f7d8661",
+    "artifacts\\source-product\\tables\\rankings.parquet": "9664103ad4a85c6512c1fe6306e9bbed08a57f6986999b34070a7c2e4e4adbb1",
+    "artifacts\\source-product\\tables\\segments.parquet": "3367887c924c39ff38dd443a41f257cb7e38c0f55b44050a323ecc4244502ae3",
+    "configs\\markers_v2.yaml": "d12b8d2e0c9ec31bc29c081a1b3790dd7614cbf9ea80f80b3c6d3990c1a304b1",
+    "configs\\product.yaml": "37230f5a6243313751293ee7460e41ea0b9ad30f885caf51582637dc0de620d6",
+    "configs\\sirena_columns.yaml": "3d4b0259fdae7674aca1ba5887b2f6dd733d1e05d9b1d50b54b2b37cd9104b70",
+    "data\\Airlines-All.zip": "ce8aac0806d8c001fe1a4253176ad826ebf3f1487e54b8c6bcf46fa5848bcc1b",
+    "data\\processed\\t14_canonical_20261017\\canonical_manifest.json": "4b5729ded7ae2dd74d6e26a3301847134720badbbec3b9a5ada7b6ba9254b234",
+    "data\\processed\\t14_canonical_20261017\\canonical_report.json": "405b0583c5516b3db1ea6d3e3730581cee5852ad34f20e1c8811f15f30e0599d",
+    "data\\processed\\t14_canonical_20261017\\identifiers.parquet": "7f0619885b63af5f00be1d009cbfe51979224790f2c57029989315d4fa5f9fdf",
+    "data\\processed\\t14_canonical_20261017\\observations.parquet": "cbcc50f12b6633f1d8eeb572201c9ff636e83461165e3c02d1bee5773f6b33ad",
+    "data\\processed\\t14_canonical_20261017\\travel_observations.parquet": "385ae55544884f8008eaf9a0d0014e4e601704ca3391d4d0e23b2554d95b22c7",
+    "scripts\\audit_marker_baseline.py": "de2522b4bebd50bb76db8867172dbdd4fa214db871d5e4dee4f75257f04df158",
+    "scripts\\dataset_manifest.json": "a0c13c415416ab6b5f6c68a5342bd2b9f8eac2c325938047332c1948660bd15d"
+  },
+  "limitations": [
+    "Conflicting document records establish a data inconsistency, not fraud, culpability or espionage.",
+    "Document type and issuer are absent; source-scoped namespaces stay separate.",
+    "Two files do not establish independent acquisition; matching ticket/flight/departure rows are repeated evidence.",
+    "Names alone do not link evidence to frozen product people; only exact anchors are reported here.",
+    "The local canonical run is complete_with_errors with human acceptance pending; full raw-to-product lineage is not established by this audit.",
+    "No ground truth labels exist; weights are explicit review policy and no detection accuracy is claimed."
+  ],
+  "preserved_baseline_rules": {
+    "M01": {
+      "criterion_id": "M01",
+      "reference_size": 5742,
+      "reference_value": 2.2131147540983607,
+      "threshold": 2.2131147540983607,
+      "threshold_method": "empirical_quantile",
+      "weight": 1.0
+    },
+    "M02": {
+      "criterion_id": "M02",
+      "reference_size": 5308,
+      "reference_value": 0.07142857142857142,
+      "threshold": 0.07142857142857142,
+      "threshold_method": "empirical_quantile",
+      "weight": 1.5
+    },
+    "M03": {
+      "criterion_id": "M03",
+      "reference_size": 8454,
+      "reference_value": 0.09999999999999998,
+      "threshold": 0.09999999999999998,
+      "threshold_method": "empirical_quantile",
+      "weight": 1.0
+    }
+  },
+  "raw_record_checks": [
+    {
+      "fields_match": {
+        "birth_date": true,
+        "name_raw": true,
+        "value": true
+      },
+      "locator": "line:83249-83249",
+      "passed": true,
+      "source_id": "boarding_csv",
+      "travel_fields_match": [
+        {
+          "departure_local": true,
+          "flight_number_normalized": true,
+          "ticket_number_normalized": true
+        }
+      ]
+    },
+    {
+      "fields_match": {
+        "birth_date": true,
+        "name_raw": true,
+        "value": true
+      },
+      "locator": "line:92877-92877",
+      "passed": true,
+      "source_id": "boarding_csv",
+      "travel_fields_match": [
+        {
+          "departure_local": true,
+          "flight_number_normalized": true,
+          "ticket_number_normalized": true
+        }
+      ]
+    },
+    {
+      "fields_match": {
+        "birth_date": true,
+        "name_raw": true,
+        "value": true
+      },
+      "locator": "line:134535-134535",
+      "passed": true,
+      "source_id": "boarding_csv",
+      "travel_fields_match": [
+        {
+          "departure_local": true,
+          "flight_number_normalized": true,
+          "ticket_number_normalized": true
+        }
+      ]
+    },
+    {
+      "fields_match": {
+        "birth_date": true,
+        "name_raw": true,
+        "value": true
+      },
+      "locator": "line:150154-150154",
+      "passed": true,
+      "source_id": "boarding_csv",
+      "travel_fields_match": [
+        {
+          "departure_local": true,
+          "flight_number_normalized": true,
+          "ticket_number_normalized": true
+        }
+      ]
+    },
+    {
+      "fields_match": {
+        "birth_date": true,
+        "name_raw": true,
+        "value": true
+      },
+      "locator": "line:93154",
+      "passed": true,
+      "source_id": "sirena_fixed",
+      "travel_fields_match": [
+        {
+          "departure_local": true,
+          "flight_number_normalized": true,
+          "ticket_number_normalized": true
+        }
+      ]
+    },
+    {
+      "fields_match": {
+        "birth_date": true,
+        "name_raw": true,
+        "value": true
+      },
+      "locator": "line:150694",
+      "passed": true,
+      "source_id": "sirena_fixed",
+      "travel_fields_match": [
+        {
+          "departure_local": true,
+          "flight_number_normalized": true,
+          "ticket_number_normalized": true
+        }
+      ]
+    }
+  ],
+  "raw_source_counts": {
+    "boarding_csv": {
+      "invalid_width_rows": 1,
+      "valid_width_rows": 155147
+    },
+    "sirena_fixed": {
+      "data_rows": 155757
+    }
+  },
+  "repeated_ticket_flight_departure_across_sources": [
+    {
+      "departure_local": "2017-01-16T01:45",
+      "flight": "SU1057",
+      "rows": [
+        {
+          "source_id": "boarding_csv",
+          "travel_id": "7c76cd8103218cb01839f748589d871329cde8756ce9ecb97063208e8cfb198d"
+        },
+        {
+          "source_id": "sirena_fixed",
+          "travel_id": "2b5658505826fdab57fb6219bf99cfd3dd728d5592300124d55cc263102765b6"
+        }
+      ],
+      "ticket": "2082229451418171"
+    },
+    {
+      "departure_local": "2017-01-03T11:15",
+      "flight": "SU1273",
+      "rows": [
+        {
+          "source_id": "boarding_csv",
+          "travel_id": "92fa23ea1ae2867214b5b45994196a1509434cf1d94249c41e652701cc4e3cec"
+        },
+        {
+          "source_id": "sirena_fixed",
+          "travel_id": "08ac4ff067469d36e13f7a94a8c76ae34ebaa891dcbdd9a9369befc829eafe12"
+        }
+      ],
+      "ticket": "7230123462656045"
+    }
+  ],
+  "runtime_product_run_id": "product-41e7bf659768cc4510d2",
+  "schema_version": "marker-baseline:1.0",
+  "scope": "T32 step 1: original-record audit and marker/weight specification; runtime migration pending",
+  "source_fingerprints": [
+    {
+      "bytes": 19178467,
+      "matches_committed_dataset_manifest": true,
+      "member": "Airlines/BoardingData.csv",
+      "sha256": "9ba2c4be763f5c51b38f99e84e86b68737ba3dc0cfab00b498a9d3de029b053f",
+      "source_id": "boarding_csv"
+    },
+    {
+      "bytes": 56128294,
+      "matches_committed_dataset_manifest": true,
+      "member": "Airlines/Sirena-export-fixed.tab",
+      "sha256": "45c56c0f0c1f146468006788b7727dfd77d7222d9b34b3ad15fec208720cb261",
+      "source_id": "sirena_fixed"
+    }
+  ],
+  "status": "complete_with_limitations",
+  "strict_within_source_candidates": 2,
+  "target_ranking_order": [
+    "strong_matched_group_count DESC",
+    "baseline_matched_group_count DESC",
+    "rule_score DESC",
+    "person_id ASC"
+  ],
+  "target_weights": {
+    "B01": 0.01,
+    "D01": 2.0,
+    "D02": 0.01,
+    "L01": 0.01,
+    "M01": 1.0,
+    "M02": 1.5,
+    "M03": 1.0,
+    "M07": 0.01,
+    "N01": 0.01,
+    "P01": 0.01
+  },
+  "travel_evidence": [
+    {
+      "departure_local": "2017-03-10T14:15",
+      "destination_raw": "Moscow",
+      "flight_number_normalized": "SU1281",
+      "locator": "line:134535-134535/travel",
+      "observation_id": "3bcb3cd577cdeb5452935ad4ad77cfb1ecc76f3f6b9ad0f3abbe537d8813ce32",
+      "origin_raw": null,
+      "source_id": "boarding_csv",
+      "ticket_number_normalized": null,
+      "travel_id": "f80b19382b5328f91c50f9e3eaff79e5c91091e4d3add7486391a25284101c0f"
+    },
+    {
+      "departure_local": "2017-01-03T11:15",
+      "destination_raw": "Moscow",
+      "flight_number_normalized": "SU1273",
+      "locator": "line:150154-150154/travel",
+      "observation_id": "13dee25332d70bef41ebdae30d2612d35531dd34cbb2156110e4ee2b18cff5a0",
+      "origin_raw": null,
+      "source_id": "boarding_csv",
+      "ticket_number_normalized": "7230123462656045",
+      "travel_id": "92fa23ea1ae2867214b5b45994196a1509434cf1d94249c41e652701cc4e3cec"
+    },
+    {
+      "departure_local": "2017-03-09T07:15",
+      "destination_raw": "Kazan",
+      "flight_number_normalized": "SU1276",
+      "locator": "line:83249-83249/travel",
+      "observation_id": "2c46c1cae4d416418b6e902952062ec53b2627403f5eda7a6ebf0479f3b14c58",
+      "origin_raw": null,
+      "source_id": "boarding_csv",
+      "ticket_number_normalized": "5858732412927507",
+      "travel_id": "3c0b5907f804e110c1b4a8e1cb877f448645f8d7e19e0bdb1f473361bbc49415"
+    },
+    {
+      "departure_local": "2017-01-16T01:45",
+      "destination_raw": "Moscow",
+      "flight_number_normalized": "SU1057",
+      "locator": "line:92877-92877/travel",
+      "observation_id": "ce8372f8cdce8661cdad189d8c6c929b0ccfc5238118172a9b8f0a5366d8eeb5",
+      "origin_raw": null,
+      "source_id": "boarding_csv",
+      "ticket_number_normalized": "2082229451418171",
+      "travel_id": "7c76cd8103218cb01839f748589d871329cde8756ce9ecb97063208e8cfb198d"
+    },
+    {
+      "departure_local": "2017-01-03T11:15",
+      "destination_raw": "SVO",
+      "flight_number_normalized": "SU1273",
+      "locator": "line:150694/travel",
+      "observation_id": "18a39cbf56474bc693a033b370dd2f42c6773bcddfaa00e90ffbbbf98a5d94d5",
+      "origin_raw": "KRR",
+      "source_id": "sirena_fixed",
+      "ticket_number_normalized": "7230123462656045",
+      "travel_id": "08ac4ff067469d36e13f7a94a8c76ae34ebaa891dcbdd9a9369befc829eafe12"
+    },
+    {
+      "departure_local": "2017-01-16T01:45",
+      "destination_raw": "SVO",
+      "flight_number_normalized": "SU1057",
+      "locator": "line:93154/travel",
+      "observation_id": "702717fb599ea1bb6c8abd06a00b078b7bf5e2ae26455b1a6a1a212bf1ad2fd1",
+      "origin_raw": "MCX",
+      "source_id": "sirena_fixed",
+      "ticket_number_normalized": "2082229451418171",
+      "travel_id": "2b5658505826fdab57fb6219bf99cfd3dd728d5592300124d55cc263102765b6"
+    }
+  ],
+  "weight_policy_checks": {
+    "all_requested_weak_markers_enabled_with_positive_weights": true,
+    "baseline_cap_consistent": true,
+    "baseline_formula_caps_consistent": true,
+    "baseline_maximum_contribution": 10.5,
+    "baseline_weights_unchanged": true,
+    "duplicate_behavioral_markers_not_added": true,
+    "exactly_ten_unique_requested_criteria": true,
+    "forest_kept_separate": true,
+    "no_show_unavailable_instead_of_inferred": true,
+    "original_baseline_group_count_preserved": true,
+    "strong_cap_consistent": true,
+    "strong_exceeds_all_weak": true,
+    "strong_groups_sorted_first": true,
+    "strong_minimum_contribution": 2.0,
+    "weak_cap_consistent": true,
+    "weak_maximum_contribution": 0.06
+  },
+  "within_source_dob_conflict_groups": [
+    {
+      "birth_dates": 2,
+      "evidence_rows": 4,
+      "identifier_namespace": "[\"document\",\"source\",\"boarding_csv\"]",
+      "incompatible_name_and_birth_date_pairs": [
+        [
+          "3bcb3cd577cdeb5452935ad4ad77cfb1ecc76f3f6b9ad0f3abbe537d8813ce32",
+          "13dee25332d70bef41ebdae30d2612d35531dd34cbb2156110e4ee2b18cff5a0"
+        ],
+        [
+          "13dee25332d70bef41ebdae30d2612d35531dd34cbb2156110e4ee2b18cff5a0",
+          "2c46c1cae4d416418b6e902952062ec53b2627403f5eda7a6ebf0479f3b14c58"
+        ],
+        [
+          "13dee25332d70bef41ebdae30d2612d35531dd34cbb2156110e4ee2b18cff5a0",
+          "ce8372f8cdce8661cdad189d8c6c929b0ccfc5238118172a9b8f0a5366d8eeb5"
+        ]
+      ],
+      "name_variants": 3,
+      "source_id": "boarding_csv",
+      "strict_candidate": true,
+      "value_normalized": "8248 013778"
+    },
+    {
+      "birth_dates": 2,
+      "evidence_rows": 2,
+      "identifier_namespace": "[\"document\",\"source\",\"sirena_fixed\"]",
+      "incompatible_name_and_birth_date_pairs": [
+        [
+          "18a39cbf56474bc693a033b370dd2f42c6773bcddfaa00e90ffbbbf98a5d94d5",
+          "702717fb599ea1bb6c8abd06a00b078b7bf5e2ae26455b1a6a1a212bf1ad2fd1"
+        ]
+      ],
+      "name_variants": 2,
+      "source_id": "sirena_fixed",
+      "strict_candidate": true,
+      "value_normalized": "8248 013778"
+    }
+  ]
+}
