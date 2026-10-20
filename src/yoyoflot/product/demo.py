@@ -29,7 +29,7 @@ class DemoSubsetStore:
         }
         rows=self.source.top(max(len(self.ids),1))
         metadata['counts']=dict(metadata.get('counts',{}), persons=len(self.ids),
-                                segments=sum(row.get('total_segments',0) for row in rows))
+                                segments=sum(row.get('total_segments',0) for row in rows),top50=len(self.ids))
         metadata['eligibility']=[{'eligibility_status':status,'profiles':sum(row['eligibility_status']==status for row in rows)}
                                  for status in ('eligible','no_matches','insufficient_data')]
         metadata['assessment']=self.source.assessment_statistics(self.ids)

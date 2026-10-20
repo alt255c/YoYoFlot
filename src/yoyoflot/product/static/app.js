@@ -81,7 +81,7 @@ function renderList() {
     rows = rows.filter(row => `${row.display_name || ''} ${row.person_id}`.toLocaleLowerCase('ru').includes(query));
   }
   $('#listTitle').textContent = state.viewMode === 'ranking' ? `Топ-${state.limit}` : 'Все профили';
-  $('#listDescription').textContent = state.viewMode === 'ranking' ? 'Сначала число сработавших групп, затем сумма вкладов и стабильный ID.' : 'Поиск и фильтры работают по всей популяции, а не только по рейтингу.';
+  $('#listDescription').textContent = state.viewMode === 'ranking' ? (state.metadata?.scoring ? 'По сумме баллов из текущего конфига; при равенстве — стабильный ID.' : 'Сначала число сработавших групп, затем сумма вкладов и стабильный ID.') : 'Поиск и фильтры работают по всей популяции, а не только по рейтингу.';
   const total = state.viewMode === 'ranking' ? state.list.length : (state.list.pagination?.total || 0);
   $('#listCount').textContent = number(total);
   if (state.viewMode === 'all') {
@@ -98,7 +98,7 @@ function renderList() {
     const button = node('button', undefined, `person-row ${row.person_id === state.selected ? 'selected' : ''}`); button.type = 'button';
     const place = node('span', row.rank ? String(row.rank).padStart(2, '0') : '··', 'person-place');
     const identity = node('span', undefined, 'person-identity'); identity.append(node('strong', row.display_name || 'Имя не указано'), node('small', row.person_id));
-    const score = node('span', undefined, 'person-score'); score.append(node('strong', number(row.rule_score)), node('small', `${row.matched_criteria_count || 0} / 3 факторов`));
+    const score = node('span', undefined, 'person-score'); score.append(node('strong', number(row.rule_score)), node('small', `${row.matched_criteria_count || 0} / ${state.metadata?.scoring?.marker_count || 3} факторов`));
     const badge = node('span', statusLabel(assessmentStatus(row)), `person-status ${statusClass(assessmentStatus(row))}`);
     button.append(place, identity, score, badge); button.addEventListener('click', () => selectProfile(row.person_id)); root.append(button);
   }
@@ -208,13 +208,14 @@ function renderProfile() {
   const score = node('div', undefined, 'score-block'); score.append(node('span', 'RULE SCORE', 'score-label'), node('strong', number(person.rule_score)), node('small', `${person.matched_criteria_count || 0} сработавших групп`));
   const head = node('section', undefined, 'profile-head panel'); head.append(identity, score);
   const chips = node('div', undefined, 'profile-chips'); chips.append(node('span', `${statusLabel(assessmentStatus(person))}`, `chip ${statusClass(assessmentStatus(person))}`), node('span', person.identity_status === 'accepted' ? 'Идентичность установлена' : 'Идентичность неоднозначна', 'chip'), node('span', `${number(person.total_segments || data.segments.length)} сегментов`, 'chip'), node('span', `${number(data.route_balance.total)} маршрутов`, 'chip')); head.append(chips); root.append(head);
+  if (state.metadata?.scoring) chips.append(node('span', `Проверено ${person.available_criteria_count || 0} из ${state.metadata.scoring.marker_count}`, 'chip'));
 
   const sourcePanel = node('section', undefined, 'panel source-details-panel'); sourcePanel.id = 'sourceDetailsPanel'; root.append(sourcePanel); renderSourceDetails();
 
   const factorPanel = node('section', undefined, 'panel factor-panel'); const factorTitle = node('div', undefined, 'section-heading'); factorTitle.append(node('div', undefined)); factorTitle.firstChild.append(node('p', 'ДОКАЗАТЕЛЬСТВА СИГНАЛА', 'eyebrow'), node('h3', 'Что сработало')); factorPanel.append(factorTitle);
   const factors = node('div', undefined, 'factor-grid');
   for (const factor of data.factors || []) {
-    const article = node('article', undefined, `factor-card ${factor.status}`); const top = node('div', undefined, 'factor-top'); top.append(node('span', factor.status === 'matched' ? 'СРАБОТАЛО' : factor.status === 'unavailable' ? 'НЕДОСТУПНО' : 'НЕ СРАБОТАЛО', 'factor-status'), node('span', factor.criterion_id, 'factor-id')); article.append(top, node('h4', factor.title_ru), node('p', factor.explanation_ru || 'Нет пояснения.'));
+    const article = node('article', undefined, `factor-card ${factor.status}`); const top = node('div', undefined, 'factor-top'); top.append(node('span', factor.weight === 0 ? 'ОТКЛЮЧЕНО' : factor.status === 'matched' ? 'СРАБОТАЛО' : factor.status === 'unavailable' ? 'НЕДОСТУПНО' : 'НЕ СРАБОТАЛО', 'factor-status'), node('span', factor.criterion_id, 'factor-id')); article.append(top, node('h4', factor.title_ru), node('p', factor.explanation_ru || 'Нет пояснения.'));
     const meter = node('div', undefined, 'factor-meter'); const value = Number(factor.value); const threshold = Number(factor.threshold); const ratio = Number.isFinite(value) && threshold > 0 ? Math.min(100, Math.max(5, value / threshold * 55)) : 4; meter.append(node('i')); meter.firstChild.style.width = `${ratio}%`; article.append(meter);
     if (factor.evidence_segment_ids?.length) { const link = node('button', `↳ ${factor.evidence_segment_ids.length} подтверждений`, 'evidence-link'); link.type = 'button'; link.addEventListener('click', () => { state.focus = factor.evidence_segment_ids[0]; document.querySelector('#timeline')?.scrollIntoView({behavior: 'smooth', block: 'center'}); renderTimeline(); }); article.append(link); }
     factors.append(article);
@@ -223,12 +224,12 @@ function renderProfile() {
 
   if (data.additional_factors?.length) {
     const panel = node('section', undefined, 'panel factor-panel');
-    panel.append(node('p', 'ПРОВЕРКИ ПО ИСХОДНЫМ ЗАПИСЯМ', 'eyebrow'), node('h3', 'Доступные проверки короткой истории'),
-      node('p', 'Проверяются связанные записи даже при неоднозначной идентичности. Результаты показаны отдельно от основного рейтинга M01–M03.', 'muted-copy'));
+    panel.append(node('p', 'ПРОВЕРКИ ПО ИСХОДНЫМ ЗАПИСЯМ', 'eyebrow'), node('h3', 'Дополнительные факторы'),
+      node('p', state.metadata?.scoring ? 'Подготовленные результаты участвуют в общей сумме баллов по текущему конфигу. Неподготовленные проверки и отсутствующие данные баллов не добавляют.' : 'Проверяются связанные записи даже при неоднозначной идентичности. Результаты показаны отдельно от основного рейтинга M01–M03.', 'muted-copy'));
     const grid = node('div', undefined, 'factor-grid');
     for (const factor of data.additional_factors) {
       const article = node('article', undefined, `factor-card ${factor.status}`);
-      article.append(node('span', factor.status === 'matched' ? 'СРАБОТАЛО' : factor.status === 'unavailable' ? 'НЕДОСТУПНО' : 'ПРОВЕРЕНО · НЕТ СОВПАДЕНИЙ', 'factor-status'),
+      article.append(node('span', factor.weight === 0 ? 'ОТКЛЮЧЕНО' : factor.status === 'matched' ? 'СРАБОТАЛО' : factor.status === 'unavailable' ? 'НЕДОСТУПНО' : 'ПРОВЕРЕНО · НЕТ СОВПАДЕНИЙ', 'factor-status'),
         node('h4', factor.title_ru), node('p', factor.explanation_ru));
       if (factor.evidence_segment_ids?.length) {
         const button = node('button', `↳ ${number(factor.evidence_segment_ids.length)} связанных перелётов`, 'evidence-link');

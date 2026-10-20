@@ -11,6 +11,7 @@ import duckdb
 from ..provenance import fingerprint
 from .build import VERSION, _digest, _rows
 from .assessment import TABLES as ASSESSMENT_TABLES, verify as verify_assessment
+from .scoring import BASELINE, TITLES as SCORING_TITLES, RuntimeScores
 
 
 def _json_file(path):
@@ -18,7 +19,9 @@ def _json_file(path):
 
 
 class ProductStore:
-    def __init__(self, path, allow_demo=False):
+    def __init__(self, path, allow_demo=False, scoring=None):
+        self.scoring = scoring
+        self.runtime_scores = None
         self.path = Path(path).resolve()
         self.manifest = _json_file(self.path/'run_manifest.json')
         m = self.manifest
@@ -51,6 +54,14 @@ class ProductStore:
                     if row[field] is not None and (not math.isfinite(row[field]) or abs(row[field])>(90 if field=='latitude' else 180)):
                         raise ValueError('Invalid airport coordinate')
                 self.airports[row['airport_id']]=row
+        if scoring is not None:
+            with self.connection() as db:
+                self.runtime_scores = RuntimeScores(db, scoring, fingerprint(self.path / 'run_manifest.json'),
+                    fingerprint(self.assessment_root / 'assessment_manifest.json') if self.assessment_root else None)
+
+    def close(self):
+        if self.runtime_scores is not None:
+            self.runtime_scores.close()
 
     def _find_assessment_root(self):
         configured = os.environ.get('YOYO_ASSESSMENT_ROOT')
@@ -83,14 +94,26 @@ class ProductStore:
                 'identifiers': identifiers, 'documents': [r for r in identifiers if r['kind']=='document']}
 
     def assessment_statistics(self, ids=None):
-        if self.assessment_root is not None and ids is None:
+        if self.runtime_scores is not None and ids is None:
+            return dict(self.runtime_scores.statistics, source_assessment_available=self.assessment_root is not None,
+                        ranked_with_signals=self.runtime_scores.statistics['with_signals'])
+        if self.runtime_scores is None and self.assessment_root is not None and ids is None:
             return dict(self.assessment_report['statistics'], source_assessment_available=True,
                         ranked_with_signals=sum(row['profiles'] for row in self.manifest.get('eligibility', [])
                                                 if row['eligibility_status']=='eligible'))
         with self.connection() as db:
             params = [ids] if ids is not None else []
             where = ' WHERE person_id IN (SELECT unnest(?::VARCHAR[]))' if ids is not None else ''
-            if self.assessment_root is not None:
+            if self.runtime_scores is not None:
+                data = _rows(db, """SELECT count(*) profiles,
+                    count(*) FILTER(WHERE available_criteria_count>0) assessed,
+                    count(*) FILTER(WHERE eligibility_status='eligible') with_signals,
+                    count(*) FILTER(WHERE eligibility_status='no_matches') without_signals,
+                    count(*) FILTER(WHERE eligibility_status='insufficient_data') unavailable,
+                    count(*) FILTER(WHERE identity_accepted) identity_accepted,
+                    count(*) FILTER(WHERE source_links_complete) source_links_complete
+                    FROM rankings""" + where, params)[0]
+            elif self.assessment_root is not None:
                 data = _rows(db, """SELECT count(*) profiles,
                     count(*) FILTER(WHERE evaluated_criteria_count>0) assessed,
                     count(*) FILTER(WHERE assessment_status='eligible') with_signals,
@@ -123,20 +146,37 @@ class ProductStore:
             if self.assessment_root is not None:
                 for name in ASSESSMENT_TABLES:
                     db.read_parquet(str(self.assessment_root / (name + '.parquet'))).create_view('assessment_' + name)
+            if self.runtime_scores is not None:
+                self.runtime_scores.attach(db)
             yield db
 
     def metadata(self):
-        return dict(self.manifest, data_mode=self.data_mode, evaluation=_json_file(self.path/'evaluation.json'),
+        metadata = dict(self.manifest, data_mode=self.data_mode, evaluation=_json_file(self.path/'evaluation.json'),
                     forest=_json_file(self.path/'forest.json'),graph=_json_file(self.path/'graph.json'),rules=_json_file(self.path/'rules.json'),
                     assessment=self.assessment_statistics(),
                     source_assessment=(dict(run_id=self.assessment_manifest['run_id'],
                         prepared_source_markers=self.assessment_report['prepared_source_markers'],
                         pending_source_markers=self.assessment_report['pending_source_markers']) if self.assessment_manifest else None))
+        if self.runtime_scores is not None:
+            statistics = self.runtime_scores.statistics
+            metadata.update(scoring=self.runtime_scores.info, sort_order=self.runtime_scores.info['sort_order'],
+                eligibility=[{'eligibility_status': status, 'profiles': statistics[key]} for status,key in (
+                    ('eligible','with_signals'),('no_matches','without_signals'),('insufficient_data','unavailable'))])
+            metadata['snapshot'] = {key: self.manifest.get(key) for key in ('run_id','sort_order','counts','eligibility')}
+            metadata['counts'] = dict(self.manifest['counts'], top50=min(statistics['with_signals'],50))
+            metadata['rules'] = [dict(row, weight=self.scoring.weights[row['criterion_id']]) for row in metadata['rules']]
+            metadata['evaluation_scope'] = 'Frozen snapshot evaluation; runtime weights/ranking are not re-evaluated quality metrics.'
+            metadata['forest'] = dict(metadata['forest'], score_scope='frozen_snapshot_not_runtime_reweighted_ranking')
+        return metadata
+
+    def _ranking_relation(self):
+        return ('rankings LEFT JOIN assessment_profile_assessments USING(person_id)'
+                if self.assessment_root and self.runtime_scores is None else 'rankings')
 
     def top(self, limit=50):
         if type(limit) is not int or not 1<=limit<=1000:raise ValueError('Limit must be 1–1000')
         with self.connection() as db:
-            relation = 'rankings LEFT JOIN assessment_profile_assessments USING(person_id)' if self.assessment_root else 'rankings'
+            relation = self._ranking_relation()
             return _rows(db,f'''SELECT * FROM {relation}
                 WHERE eligibility_status='eligible' AND rank IS NOT NULL
                 ORDER BY rank LIMIT ?''',[limit])
@@ -159,16 +199,18 @@ class ProductStore:
             'score': 'rule_score DESC NULLS LAST, matched_criteria_count DESC, person_id',
             'name': 'lower(coalesce(display_name, \'\')), person_id',
         }[sort]
+        if self.runtime_scores is not None and sort in {'rank','score'}:
+            order = 'rule_score DESC, person_id'
         clauses=[]
         params=[]
         if eligibility in {'assessed', 'not_assessed'}:
-            field = 'evaluated_criteria_count' if self.assessment_root else 'available_criteria_count'
+            field = 'evaluated_criteria_count' if self.assessment_root or self.runtime_scores is not None else 'available_criteria_count'
             clauses.append(field + ('>0' if eligibility=='assessed' else '=0'))
         elif eligibility in {'identity_accepted', 'identity_ambiguous'}:
             clauses.append('identity_status=?')
             params.append('accepted' if eligibility=='identity_accepted' else 'ambiguous')
         elif eligibility != 'all':
-            field = 'assessment_status' if self.assessment_root else 'eligibility_status'
+            field = 'assessment_status' if self.assessment_root or self.runtime_scores is not None else 'eligibility_status'
             clauses.append(field+'=?')
             params.append(eligibility)
         if query.strip():
@@ -177,7 +219,7 @@ class ProductStore:
             params.extend([needle, needle])
         where=' WHERE '+ ' AND '.join(clauses) if clauses else ''
         with self.connection() as db:
-            relation = 'rankings LEFT JOIN assessment_profile_assessments USING(person_id)' if self.assessment_root else 'rankings'
+            relation = self._ranking_relation()
             total=db.execute(f'SELECT count(*) FROM {relation}{where}', params).fetchone()[0]
             rows=_rows(db, f'SELECT * FROM {relation}{where} ORDER BY {order} LIMIT ? OFFSET ?', params+[limit,offset])
         return {'items':rows, 'pagination':{'offset':offset,'limit':limit,'total':total,'has_next':offset+len(rows)<total}}
@@ -200,13 +242,20 @@ class ProductStore:
             if not people:raise KeyError('Profile not found')
             person=people[0]
             additional_factors=[]
-            if self.assessment_root:
-                person.update(_rows(db, 'SELECT * FROM assessment_profile_assessments WHERE person_id=?', [person_id])[0])
-                additional_factors=_rows(db, '''SELECT * FROM assessment_marker_coverage
-                    WHERE person_id=? AND NOT included_in_ranking ORDER BY criterion_id''',[person_id])
+            if self.assessment_root or self.runtime_scores is not None:
+                if self.runtime_scores is None:
+                    person.update(_rows(db, 'SELECT * FROM assessment_profile_assessments WHERE person_id=?', [person_id])[0])
+                table = 'explanations' if self.runtime_scores is not None else 'assessment_marker_coverage'
+                additional_factors=_rows(db, f'''SELECT * FROM {table}
+                    WHERE person_id=? AND criterion_id NOT IN ('M01','M02','M03') ORDER BY criterion_id''',[person_id])
                 for factor in additional_factors:
                     if factor['status']=='unavailable':
                         factor['explanation_ru']=factor['availability_reason']
+                    elif self.runtime_scores is not None:
+                        factor['explanation_ru']=(f"Проверены связанные записи: {factor['used_observations']}. "
+                            f"Результат: {'есть совпадение' if factor['status']=='matched' else 'совпадений не найдено'}. "
+                            f"Баллы при срабатывании: {factor['weight']:.4g}; прибавлено: {factor['contribution']:.4g}."
+                            + (' Фактор отключён весом 0.' if not factor['included_in_ranking'] else ''))
                     else:
                         factor['explanation_ru']=(f"Проверены связанные исходные записи: {factor['used_observations']}. "
                             f"Результат: {'есть совпадение' if factor['status']=='matched' else 'совпадений не найдено'}. "
@@ -214,8 +263,20 @@ class ProductStore:
                             "Текущий основной балл не изменён.")
                     factor['evidence_segment_ids']=[r['segment_id'] for r in _rows(db, '''SELECT DISTINCT segment_id
                         FROM assessment_marker_evidence WHERE person_id=? AND criterion_id=? AND segment_id IS NOT NULL
-                        ORDER BY segment_id''',[person_id,factor['criterion_id']])]
-            factors=_rows(db,'SELECT * FROM explanations WHERE person_id=? ORDER BY contribution DESC,criterion_id',[person_id])
+                        ORDER BY segment_id''',[person_id,factor['criterion_id']])] if self.assessment_root else []
+            if self.runtime_scores is not None:
+                for cid in self.runtime_scores.pending:
+                    if cid in BASELINE:
+                        continue
+                    additional_factors.append(dict(criterion_id=cid,title_ru=SCORING_TITLES[cid],
+                        status='unavailable',weight=self.scoring.weights[cid],value=None,threshold=1.0,
+                        contribution=0.0,used_observations=0,included_in_ranking=self.scoring.weights[cid]>0,
+                        availability_reason='Расчёт и проверенные свидетельства этого маркера ещё не подготовлены',
+                        explanation_ru='Расчёт и проверенные свидетельства этого маркера ещё не подготовлены. Баллы не начислены.',
+                        evidence_segment_ids=[]))
+                additional_factors.sort(key=lambda factor: factor['criterion_id'])
+                person['configured_criteria_count'] = len(self.scoring.weights)
+            factors=_rows(db,"SELECT * FROM explanations WHERE person_id=? AND criterion_id IN ('M01','M02','M03') ORDER BY contribution DESC,criterion_id",[person_id])
             for factor in factors:
                 if factor['status']=='unavailable':
                     factor['explanation_ru']=factor['title_ru']+': '+factor['availability_reason']+'.'
@@ -223,7 +284,7 @@ class ProductStore:
                 else:
                     unit='перелётов / 30 дней' if factor['criterion_id']=='M01' else 'доля'
                     factor['explanation_ru']=(f"{factor['title_ru']}: {factor['value']:.4g} ({unit}), порог ≥ {factor['threshold']:.4g}. "
-                        f"Наблюдений: {factor['used_observations']}. Вес: {factor['weight']:.4g}; вклад: {factor['contribution']:.4g}. "
+                        f"Наблюдений: {factor['used_observations']}. Базовые баллы: {factor['weight']:.4g}; прибавлено: {factor['contribution']:.4g}. "
                         + (f"Калибровочная выборка: {factor['reference_size']} профилей." if factor['reference_size'] else "Фиксированный порог."))
             segments=_rows(db,'SELECT * FROM segments WHERE person_id=? ORDER BY departure_date NULLS LAST,segment_id',[person_id])
             for s in segments:
@@ -264,7 +325,9 @@ class ProductStore:
             if 'if_scores.parquet' in self.manifest['files']:
                 scores=_rows(db,'SELECT * FROM if_scores WHERE person_id=?',[person_id])
                 forest=scores[0] if scores else None
-        return {'run_id':self.manifest['run_id'],'person':person,'factors':factors,'segments':segments,
+        return {'run_id':self.manifest['run_id'],
+                'scoring_run_id':self.runtime_scores.run_id if self.runtime_scores else None,
+                'person':person,'factors':factors,'segments':segments,
                 'additional_factors':additional_factors,
                 'route_balance':{'total':len(segments),'plottable':sum(s['is_plottable'] for s in segments),
                                  'unplottable':sum(not s['is_plottable'] for s in segments)},
