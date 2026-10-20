@@ -50,7 +50,8 @@ def main():
     parser.add_argument("--canonical", type=Path, default=ROOT / "data/processed/t14_canonical_20261017")
     parser.add_argument("--product", type=Path, default=ROOT / "artifacts/source-product")
     parser.add_argument("--archive", type=Path, default=ROOT / "data/Airlines-All.zip")
-    parser.add_argument("--output", type=Path, default=ROOT / "docs/validation/t32_marker_baseline.json")
+    # Preserve the original 0.01-policy audit as history.
+    parser.add_argument("--output", type=Path, default=ROOT / "docs/validation/t32_marker_policy_20261020.json")
     args = parser.parse_args()
     canonical = args.canonical.resolve()
     product = args.product.resolve()
@@ -77,20 +78,26 @@ def main():
     settings = yaml.safe_load(spec.read_text(encoding="utf-8"))
     criteria = settings["criteria"]
     strong = criteria["D01"]
+    strong_ids = {"D01", "D03", "T01"}
     baseline = {key: criteria[key] for key in ("M01", "M02", "M03")}
     weak_ids = {"L01", "P01", "M07", "D02", "N01", "B01"}
     weak = {key: criteria[key] for key in weak_ids}
     baseline_maximum = sum(rule["contribution_cap"] for rule in baseline.values())
     weak_maximum = sum(rule["contribution_cap"] for rule in weak.values())
+    maximum_main = max(criteria[key]["contribution_cap"] for key in set(baseline) | strong_ids)
+    weak_without_no_show = weak_maximum - weak["B01"]["contribution_cap"]
     existing_config = yaml.safe_load((ROOT / "configs/product.yaml").read_text(encoding="utf-8"))
     existing_rules = {rule["criterion_id"]: rule for rule in read_json(product / "rules.json")}
     weight_checks = {
         "strong_minimum_contribution": strong["weight"],
         "baseline_maximum_contribution": baseline_maximum,
         "weak_maximum_contribution": weak_maximum,
-        "strong_exceeds_all_weak": strong["weight"] > weak_maximum,
+        "weak_sum_exceeds_any_single_main": weak_maximum > maximum_main,
+        "weak_without_no_show_exceeds_any_single_main": weak_without_no_show > maximum_main,
+        "maximum_single_main_contribution": maximum_main,
         "strong_cap_consistent": abs(strong["weight"] - strong["contribution_cap"]) < 1e-12
-            and abs(strong["weight"] - settings["strong_total_contribution_cap"]) < 1e-12,
+            and abs(sum(criteria[key]["contribution_cap"] for key in strong_ids)
+                    - settings["strong_total_contribution_cap"]) < 1e-12,
         "baseline_cap_consistent": abs(baseline_maximum - settings["baseline_total_contribution_cap"]) < 1e-12,
         "weak_cap_consistent": abs(weak_maximum - settings["weak_total_contribution_cap"]) < 1e-12,
         "baseline_formula_caps_consistent": all(abs(rule["weight"] * 3 - rule["contribution_cap"]) < 1e-12
@@ -98,12 +105,17 @@ def main():
         "baseline_weights_unchanged": all(rule["weight"] == existing_config["criteria"][key]["weight"]
                                           == existing_rules[key]["weight"] for key, rule in baseline.items()),
         "all_requested_weak_markers_enabled_with_positive_weights": all(rule["enabled"] is True
-            and 0 < rule["weight"] <= 0.01 for rule in weak.values()),
-        "exactly_ten_unique_requested_criteria": set(criteria) == {"D01", "M01", "M02", "M03"} | weak_ids,
+            and rule["weight"] > 0 for rule in weak.values()),
+        "approved_secondary_points": {key: rule["weight"] for key, rule in weak.items()} == {
+            "L01": 0.8, "P01": 0.8, "M07": 1.8, "D02": 0.9, "N01": 0.7, "B01": 1.2},
+        "exactly_twelve_unique_requested_criteria": set(criteria) == set(baseline) | strong_ids | weak_ids,
         "duplicate_behavioral_markers_not_added": settings["duplicate_list_items"] == {
             "frequent_flights": "M01", "quick_returns": "M02", "repeated_route": "M03"},
-        "strong_groups_sorted_first": settings["ranking_order"][0] == "strong_matched_group_count DESC",
-        "original_baseline_group_count_preserved": settings["ranking_order"][1] == "baseline_matched_group_count DESC",
+        "score_sorted_first_with_stable_tie_break": settings["ranking_order"] == ["rule_score DESC", "person_id ASC"],
+        "repeat_coflight_thresholds": criteria["M07"]["min_distinct_dates"] == 3
+            and criteria["M07"]["min_distinct_directed_routes"] == 2,
+        "repeat_no_show_threshold": criteria["B01"]["min_distinct_events"] == 3,
+        "dependent_conflicts_not_double_counted": settings["evidence_deduplication"]["document_and_ticket_same_conflict_cap"] == 2.0,
         "no_show_unavailable_instead_of_inferred": criteria["B01"]["status"] == "unavailable_on_current_dataset"
             and criteria["B01"]["missing_boarding_record_is_no_show"] is False,
         "forest_kept_separate": settings["forest"]["enabled"] is True
