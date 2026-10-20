@@ -9,3 +9,4 @@ services:
       YOYO_PRODUCT: /app/product
     volumes:
       - "${YOYO_PRODUCT_PATH:-./artifacts/source-product}:/app/product:ro"
+      - "${YOYO_ASSESSMENT_PATH:-./artifacts/source-assessment}:/app/source-assessment:ro"

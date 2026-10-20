@@ -27,6 +27,12 @@ class DemoSubsetStore:
             'synthetic_records':False,
             'labels_invented':False,
         }
+        rows=self.source.top(max(len(self.ids),1))
+        metadata['counts']=dict(metadata.get('counts',{}), persons=len(self.ids),
+                                segments=sum(row.get('total_segments',0) for row in rows))
+        metadata['eligibility']=[{'eligibility_status':status,'profiles':sum(row['eligibility_status']==status for row in rows)}
+                                 for status in ('eligible','no_matches','insufficient_data')]
+        metadata['assessment']=self.source.assessment_statistics(self.ids)
         metadata['limitations']=list(metadata.get('limitations',[]))+[
             'Демо-режим показывает небольшое подмножество реального рейтинга; слово «кандидат» не означает доказанный статус шпиона.'
         ]
@@ -43,8 +49,12 @@ class DemoSubsetStore:
         if type(offset) is not int or offset < 0:
             raise ValueError('Invalid offset')
         rows=[row for row in self.source.top(1000) if row['person_id'] in self.ids]
-        if eligibility != 'all':
-            rows=[row for row in rows if row.get('eligibility_status') == eligibility]
+        if eligibility in {'assessed','not_assessed'}:
+            rows=[row for row in rows if (row.get('evaluated_criteria_count',row.get('available_criteria_count',0))>0)==(eligibility=='assessed')]
+        elif eligibility in {'identity_accepted','identity_ambiguous'}:
+            rows=[row for row in rows if row.get('identity_status')==('accepted' if eligibility=='identity_accepted' else 'ambiguous')]
+        elif eligibility != 'all':
+            rows=[row for row in rows if row.get('assessment_status',row.get('eligibility_status')) == eligibility]
         q=query.strip().lower()
         if q:
             rows=[row for row in rows if q in f"{row.get('display_name') or ''} {row['person_id']}".lower()]

@@ -19,7 +19,7 @@ from yoyoflot.product.build import _features, _graph, run
 from yoyoflot.product.config import load
 from yoyoflot.product.input import UPSTREAM_FILES, verify
 from yoyoflot.product.store import ProductStore
-from yoyoflot.product.web import handler
+from yoyoflot.product.web import StoreManager, handler
 from yoyoflot.provenance import fingerprint
 from yoyoflot.resolve.common import SCHEMAS, stable_id
 
@@ -250,12 +250,15 @@ def test_top50_boundaries_and_determinism(tmp_path):
     assert len(store.top())==50 and store.top()[-1]['rank']==50
     assert [r['person_id'] for r in store.top()]==[f'person_{i:03d}' for i in range(50)]
     for row in store.top():assert store.profile(row['person_id'])['person']['person_id']==row['person_id']
-    with pytest.raises(ValueError):store.top(51)
+    assert len(store.top(100))==53
+    assert len(store.top(1000))==53
+    for limit in (0,1001):
+        with pytest.raises(ValueError):store.top(limit)
 
 
 def test_actual_http_api_static_and_isolated_profile(product):
     store=ProductStore(product[0])
-    with ThreadingHTTPServer(('127.0.0.1',0),handler(store)) as server:
+    with ThreadingHTTPServer(('127.0.0.1',0),handler(StoreManager(store))) as server:
         thread=threading.Thread(target=server.serve_forever,daemon=True)
         thread.start()
         try:

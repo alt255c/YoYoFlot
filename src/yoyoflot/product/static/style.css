@@ -136,3 +136,6 @@ html[data-theme='dark'] .hero-visual {
   .brand-copy strong { font-size:18px; }
   .agent-name { font-size:15px; }
 }
+.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:780px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:460px){.metrics{grid-template-columns:1fr}}

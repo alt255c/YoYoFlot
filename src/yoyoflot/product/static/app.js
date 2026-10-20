@@ -53,14 +53,20 @@ function showError(message) { $('#error').hidden = !message; $('#error').textCon
 function statusLabel(status) { return {eligible: 'СИГНАЛЫ', no_matches: 'БЕЗ СОВПАДЕНИЙ', insufficient_data: 'МАЛО ДАННЫХ'}[status] || status || '—'; }
 function statusClass(status) { return ({eligible: 'eligible', no_matches: 'quiet', insufficient_data: 'muted'}[status] || 'muted'); }
 function eligibleCount() { return state.metadata?.eligibility?.find(row => row.eligibility_status === 'eligible')?.profiles || 0; }
+function assessmentStatus(person) { return person.assessment_status || person.eligibility_status; }
 
 function renderMetadata() {
   const m = state.metadata || {};
   const counts = m.counts || {};
   $('#metricPersons').textContent = number(counts.persons);
   $('#metricSegments').textContent = number(counts.segments);
-  const eligible = eligibleCount(); $('#metricEligible').textContent = number(eligible);
-  const eligibleHint = $('#metricEligibleHint'); if (eligibleHint) { const total = Number(counts.persons) || 0; const share = total ? (eligible / total * 100).toFixed(2).replace('.', ',') : '—'; eligibleHint.textContent = `${share}% популяции · есть данные для рейтинга`; }
+  const assessment = m.assessment || {};
+  const assessed = assessment.assessed;
+  $('#metricEligible').textContent = number(assessed);
+  const eligibleHint = $('#metricEligibleHint'); if (eligibleHint) { const total = Number(counts.persons) || 0; const share = total && assessed !== undefined ? (assessed / total * 100).toFixed(2).replace('.', ',') : '—'; eligibleHint.textContent = `${share}% профилей · оценён хотя бы один маркер`; }
+  $('#metricSignals').textContent = number(assessment.with_signals ?? eligibleCount());
+  $('#metricSignalsHint').textContent = `${number(assessment.without_signals)} проверены без срабатываний`;
+  $('#metricIdentity').textContent = number(assessment.identity_accepted);
   $('#metricMode').textContent = m.data_mode === 'demo_subset' ? 'DEMO' : 'SOURCE';
   $('#metricModeHint').textContent = m.data_mode === 'demo_subset' ? 'реальный набор · демо-подмножество' : 'проверенный snapshot';
   $('#agentMode').textContent = m.data_mode === 'demo_subset' ? 'ДЕМО-КОНТУР МОНИТОРИНГА' : 'КОНТУР МОНИТОРИНГА';
@@ -93,7 +99,7 @@ function renderList() {
     const place = node('span', row.rank ? String(row.rank).padStart(2, '0') : '··', 'person-place');
     const identity = node('span', undefined, 'person-identity'); identity.append(node('strong', row.display_name || 'Имя не указано'), node('small', row.person_id));
     const score = node('span', undefined, 'person-score'); score.append(node('strong', number(row.rule_score)), node('small', `${row.matched_criteria_count || 0} / 3 факторов`));
-    const badge = node('span', statusLabel(row.eligibility_status), `person-status ${statusClass(row.eligibility_status)}`);
+    const badge = node('span', statusLabel(assessmentStatus(row)), `person-status ${statusClass(assessmentStatus(row))}`);
     button.append(place, identity, score, badge); button.addEventListener('click', () => selectProfile(row.person_id)); root.append(button);
   }
 }
@@ -160,8 +166,7 @@ function renderSourceDetails() {
   const identifiers = data.identifiers || [];
   const documents = data.documents || [];
   const summary = node('p', `${number(data.travels_count || 0)} связанных перелётов · ${number(identifiers.length)} записей идентификаторов`, 'source-summary'); root.append(summary);
-  if (data.fallback_used) root.append(node('p', 'Дополнительные документы найдены по каноническому имени и дате рождения, если она указана.', 'source-loading'));
-  if (data.complete === false) root.append(node('p', `Связь с исходными данными неполная: конфликт идентификатора оставлен без автоматического объединения.`, 'source-loading'));
+  if (data.complete === false) root.append(node('p', `Показаны ${number(data.observations_count)} из ${number(data.expected_observations)} исходных наблюдений по проверенным связям. Полная связь ещё не восстановлена.`, 'source-loading'));
   const groupRows = rows => {
     const groups = new Map();
     for (const row of rows) {
@@ -202,7 +207,7 @@ function renderProfile() {
   identity.append(node('p', person.rank ? `ПРИОРИТЕТ №${person.rank}` : 'ПРОФИЛЬ МОДЕЛИ', 'eyebrow'), node('h2', person.display_name || 'Имя не указано'), node('p', person.person_id, 'profile-id'));
   const score = node('div', undefined, 'score-block'); score.append(node('span', 'RULE SCORE', 'score-label'), node('strong', number(person.rule_score)), node('small', `${person.matched_criteria_count || 0} сработавших групп`));
   const head = node('section', undefined, 'profile-head panel'); head.append(identity, score);
-  const chips = node('div', undefined, 'profile-chips'); chips.append(node('span', `${statusLabel(person.eligibility_status)}`, `chip ${statusClass(person.eligibility_status)}`), node('span', `${number(person.total_segments || data.segments.length)} сегментов`, 'chip'), node('span', `${number(data.route_balance.total)} маршрутов`, 'chip')); head.append(chips); root.append(head);
+  const chips = node('div', undefined, 'profile-chips'); chips.append(node('span', `${statusLabel(assessmentStatus(person))}`, `chip ${statusClass(assessmentStatus(person))}`), node('span', person.identity_status === 'accepted' ? 'Идентичность установлена' : 'Идентичность неоднозначна', 'chip'), node('span', `${number(person.total_segments || data.segments.length)} сегментов`, 'chip'), node('span', `${number(data.route_balance.total)} маршрутов`, 'chip')); head.append(chips); root.append(head);
 
   const sourcePanel = node('section', undefined, 'panel source-details-panel'); sourcePanel.id = 'sourceDetailsPanel'; root.append(sourcePanel); renderSourceDetails();
 
@@ -215,6 +220,24 @@ function renderProfile() {
     factors.append(article);
   }
   factorPanel.append(factors); root.append(factorPanel);
+
+  if (data.additional_factors?.length) {
+    const panel = node('section', undefined, 'panel factor-panel');
+    panel.append(node('p', 'ПРОВЕРКИ ПО ИСХОДНЫМ ЗАПИСЯМ', 'eyebrow'), node('h3', 'Доступные проверки короткой истории'),
+      node('p', 'Проверяются связанные записи даже при неоднозначной идентичности. Результаты показаны отдельно от основного рейтинга M01–M03.', 'muted-copy'));
+    const grid = node('div', undefined, 'factor-grid');
+    for (const factor of data.additional_factors) {
+      const article = node('article', undefined, `factor-card ${factor.status}`);
+      article.append(node('span', factor.status === 'matched' ? 'СРАБОТАЛО' : factor.status === 'unavailable' ? 'НЕДОСТУПНО' : 'ПРОВЕРЕНО · НЕТ СОВПАДЕНИЙ', 'factor-status'),
+        node('h4', factor.title_ru), node('p', factor.explanation_ru));
+      if (factor.evidence_segment_ids?.length) {
+        const button = node('button', `↳ ${number(factor.evidence_segment_ids.length)} связанных перелётов`, 'evidence-link');
+        button.type = 'button'; button.addEventListener('click', () => { state.focus = factor.evidence_segment_ids[0]; renderTimeline(); }); article.append(button);
+      }
+      grid.append(article);
+    }
+    panel.append(grid); root.append(panel);
+  }
 
   const mapPanel = node('section', undefined, 'panel map-panel'); const mapHeading = node('div', undefined, 'section-heading'); const headingCopy = node('div'); headingCopy.append(node('p', 'ГЕОГРАФИЯ И ХРОНОЛОГИЯ', 'eyebrow'), node('h3', 'Направленный граф перелётов')); mapHeading.append(headingCopy, node('span', 'стрелка = направление', 'micro-tag')); mapPanel.append(mapHeading);
   const controls = node('div', undefined, 'route-controls');
