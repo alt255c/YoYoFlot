@@ -333,7 +333,12 @@ def run(input_dir, output, config='configs/product.yaml', reference='data/refere
             from .store import ProductStore
             store = ProductStore(target)
             if store.manifest['request'] != request:
-                raise ValueError('Output belongs to another input/config/code version; choose a new path')
+                changed=', '.join(key for key,value in request.items()
+                                  if store.manifest['request'].get(key)!=value)
+                raise ValueError('Output belongs to another input/config/code version; '
+                    f'changed: {changed}. Existing snapshot was not overwritten. '
+                    'To start the web UI, use: python -m yoyoflot.product.web --product "'
+                    +str(target)+'". To rebuild, choose a NEW --output directory.')
             return store.manifest
         with tempfile.TemporaryDirectory(prefix='.'+target.name+'.', suffix='.partial', dir=target.parent) as temp:
             stage = Path(temp)

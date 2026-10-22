@@ -53,7 +53,7 @@ criteria:
     group_id: ticket_owner_conflict
     role: strong
     enabled: true
-    status: pending_source_field_audit
+    status: unavailable_on_current_dataset_missing_confirmed_ticket_issuer
     weight: 2.0
     value_type: binary
     threshold: 1
@@ -71,7 +71,7 @@ criteria:
     group_id: incompatible_confirmed_movements
     role: strong
     enabled: true
-    status: pending_source_field_audit
+    status: unavailable_on_current_dataset_missing_confirmed_movement_times
     weight: 2.0
     value_type: binary
     threshold: 1
@@ -125,7 +125,7 @@ criteria:
     group_id: shared_loyalty_card
     role: weak
     enabled: true
-    status: specified_not_implemented
+    status: source_assessment_prepared
     weight: 0.8
     value_type: binary
     threshold: 1
@@ -148,7 +148,7 @@ criteria:
     group_id: coflight
     role: weak
     enabled: true
-    status: specified_not_implemented
+    status: source_assessment_prepared
     weight: 1.8
     value_type: binary
     threshold: 1
@@ -163,7 +163,7 @@ criteria:
     group_id: multiple_documents
     role: weak
     enabled: true
-    status: specified_not_implemented
+    status: source_assessment_prepared
     weight: 0.9
     value_type: binary
     threshold: 1
@@ -176,7 +176,7 @@ criteria:
     group_id: single_letter_name_difference
     role: weak
     enabled: true
-    status: specified_not_implemented
+    status: source_assessment_prepared
     weight: 0.7
     value_type: binary
     threshold: 1
@@ -184,6 +184,10 @@ criteria:
     required: [exactly_one_letter_edit_after_normalization, verified_identity_link, no_known_birth_date_contradiction]
     exclude_initials_token_order_and_transliteration: true
     name_similarity_alone_attaches_document: false
+    search_scope: all_linked_profiles_without_accepted_gate
+    unconfirmed_candidates: show_related_profiles_without_points_or_merge
+    availability: comparable_full_name_and_completed_global_search
+    scored_match_requires: exact_scoped_document_or_loyalty_card_and_no_known_birth_date_conflict
   B01:
     title_ru: Повторные неявки на посадку
     group_id: passenger_no_show

@@ -172,12 +172,17 @@ def handler(manager):
                     if set(query) != {'id'} or len(query['id']) != 1:
                         raise ValueError('Expected one id parameter')
                     payload=store.source_details(query['id'][0])
-                elif path.path in {'/','/app.js','/style.css','/world.geojson','/favicon.svg','/mosquito.gif'}:
+                elif path.path == '/api/marker-related':
+                    if not set(query)<= {'id','marker','offset','limit'} or len(query.get('id',[]))!=1 or len(query.get('marker',['N01']))!=1:
+                        raise ValueError('Expected id, marker and pagination parameters')
+                    payload=store.related_profiles(query['id'][0],query.get('marker',['N01'])[0],
+                        offset=_int_param(query,'offset',0,0,10_000_000),limit=_int_param(query,'limit',10,1,50))
+                elif path.path in {'/','/app.js','/style.css','/world.geojson','/favicon.svg','/mosquito.gif','/fly.png'}:
                     name='index.html' if path.path=='/' else path.path[1:]
                     content=files('yoyoflot.product').joinpath('static',name).read_bytes()
                     mime={'index.html':'text/html; charset=utf-8','app.js':'text/javascript; charset=utf-8',
                           'style.css':'text/css; charset=utf-8','world.geojson':'application/geo+json',
-                          'favicon.svg':'image/svg+xml','mosquito.gif':'image/gif'}[name]
+                          'favicon.svg':'image/svg+xml','mosquito.gif':'image/gif','fly.png':'image/png'}[name]
                     self.send_content(200,content,mime)
                     return
                 else:
@@ -252,6 +257,7 @@ def serve(product=None, host='127.0.0.1', port=8501, demo=False, scoring_path=No
     scoring = load_scoring(scoring_path or os.environ.get('YOYO_SCORING_CONFIG') or default_scoring_path())
     print(f'Loading scoring config: {scoring.path}; sha256={scoring.sha256}', flush=True)
     source=ProductStore(product, scoring=scoring)
+    print(f'Source markers: {source.assessment_root}; prepared={source.runtime_scores.prepared}; pending={source.runtime_scores.pending}',flush=True)
     manager=StoreManager(source)
     if demo:
         manager.demo()

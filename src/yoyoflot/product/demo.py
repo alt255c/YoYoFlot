@@ -33,6 +33,8 @@ class DemoSubsetStore:
         metadata['eligibility']=[{'eligibility_status':status,'profiles':sum(row['eligibility_status']==status for row in rows)}
                                  for status in ('eligible','no_matches','insufficient_data')]
         metadata['assessment']=self.source.assessment_statistics(self.ids)
+        if metadata.get('scoring'):
+            metadata['scoring']['marker_statistics']=self.source.marker_statistics(self.ids)
         metadata['limitations']=list(metadata.get('limitations',[]))+[
             'Демо-режим показывает небольшое подмножество реального рейтинга; слово «кандидат» не означает доказанный статус шпиона.'
         ]
@@ -76,3 +78,8 @@ class DemoSubsetStore:
         if person_id not in self.ids:
             raise KeyError('Profile not found in demo subset')
         return self.source.source_details(person_id)
+
+    def related_profiles(self, person_id, criterion_id='N01', offset=0, limit=10):
+        if person_id not in self.ids:
+            raise KeyError('Profile not found in demo subset')
+        return self.source.related_profiles(person_id,criterion_id,offset,limit)

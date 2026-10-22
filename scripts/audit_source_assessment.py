@@ -39,7 +39,12 @@ def audit(product):
         checks['source_factor_changed_ranking'] = db.execute('''SELECT count(*) FROM assessment_marker_coverage
             WHERE NOT included_in_ranking AND contribution<>0''').fetchone()[0]
         checks['coverage_rows_missing_or_extra'] = abs(db.execute(
-            'SELECT count(*) FROM assessment_marker_coverage').fetchone()[0] - 6 * store.manifest['counts']['persons'])
+            'SELECT count(*) FROM assessment_marker_coverage').fetchone()[0]
+            - (3+len(store.assessment_report['prepared_source_markers'])) * store.manifest['counts']['persons'])
+        checks['matched_without_source_evidence'] = db.execute('''SELECT count(*)
+            FROM assessment_marker_coverage c WHERE NOT c.included_in_ranking AND c.status='matched'
+            AND NOT EXISTS(SELECT 1 FROM assessment_marker_evidence e WHERE e.person_id=c.person_id
+                           AND e.criterion_id=c.criterion_id AND e.is_matched)''').fetchone()[0]
         ambiguous = db.execute('''SELECT a.person_id FROM assessment_profile_assessments a
             JOIN persons p USING(person_id) WHERE NOT a.identity_accepted AND a.evaluated_criteria_count>0
             ORDER BY a.person_id LIMIT 1''').fetchone()[0]
@@ -73,7 +78,7 @@ def audit(product):
                 profile = json.load(response)
                 assert profile['person']['identity_status'] == 'ambiguous'
                 assert profile['person']['evaluated_criteria_count'] > 0
-                assert len(profile['additional_factors']) == 3
+                assert len(profile['additional_factors']) == len(store.assessment_report['prepared_source_markers'])
             with urlopen(base + '/api/metadata') as response:
                 assert json.load(response)['assessment'] == statistics
             for status, count_key in [('all', 'profiles'), ('assessed', 'assessed'),

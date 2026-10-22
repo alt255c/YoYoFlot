@@ -45,10 +45,15 @@
       <div class="metric"><span class="metric-label">Профили</span><strong id="metricPersons">—</strong><small>прошли через модель</small></div>
       <div class="metric"><span class="metric-label">Сегменты</span><strong id="metricSegments">—</strong><small>с сохранённым происхождением</small></div>
       <div class="metric metric-accent"><span class="metric-label">Проверены доступные маркеры</span><strong id="metricEligible">—</strong><small id="metricEligibleHint">оценён хотя бы один маркер</small></div>
-      <div class="metric"><span class="metric-label">Есть срабатывания</span><strong id="metricSignals">—</strong><small id="metricSignalsHint">по доступным проверкам</small></div>
+      <div class="metric"><span class="metric-label">Требуют просмотра</span><strong id="metricSignals">—</strong><small id="metricSignalsHint">по доступным проверкам</small></div>
       <div class="metric"><span class="metric-label">Идентичность установлена</span><strong id="metricIdentity">—</strong><small>статус accepted; учитывается отдельно</small></div>
       <div class="metric"><span class="metric-label">Активный набор</span><strong id="metricMode">—</strong><small id="metricModeHint">проверка snapshot</small></div>
     </section>
+    <details id="markerSummary" class="panel marker-summary" hidden>
+      <summary>Все 12 маркеров: доступность и результаты расчёта</summary>
+      <p>Нажмите число, чтобы открыть пример профиля. «Похожие имена без связи» — найденные кандидаты без подтверждающего идентификатора; баллы за них не начислены. «Начислены баллы» исключает вес 0 и повторный учёт одного основания. Эти числа не означают количество доказанных нарушений.</p>
+      <div id="markerSummaryRows" class="marker-summary-table"></div>
+    </details>
 
     <section class="control-deck panel" aria-label="Управление рейтингом">
       <div class="control-head">

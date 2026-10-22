@@ -17,10 +17,11 @@ import yaml
 
 from ..provenance import fingerprint
 
-VERSION = 'source-assessment:1.0'
+VERSION = 'source-assessment:3.0'
 TABLES = ('source_links', 'segment_source_links', 'profile_identifiers',
           'document_conflicts', 'conflict_members', 'marker_evidence',
-          'marker_coverage', 'profile_assessments')
+          'marker_coverage', 'profile_assessments', 'marker_dependencies',
+          'marker_diagnostics', 'marker_related_profiles')
 
 
 def digest(value):
@@ -40,11 +41,12 @@ def query_rows(db, sql, params=None):
 def verify(root, product_manifest_sha256):
     root = Path(root).resolve()
     manifest = read_json(root / 'assessment_manifest.json')
-    if (manifest.get('version') != VERSION or manifest.get('status') != 'complete_with_limitations'
+    if (manifest.get('version') not in {'source-assessment:1.0','source-assessment:2.0', VERSION} or manifest.get('status') != 'complete_with_limitations'
             or manifest.get('run_id') != 'assessment-' + digest(manifest.get('request'))[:20]
             or manifest['request']['product_manifest_sha256'] != product_manifest_sha256):
         raise ValueError('Source assessment does not belong to this product')
-    if set(manifest.get('files', {})) != {n + '.parquet' for n in TABLES} | {'assessment_report.json'}:
+    required_tables = TABLES if manifest['version']==VERSION else TABLES[:9] if manifest['version']=='source-assessment:2.0' else TABLES[:8]
+    if set(manifest.get('files', {})) != {n + '.parquet' for n in required_tables} | {'assessment_report.json'}:
         raise ValueError('Incomplete source assessment')
     for name, expected in manifest['files'].items():
         path = root / name
@@ -64,6 +66,9 @@ def _inputs(product, canonical, archive, raw_dir, repo):
     files = [product / 'run_manifest.json', canonical / 'canonical_manifest.json',
              canonical / 'canonical_report.json', archive, repo / 'configs/markers_v2.yaml',
              repo / 'scripts/dataset_manifest.json', Path(__file__).resolve()]
+    files.append(Path(__file__).with_name('source_markers.py'))
+    files.append(Path(__file__).with_name('name_markers.py'))
+    files.append(Path(__file__).resolve().parents[1] / 'resolve/matching.py')
     for name in ('observations', 'identifiers', 'travel_observations'):
         path = canonical / (name + '.parquet')
         if fingerprint(path) != cm['files'][path.name]:
@@ -136,6 +141,7 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
         with duckdb.connect() as db:
             db.execute('SET threads=2')
             db.execute('SET memory_limit=?', [memory_limit])
+            db.execute('SET preserve_insertion_order=false')
             db.execute('SET temp_directory=?', [str(Path(tmp) / 'spill')])
             for name in ('observations', 'identifiers', 'travel_observations'):
                 db.read_parquet(str(canonical / (name + '.parquet'))).create_view(name)
@@ -246,11 +252,21 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
                     r.source_record_id,r.locator,r.pnr,r.booking_event_id,
                     g.profiles>1 AND g.passenger_names>1
                 FROM pnr_records r JOIN pnr_groups g USING(booking_event_id)''')
+            from .source_markers import prepare
+            field_audit = prepare(db,cfg,progress)
             db.execute('''CREATE TABLE source_marker_results AS SELECT person_id,criterion_id,
-                count(*) used_observations,bool_or(is_matched) AS is_matched
+                count(DISTINCT observation_id) used_observations,bool_or(is_matched) AS is_matched
                 FROM marker_evidence GROUP BY person_id,criterion_id''')
+            missing_fields={
+                'N01':'Нет полного сопоставимого имени в связанных исходных записях',
+                'L01':'Нет карты с известной программой и сопоставимым полным именем владельца',
+                'D02':'Нет пригодного документного идентификатора, связанного с профилем',
+                'P01':'Нет PNR вместе с известными рейсом, точным временем и разрешённым маршрутом',
+                'M07':'Нет пригодных посадочных записей с полным именем, точным рейсом, датой и маршрутом'}
             new_settings = [{'criterion_id': cid, 'title_ru': cfg['criteria'][cid]['title_ru'],
-                             'weight': cfg['criteria'][cid]['weight']} for cid in ('D01','P01','B01')]
+                             'weight': cfg['criteria'][cid]['weight'],
+                             'unavailable_reason':field_audit['unavailable_reasons'].get(cid,missing_fields.get(cid))}
+                            for cid in cfg['criteria'] if cid not in ('M01','M02','M03')]
             import pyarrow as pa
             db.register('new_settings', pa.Table.from_pylist(new_settings))
             db.execute('''CREATE TABLE marker_coverage AS
@@ -263,12 +279,13 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
                     CASE WHEN r.person_id IS NULL THEN 'unavailable' WHEN r.is_matched THEN 'matched' ELSE 'not_matched' END,
                     CASE WHEN r.person_id IS NOT NULL THEN r.is_matched::INTEGER::DOUBLE END,
                     1.0,k.weight,coalesce(r.used_observations,0),
-                    CASE WHEN k.criterion_id='B01' THEN 'Нет явного пассажирского статуса неявки'
-                         WHEN r.person_id IS NULL THEN 'Нет пригодных связанных записей для этого маркера' END,
+                    CASE WHEN r.person_id IS NULL THEN coalesce(d.availability_reason,k.unavailable_reason,
+                         'Нет пригодных связанных записей для этого маркера') END,
                     0.0,CASE WHEN r.is_matched THEN k.weight ELSE 0.0 END,
                     'linked_source_records',false
                 FROM persons p CROSS JOIN new_settings k LEFT JOIN source_marker_results r
-                    ON r.person_id=p.person_id AND r.criterion_id=k.criterion_id''')
+                    ON r.person_id=p.person_id AND r.criterion_id=k.criterion_id
+                LEFT JOIN marker_diagnostics d ON d.person_id=p.person_id AND d.criterion_id=k.criterion_id''')
             db.execute('''CREATE TABLE profile_assessments AS SELECT p.person_id,
                 p.identity_status='accepted' identity_accepted,
                 count(*) FILTER(WHERE m.status<>'unavailable') evaluated_criteria_count,
@@ -295,13 +312,19 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
                 (SELECT person_id,criterion_id,status,value,threshold,weight,contribution FROM explanations
                  EXCEPT SELECT person_id,criterion_id,status,value,threshold,weight,contribution FROM marker_coverage WHERE included_in_ranking))''').fetchone()[0]
             checks['inferred_no_shows'] = db.execute("SELECT count(*) FROM marker_coverage WHERE criterion_id='B01' AND (status<>'unavailable' OR value IS NOT NULL OR contribution<>0)").fetchone()[0]
+            checks['duplicate_marker_diagnostics']=db.execute('''SELECT count(*) FROM (
+                SELECT person_id,criterion_id FROM marker_diagnostics GROUP BY 1,2 HAVING count(*)>1)''').fetchone()[0]
+            checks['unconfirmed_name_points']=db.execute('''SELECT count(*) FROM marker_coverage c
+                WHERE criterion_id='N01' AND status='matched' AND NOT EXISTS(
+                    SELECT 1 FROM marker_related_profiles r WHERE r.person_id=c.person_id
+                        AND r.criterion_id='N01' AND r.link_status='verified_identifier')''').fetchone()[0]
             if any(checks.values()):
                 raise ValueError('Source assessment integrity checks failed: ' + str(checks))
             counts = {}
             for table in TABLES:
                 counts[table] = db.execute(f'SELECT count(*) FROM {table}').fetchone()[0]
                 path = str(stage / (table + '.parquet')).replace("'", "''")
-                order = 'person_id,criterion_id' if table == 'marker_coverage' else 'person_id' if table in {
+                order = 'person_id,criterion_id' if table in {'marker_coverage','marker_dependencies','marker_diagnostics','marker_related_profiles'} else 'person_id' if table in {
                     'source_links','segment_source_links','profile_identifiers','marker_evidence','profile_assessments'} else 'conflict_id'
                 db.execute(f"COPY (SELECT * FROM {table} ORDER BY {order}) TO '{path}' (FORMAT PARQUET, COMPRESSION ZSTD)")
             statistics = query_rows(db, '''SELECT count(*) profiles,
@@ -322,8 +345,9 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
                           GROUP BY criterion_id,status ORDER BY criterion_id,status'''),
                       'source_version_bridges': request['source_version_bridges'],
                       'canonical_status': cr['status'], 'product_run_id': pm['run_id'],
-                      'prepared_source_markers': ['D01','P01','B01'],
-                      'pending_source_markers': ['L01','M07','D02','N01'],
+                      'prepared_source_markers': sorted(set(cfg['criteria'])-{'M01','M02','M03'}),
+                      'pending_source_markers': [],
+                      'field_audit':field_audit,
                       'limitations': [
                           'Exact anchors recover source associations, not all T13 component members; completeness is measured per profile.',
                           'Ambiguous identity remains ambiguous. Source checks apply to linked records, not a proven unique physical person.',
