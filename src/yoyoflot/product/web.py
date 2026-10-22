@@ -21,6 +21,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from .demo import DemoSubsetStore
 from .store import ProductStore
+from .scoring import default_path as default_scoring_path, load as load_scoring
 
 
 MAX_UPLOAD_BYTES = 512 * 1024 * 1024
@@ -39,6 +40,8 @@ class StoreManager:
         self._base = store
         self._store = store
         self._temporary_roots = []
+        self.scoring = getattr(store, 'scoring', None)
+        self._stores = [store]
 
     def current(self):
         with self._lock:
@@ -49,6 +52,7 @@ class StoreManager:
             self._store = store
             if as_base:
                 self._base = store
+                self._stores.append(store)
             if temporary_root:
                 self._temporary_roots.append(Path(temporary_root))
 
@@ -59,6 +63,10 @@ class StoreManager:
     def demo(self):
         with self._lock:
             self._store = DemoSubsetStore(self._base)
+
+    def close(self):
+        for store in self._stores:
+            store.close()
 
 
 def _int_param(query, name, default, minimum, maximum):
@@ -164,12 +172,17 @@ def handler(manager):
                     if set(query) != {'id'} or len(query['id']) != 1:
                         raise ValueError('Expected one id parameter')
                     payload=store.source_details(query['id'][0])
-                elif path.path in {'/','/app.js','/style.css','/world.geojson','/favicon.svg','/mosquito.gif'}:
+                elif path.path == '/api/marker-related':
+                    if not set(query)<= {'id','marker','offset','limit'} or len(query.get('id',[]))!=1 or len(query.get('marker',['N01']))!=1:
+                        raise ValueError('Expected id, marker and pagination parameters')
+                    payload=store.related_profiles(query['id'][0],query.get('marker',['N01'])[0],
+                        offset=_int_param(query,'offset',0,0,10_000_000),limit=_int_param(query,'limit',10,1,50))
+                elif path.path in {'/','/app.js','/style.css','/world.geojson','/favicon.svg','/mosquito.gif','/fly.png'}:
                     name='index.html' if path.path=='/' else path.path[1:]
                     content=files('yoyoflot.product').joinpath('static',name).read_bytes()
                     mime={'index.html':'text/html; charset=utf-8','app.js':'text/javascript; charset=utf-8',
                           'style.css':'text/css; charset=utf-8','world.geojson':'application/geo+json',
-                          'favicon.svg':'image/svg+xml','mosquito.gif':'image/gif'}[name]
+                          'favicon.svg':'image/svg+xml','mosquito.gif':'image/gif','fly.png':'image/png'}[name]
                     self.send_content(200,content,mime)
                     return
                 else:
@@ -209,7 +222,7 @@ def handler(manager):
                     raise UploadError('Загрузить можно только ZIP подготовленного продукта')
                 product_root,temp_root=_extract_product(payload)
                 try:
-                    product=ProductStore(product_root)
+                    product=ProductStore(product_root, scoring=manager.scoring)
                 except Exception as exc:
                     shutil.rmtree(temp_root, ignore_errors=True)
                     raise UploadError(f'ZIP не является проверенным продуктом: {exc}') from exc
@@ -240,30 +253,40 @@ def handler(manager):
     return Handler
 
 
-def serve(product=None, host='127.0.0.1', port=8501, demo=False):
-    source=ProductStore(product)
+def serve(product=None, host='127.0.0.1', port=8501, demo=False, scoring_path=None):
+    scoring = load_scoring(scoring_path or os.environ.get('YOYO_SCORING_CONFIG') or default_scoring_path())
+    print(f'Loading scoring config: {scoring.path}; sha256={scoring.sha256}', flush=True)
+    source=ProductStore(product, scoring=scoring)
+    print(f'Source markers: {source.assessment_root}; prepared={source.runtime_scores.prepared}; pending={source.runtime_scores.pending}',flush=True)
     manager=StoreManager(source)
     if demo:
         manager.demo()
     initial=manager.current()
-    with ThreadingHTTPServer((host,port),handler(manager)) as server:
-        print(f'YoYoFlot Sentinel: {initial.metadata()["run_id"]}; HTTP port {server.server_port}; mode={initial.data_mode}',flush=True)
-        try:
+    try:
+        with ThreadingHTTPServer((host,port),handler(manager)) as server:
+            print(f'YoYoFlot Sentinel: {initial.metadata()["run_id"]}; HTTP port {server.server_port}; mode={initial.data_mode}; scoring={source.runtime_scores.run_id}',flush=True)
             server.serve_forever()
-        except KeyboardInterrupt:
-            pass
+    except KeyboardInterrupt:
+        pass
+    finally:
+        manager.close()
 
 
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--product',default=os.environ.get('YOYO_PRODUCT'))
+    p.add_argument('--scoring',default=os.environ.get('YOYO_SCORING_CONFIG'),
+                   help='Weights YAML; default: configs/scoring.yaml. Read once at startup.')
     p.add_argument('--demo',action='store_true',default=os.environ.get('YOYO_DEMO','').lower() in {'1','true','yes'})
     p.add_argument('--host',default=os.environ.get('YOYO_HOST','127.0.0.1'))
     p.add_argument('--port',type=int,default=int(os.environ.get('YOYO_PORT','8501')))
     a=p.parse_args(argv)
     if not a.product:
         p.error('--product is required; --demo selects a real subset from that product')
-    serve(a.product,a.host,a.port,a.demo)
+    try:
+        serve(a.product,a.host,a.port,a.demo,a.scoring)
+    except (OSError, ValueError) as exc:
+        p.error(str(exc))
 
 
 if __name__=='__main__':

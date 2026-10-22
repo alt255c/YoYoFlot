@@ -44,9 +44,16 @@
     <section id="metrics" class="metrics" aria-label="Сводка набора">
       <div class="metric"><span class="metric-label">Профили</span><strong id="metricPersons">—</strong><small>прошли через модель</small></div>
       <div class="metric"><span class="metric-label">Сегменты</span><strong id="metricSegments">—</strong><small>с сохранённым происхождением</small></div>
-      <div class="metric metric-accent"><span class="metric-label">Можно проверять</span><strong id="metricEligible">—</strong><small id="metricEligibleHint">достаточно данных для рейтинга</small></div>
+      <div class="metric metric-accent"><span class="metric-label">Проверены доступные маркеры</span><strong id="metricEligible">—</strong><small id="metricEligibleHint">оценён хотя бы один маркер</small></div>
+      <div class="metric"><span class="metric-label">Требуют просмотра</span><strong id="metricSignals">—</strong><small id="metricSignalsHint">по доступным проверкам</small></div>
+      <div class="metric"><span class="metric-label">Идентичность установлена</span><strong id="metricIdentity">—</strong><small>статус accepted; учитывается отдельно</small></div>
       <div class="metric"><span class="metric-label">Активный набор</span><strong id="metricMode">—</strong><small id="metricModeHint">проверка snapshot</small></div>
     </section>
+    <details id="markerSummary" class="panel marker-summary" hidden>
+      <summary>Все 12 маркеров: доступность и результаты расчёта</summary>
+      <p>Нажмите число, чтобы открыть пример профиля. «Похожие имена без связи» — найденные кандидаты без подтверждающего идентификатора; баллы за них не начислены. «Начислены баллы» исключает вес 0 и повторный учёт одного основания. Эти числа не означают количество доказанных нарушений.</p>
+      <div id="markerSummaryRows" class="marker-summary-table"></div>
+    </details>
 
     <section class="control-deck panel" aria-label="Управление рейтингом">
       <div class="control-head">
@@ -59,7 +66,7 @@
       <div class="filters">
         <div class="rank-picker" id="rankPicker" aria-label="Размер рейтинга"><span>Топ</span><button class="rank-choice active" data-limit="50">50</button><button class="rank-choice" data-limit="100">100</button><button class="rank-choice" data-limit="1000">1000</button></div>
         <label class="search-box"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Имя или person_id" autocomplete="off"></label>
-        <label class="select-box"><span>Статус</span><select id="statusFilter"><option value="all">Все профили</option><option value="eligible">Есть сигналы</option><option value="no_matches">Без совпадений</option><option value="insufficient_data">Недостаточно данных</option></select></label>
+        <label class="select-box"><span>Статус</span><select id="statusFilter"><option value="all">Все профили</option><option value="assessed">Есть оценённые маркеры</option><option value="not_assessed">Нет доступных проверок</option><option value="eligible">Есть сигналы</option><option value="no_matches">Без совпадений</option><option value="identity_accepted">Идентичность установлена</option><option value="identity_ambiguous">Идентичность неоднозначна</option></select></label>
         <label class="select-box"><span>Сортировка</span><select id="sortSelect"><option value="rank">Приоритет проверки</option><option value="score">Баллы</option><option value="name">Имя</option></select></label>
       </div>
     </section>

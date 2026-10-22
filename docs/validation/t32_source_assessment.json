@@ -1,0 +1,72 @@
+{
+  "ambiguous_profile_assessed_without_identity_upgrade": true,
+  "assessment_manifest_sha256": "5b455219daf540f4ebe6864464f9336bbd7abb46aabd74c7678c464b3abcc678",
+  "assessment_run_id": "assessment-6de373bdd6f18f3db3e0",
+  "checks": {
+    "associations_exceed_frozen_observation_count": 0,
+    "baseline_rows_changed": 0,
+    "coverage_rows_missing_or_extra": 0,
+    "duplicate_profile_assessments": 0,
+    "identity_status_changed": 0,
+    "inferred_no_shows": 0,
+    "multiply_assigned_observation": 0,
+    "person_anchors_unresolved": 0,
+    "segment_anchors_unresolved": 0,
+    "source_factor_changed_ranking": 0,
+    "unknown_source_link_profile": 0
+  },
+  "conflict_profile_document_checks": [
+    {
+      "documents_found": true,
+      "fuzzy_fallback_used": false,
+      "person_id": "person_085934b191ca30c2d2f088dde1c9e4663db661dabc5565546d5395716c79a7a0"
+    },
+    {
+      "documents_found": true,
+      "fuzzy_fallback_used": false,
+      "person_id": "person_3974a2472ec280384722ea277158febb6e369df71aaa99fb8816d56ae75ba37c"
+    },
+    {
+      "documents_found": true,
+      "fuzzy_fallback_used": false,
+      "person_id": "person_4c6b0a1633f97399a3bec47968acab0cd309e490871131093f6a0f2de93015b7"
+    },
+    {
+      "documents_found": true,
+      "fuzzy_fallback_used": false,
+      "person_id": "person_65ac0c5514d4c404cc6b19d34a17ef4f19499e93858f23889c16db73a59042fb"
+    },
+    {
+      "documents_found": true,
+      "fuzzy_fallback_used": false,
+      "person_id": "person_8645356783fdb3cd29032801cdf4df0ffe1f38bb46cfe4662488729dae89c18a"
+    },
+    {
+      "documents_found": true,
+      "fuzzy_fallback_used": false,
+      "person_id": "person_dfcf9cd70685f97e7412941b3f422fad33ddcac8eca763efcb2a08ea9be2fa49"
+    }
+  ],
+  "different_product_hash_rejected": true,
+  "http_filter_totals": {
+    "all": 840606,
+    "assessed": 759863,
+    "eligible": 5352,
+    "identity_accepted": 75415,
+    "no_matches": 754511,
+    "not_assessed": 80743
+  },
+  "product_run_id": "product-41e7bf659768cc4510d2",
+  "source_data": "Existing repository product and canonical data; no generated passenger records.",
+  "statistics": {
+    "assessed": 759863,
+    "identity_accepted": 75415,
+    "profiles": 840606,
+    "ranked_with_signals": 5346,
+    "source_assessment_available": true,
+    "source_links_complete": 752103,
+    "unavailable": 80743,
+    "with_signals": 5352,
+    "without_signals": 754511
+  }
+}

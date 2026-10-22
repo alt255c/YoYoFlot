@@ -1,0 +1,529 @@
+{
+  "version": "marker-candidates-review:1.0",
+  "date_moscow": "2026-10-21",
+  "created_at_utc": "2026-10-21T04:24:53.151758+00:00",
+  "product_run_id": "product-41e7bf659768cc4510d2",
+  "assessment_run_id": "assessment-b0703ebd98d53cc3e7a8",
+  "current_signal_profiles": 5354,
+  "runtime_markers_changed": false,
+  "weights_changed": false,
+  "policy": {
+    "C01": {
+      "title": "Series of short international return intervals",
+      "max_departure_gap_days": 3,
+      "window_days": 90,
+      "min_returns": 3,
+      "min_destination_countries": 3,
+      "same_origin_airport": true,
+      "shared_flight_legs_allowed": false,
+      "return_must_finish_inside_window": true
+    },
+    "C02": {
+      "title": "Repeated directed cycles",
+      "cycle_lengths": [
+        3,
+        4
+      ],
+      "max_cycle_days": 30,
+      "min_nonoverlapping_occurrences": 2,
+      "min_countries": 2
+    },
+    "C03": {
+      "title": "Change in recorded travel pattern",
+      "baseline_calendar_months": 3,
+      "current_calendar_months": 1,
+      "min_baseline_events": 6,
+      "min_current_events": 6,
+      "min_daily_rate_ratio": 3,
+      "min_new_destination_countries": 3,
+      "min_share_events_in_new_countries": 0.5,
+      "require_common_source_in_each_month": true
+    },
+    "C04": {
+      "title": "Candidate incompatible departures",
+      "max_gap_hours": 6,
+      "min_origin_distance_km": 500,
+      "screening_speed_kmh": 1500,
+      "simultaneous_min_origin_distance_km": 100,
+      "utc_policy": "airport-derived; no explicit source timezones",
+      "speed_is_physical_proof": false
+    }
+  },
+  "mixed_source_candidates": [
+    {
+      "evidence_scope": "reported",
+      "criterion_id": "C01",
+      "identity_status": "accepted",
+      "candidate_profiles": 1,
+      "already_have_signals": 0,
+      "new_profiles": 1
+    },
+    {
+      "evidence_scope": "reported",
+      "criterion_id": "C01",
+      "identity_status": "ambiguous",
+      "candidate_profiles": 3,
+      "already_have_signals": 0,
+      "new_profiles": 3
+    },
+    {
+      "evidence_scope": "reported",
+      "criterion_id": "C02",
+      "identity_status": "accepted",
+      "candidate_profiles": 3,
+      "already_have_signals": 3,
+      "new_profiles": 0
+    },
+    {
+      "evidence_scope": "reported",
+      "criterion_id": "C02",
+      "identity_status": "ambiguous",
+      "candidate_profiles": 1,
+      "already_have_signals": 0,
+      "new_profiles": 1
+    },
+    {
+      "evidence_scope": "reported",
+      "criterion_id": "C03",
+      "identity_status": "accepted",
+      "candidate_profiles": 27,
+      "already_have_signals": 11,
+      "new_profiles": 16
+    },
+    {
+      "evidence_scope": "reported",
+      "criterion_id": "C03",
+      "identity_status": "ambiguous",
+      "candidate_profiles": 22,
+      "already_have_signals": 0,
+      "new_profiles": 22
+    }
+  ],
+  "single_source_C03": {
+    "summary": [
+      {
+        "identity_status": "accepted",
+        "profiles": 1,
+        "already_have_signals": 0,
+        "new_profiles": 1
+      },
+      {
+        "identity_status": "ambiguous",
+        "profiles": 11,
+        "already_have_signals": 0,
+        "new_profiles": 11
+      }
+    ],
+    "by_source": [
+      {
+        "source_id": "forum_json",
+        "identity_status": "accepted",
+        "comparable_profiles": 1824,
+        "activity_increases": 0,
+        "combined_candidates": 0
+      },
+      {
+        "source_id": "forum_json",
+        "identity_status": "ambiguous",
+        "comparable_profiles": 9426,
+        "activity_increases": 20,
+        "combined_candidates": 6
+      },
+      {
+        "source_id": "pointz_xml",
+        "identity_status": "accepted",
+        "comparable_profiles": 55,
+        "activity_increases": 0,
+        "combined_candidates": 0
+      },
+      {
+        "source_id": "pointz_xml",
+        "identity_status": "ambiguous",
+        "comparable_profiles": 678,
+        "activity_increases": 0,
+        "combined_candidates": 0
+      },
+      {
+        "source_id": "skyteam_yaml",
+        "identity_status": "accepted",
+        "comparable_profiles": 10185,
+        "activity_increases": 9,
+        "combined_candidates": 1
+      },
+      {
+        "source_id": "skyteam_yaml",
+        "identity_status": "ambiguous",
+        "comparable_profiles": 8259,
+        "activity_increases": 17,
+        "combined_candidates": 5
+      }
+    ],
+    "overlap_pooled_C03": [
+      {
+        "identity_status": "accepted",
+        "profiles": 1,
+        "also_in_pooled_C03": 1,
+        "absent_from_pooled_C03": 0
+      },
+      {
+        "identity_status": "ambiguous",
+        "profiles": 11,
+        "also_in_pooled_C03": 10,
+        "absent_from_pooled_C03": 1
+      }
+    ],
+    "scope": "All source/profile windows; sources are evaluated separately, without pooling.",
+    "outputs": {
+      "c03_single_source_candidates.parquet": "4d8d71eb7d17ade9a92daa9f90c139d77ddac622cd29653323821eb50face668",
+      "c03_single_source_evidence.parquet": "737a8d77531b5c3ae01db2b9a681785124eba981092a1b6881a5f99d381ba8f1"
+    }
+  },
+  "combined_preferred_variant": {
+    "C01": "common base, independent return episodes; reported records",
+    "C02": "nonoverlapping cycles; dependent on M03",
+    "C03": "separate source windows, no source pooling",
+    "union": [
+      {
+        "identity_status": "accepted",
+        "candidates": 5,
+        "already_have_signals": 3,
+        "new_profiles": 2
+      },
+      {
+        "identity_status": "ambiguous",
+        "candidates": 15,
+        "already_have_signals": 0,
+        "new_profiles": 15
+      }
+    ],
+    "sql": "WITH positives AS(SELECT distinct person_id FROM coverage WHERE status='matched'),\nu AS(SELECT distinct person_id,identity_status FROM candidates WHERE criterion_id IN ('C01','C02') UNION SELECT distinct person_id,identity_status FROM single_source)\nSELECT identity_status,count(*) candidates,count(*) FILTER(WHERE p.person_id IS NOT NULL) already_have_signals,count(*) FILTER(WHERE p.person_id IS NULL) new_profiles FROM u LEFT JOIN positives p USING(person_id) GROUP BY identity_status ORDER BY 1"
+  },
+  "baseline_unavailability": [
+    {
+      "criterion_id": "M01",
+      "availability_reason": "Неоднозначная идентичность профиля",
+      "profiles": 765191
+    },
+    {
+      "criterion_id": "M01",
+      "availability_reason": "Есть неоднозначные сегменты",
+      "profiles": 42716
+    },
+    {
+      "criterion_id": "M01",
+      "availability_reason": "Недостаточно пригодных наблюдений",
+      "profiles": 4177
+    },
+    {
+      "criterion_id": "M02",
+      "availability_reason": "Неоднозначная идентичность профиля",
+      "profiles": 765191
+    },
+    {
+      "criterion_id": "M02",
+      "availability_reason": "Недостаточно пригодных наблюдений",
+      "profiles": 25468
+    },
+    {
+      "criterion_id": "M02",
+      "availability_reason": "Соседство поездок или маршруты неоднозначны",
+      "profiles": 23598
+    },
+    {
+      "criterion_id": "M03",
+      "availability_reason": "Неоднозначная идентичность профиля",
+      "profiles": 765191
+    },
+    {
+      "criterion_id": "M03",
+      "availability_reason": "Недостаточно известных маршрутов",
+      "profiles": 29085
+    },
+    {
+      "criterion_id": "M03",
+      "availability_reason": "Недостаточно пригодных наблюдений",
+      "profiles": 4177
+    }
+  ],
+  "field_audit": {
+    "sex_by_source": [
+      {
+        "source_id": "boarding_csv",
+        "observations": 155147,
+        "filled": 155147
+      },
+      {
+        "source_id": "boardingpass_xlsx",
+        "observations": 615771,
+        "filled": 0
+      },
+      {
+        "source_id": "forum_json",
+        "observations": 66592,
+        "filled": 50155
+      },
+      {
+        "source_id": "pointz_xml",
+        "observations": 66657,
+        "filled": 0
+      },
+      {
+        "source_id": "sirena_fixed",
+        "observations": 155757,
+        "filled": 0
+      },
+      {
+        "source_id": "skyteam_yaml",
+        "observations": 1687053,
+        "filled": 0
+      }
+    ],
+    "linked_sex_contradictions": [
+      {
+        "profiles": 0
+      }
+    ],
+    "linked_birth_date_contradictions": [
+      {
+        "profiles": 0
+      }
+    ],
+    "document_sex_contradictions": [
+      {
+        "conflict_groups": 0
+      }
+    ],
+    "document_birth_date_contradictions": [
+      {
+        "conflict_groups": 2
+      }
+    ],
+    "source_time_fields": [
+      {
+        "source_id": "boarding_csv",
+        "event_kind": "boarding_record",
+        "events": 155147,
+        "explicit_timezone": 0,
+        "arrival_time": 0,
+        "explicit_no_show": 0
+      },
+      {
+        "source_id": "boardingpass_xlsx",
+        "event_kind": "boarding_pass_record",
+        "events": 615771,
+        "explicit_timezone": 0,
+        "arrival_time": 0,
+        "explicit_no_show": 0
+      },
+      {
+        "source_id": "forum_json",
+        "event_kind": "registered_flight",
+        "events": 1308987,
+        "explicit_timezone": 0,
+        "arrival_time": 0,
+        "explicit_no_show": 0
+      },
+      {
+        "source_id": "pointz_xml",
+        "event_kind": "loyalty_activity",
+        "events": 436090,
+        "explicit_timezone": 0,
+        "arrival_time": 0,
+        "explicit_no_show": 0
+      },
+      {
+        "source_id": "sirena_fixed",
+        "event_kind": "reservation_record",
+        "events": 155757,
+        "explicit_timezone": 0,
+        "arrival_time": 155757,
+        "explicit_no_show": 0
+      },
+      {
+        "source_id": "skyteam_yaml",
+        "event_kind": "exchange_record",
+        "events": 1687053,
+        "explicit_timezone": 0,
+        "arrival_time": 0,
+        "explicit_no_show": 0
+      }
+    ],
+    "observation_multi_profile_links": [
+      {
+        "observations": 0
+      }
+    ],
+    "segment_profile_mismatch": [
+      {
+        "links": 0
+      }
+    ],
+    "baseline_unavailability": [
+      {
+        "criterion_id": "M01",
+        "availability_reason": "Неоднозначная идентичность профиля",
+        "profiles": 765191
+      },
+      {
+        "criterion_id": "M01",
+        "availability_reason": "Есть неоднозначные сегменты",
+        "profiles": 42716
+      },
+      {
+        "criterion_id": "M01",
+        "availability_reason": "Недостаточно пригодных наблюдений",
+        "profiles": 4177
+      },
+      {
+        "criterion_id": "M02",
+        "availability_reason": "Неоднозначная идентичность профиля",
+        "profiles": 765191
+      },
+      {
+        "criterion_id": "M02",
+        "availability_reason": "Недостаточно пригодных наблюдений",
+        "profiles": 25468
+      },
+      {
+        "criterion_id": "M02",
+        "availability_reason": "Соседство поездок или маршруты неоднозначны",
+        "profiles": 23598
+      },
+      {
+        "criterion_id": "M03",
+        "availability_reason": "Неоднозначная идентичность профиля",
+        "profiles": 765191
+      },
+      {
+        "criterion_id": "M03",
+        "availability_reason": "Недостаточно известных маршрутов",
+        "profiles": 29085
+      },
+      {
+        "criterion_id": "M03",
+        "availability_reason": "Недостаточно пригодных наблюдений",
+        "profiles": 4177
+      }
+    ]
+  },
+  "history_lengths": [
+    {
+      "evidence_scope": "boarding",
+      "identity_status": "accepted",
+      "profiles": 38167,
+      "single_event": 10496,
+      "two_events": 2442,
+      "six_events_three_dates": 0,
+      "six_events_90_day_span": 0
+    },
+    {
+      "evidence_scope": "boarding",
+      "identity_status": "ambiguous",
+      "profiles": 597296,
+      "single_event": 490883,
+      "two_events": 4033,
+      "six_events_three_dates": 4,
+      "six_events_90_day_span": 4
+    },
+    {
+      "evidence_scope": "reported",
+      "identity_status": "accepted",
+      "profiles": 71206,
+      "single_event": 0,
+      "two_events": 47120,
+      "six_events_three_dates": 47084,
+      "six_events_90_day_span": 47084
+    },
+    {
+      "evidence_scope": "reported",
+      "identity_status": "ambiguous",
+      "profiles": 647951,
+      "single_event": 480507,
+      "two_events": 65975,
+      "six_events_three_dates": 59693,
+      "six_events_90_day_span": 59685
+    }
+  ],
+  "original_records_review": {
+    "checked_records": 26,
+    "all_payloads_match": true,
+    "all_original_files_unchanged": true,
+    "original_file_sha256": {
+      "SkyTeam-Exchange.yaml": "ce4e47a2ba6f3db6fca0e86f603de032d0b32e5e20f613b638dafee11b6ad2a9",
+      "FrequentFlyerForum-Profiles.json": "3370f67664dfb2bf790ec343e971ffac95e42c0dd175c1b27037bac5868b1e8c",
+      "PointzAggregator-AirlinesData.xml": "71559a60837468731f8baa71c1ab9680a2248930ce9f476b6bf13aae6ad9a880"
+    }
+  },
+  "all_calculation_inputs_unchanged": true,
+  "input_sha256": {
+    "artifacts\\source-product\\tables\\persons.parquet": "2fcec8f4dce8c01bc9cb5551f289f5f65eb64db4f06db7505385ff9c8f7d8661",
+    "artifacts\\source-product\\tables\\segments.parquet": "3367887c924c39ff38dd443a41f257cb7e38c0f55b44050a323ecc4244502ae3",
+    "artifacts\\source-product\\tables\\rankings.parquet": "9664103ad4a85c6512c1fe6306e9bbed08a57f6986999b34070a7c2e4e4adbb1",
+    "artifacts\\source-assessment-v2\\marker_coverage.parquet": "dd45df72121576b9b70827983e1e7644950cc02f2ad8400de178f4373905663a",
+    "artifacts\\source-assessment-v2\\source_links.parquet": "16c6fb5f6580044dda3d95b5e6a1165952a3a89cb75e0b8d67904275d89d7f58",
+    "artifacts\\source-assessment-v2\\segment_source_links.parquet": "c506fcf0be73971f4fd2b11ecdaabb91dc9ab59d44045e800c65ff53158d5795",
+    "artifacts\\source-assessment-v2\\profile_identifiers.parquet": "69669f51a5c545ef39d6154e3125f2160d07f1b1baaade04d62ab405368fbca9",
+    "data\\processed\\t14_canonical_20261017\\observations.parquet": "cbcc50f12b6633f1d8eeb572201c9ff636e83461165e3c02d1bee5773f6b33ad",
+    "data\\processed\\t14_canonical_20261017\\travel_observations.parquet": "385ae55544884f8008eaf9a0d0014e4e601704ca3391d4d0e23b2554d95b22c7",
+    "artifacts\\source-product\\airports.csv": "7afcc2b62f26a6ef9b460b566c67effe9a53b8870e1b3c76a4e3e268cffa2bcb",
+    "artifacts\\source-product\\run_manifest.json": "5e5e8046fb63ef35574da83f26f859be7195a418cd3858a9966f9f8fcad5cb44",
+    "artifacts\\source-assessment-v2\\assessment_manifest.json": "6a93aa8eed328b6a7e4f2507e7611cb9c739ca6fa4013e380ce8b1e93a34affe",
+    "data\\processed\\t14_canonical_20261017\\canonical_manifest.json": "4b5729ded7ae2dd74d6e26a3301847134720badbbec3b9a5ada7b6ba9254b234",
+    "scripts\\audit_marker_candidates.py": "6911483b8aff78c0c50cb0ac2a64e1ebddadc443f3936887408985f6b6e27b72"
+  },
+  "local_evidence": {
+    "artifacts\\marker-candidates-20261021-v4\\report.json": {
+      "bytes": 133897,
+      "sha256": "cba69a69ec43fdb08b197ab21f15187e0fa9ddcd61048536a886cafef8fcfcb1"
+    },
+    "artifacts\\marker-candidates-20261021-v4\\candidates.parquet": {
+      "bytes": 5903,
+      "sha256": "b6d51c90744a28a1a8450bc00ca59e2b5693adb43655742f116185171914afdb"
+    },
+    "artifacts\\marker-candidates-20261021-v4\\evidence.parquet": {
+      "bytes": 127425,
+      "sha256": "036ea13dbc02cfd0ccbc75902a3c39134196ddd795968702f0a9c74ad52b152e"
+    },
+    "artifacts\\marker-candidates-20261021-v4\\source_robustness_all.json": {
+      "bytes": 65241,
+      "sha256": "0559d9a1e2ca618e78d85b76012866a05fd947a183121a4bfd9b5040997949ba"
+    },
+    "artifacts\\marker-candidates-20261021-v4\\c03_single_source_candidates.parquet": {
+      "bytes": 3162,
+      "sha256": "4d8d71eb7d17ade9a92daa9f90c139d77ddac622cd29653323821eb50face668"
+    },
+    "artifacts\\marker-candidates-20261021-v4\\c03_single_source_evidence.parquet": {
+      "bytes": 25111,
+      "sha256": "737a8d77531b5c3ae01db2b9a681785124eba981092a1b6881a5f99d381ba8f1"
+    },
+    "artifacts\\marker-candidates-20261021-v4\\originals_review.json": {
+      "bytes": 7565,
+      "sha256": "e3b8bea54ecf082aa665602eff3733e1d6e41ee27cd4ae5d2e8194483dc8c0e5"
+    },
+    "artifacts\\marker-candidates-20261021-v4\\review_originals.py": {
+      "bytes": 6255,
+      "sha256": "76bdd8801acd2802c0ebd6674a38a33633900fdf1b606a95e558a126b82437aa"
+    },
+    "artifacts\\marker-candidates-20261021-v4\\route_field_audit.json": {
+      "bytes": 1642,
+      "sha256": "78ffe620a13fac42fa59f4bd76f87af3ba5e661f472f15052a0861eae7050973"
+    }
+  },
+  "scripts": {
+    "scripts\\audit_marker_candidates.py": "6911483b8aff78c0c50cb0ac2a64e1ebddadc443f3936887408985f6b6e27b72",
+    "scripts\\audit_marker_candidate_sources.py": "0ff9125411fde7b59861c9b1dda87b0c429ef180e8857c3c2e3a71e9e0375fa0"
+  },
+  "limitations": [
+    "No labels of espionage; no detection accuracy or probability can be calculated.",
+    "Boarding-record evidence_scope denotes source records, not independently verified physical boarding.",
+    "Reported evidence_scope excludes reservations, but reports and loyalty entries do not prove travel.",
+    "Identity accepted is a frozen resolver status, not an external identity verification.",
+    "Unknown same-day ordering and unusable records break sequences; unknown dates disable profile sequences.",
+    "Truly absent events can still conceal intervening travel.",
+    "Short returns use departure-to-departure intervals, not actual time spent in a country.",
+    "All UTC departure times are airport-derived; clock/date/geography errors may create conflicts.",
+    "Recorded monthly activity does not establish continuous source coverage.",
+    "No weights, model, backend, frontend or source Parquet are changed."
+  ],
+  "recommendation": "No new strong marker established. C01 refines M02, C02 explains M03, source-bound C03 is a weak activity hypothesis dependent on M01. Identity linking requires separate work."
+}
