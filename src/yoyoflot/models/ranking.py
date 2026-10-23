@@ -1,11 +1,9 @@
 """Stable criteria-count ranking and immutable, self-contained demo artifacts."""
 import json
 import platform
-import math
 import shutil
 import tempfile
 import time
-from bisect import bisect_left, bisect_right
 from datetime import date
 from pathlib import Path
 
@@ -24,7 +22,6 @@ SCORE_SCHEMA = pa.schema([
     ("profile_id", pa.string()), ("display_name", pa.string()), ("rank", pa.int32()),
     ("matched_criteria_count", pa.int32()), ("available_criteria_count", pa.int32()),
     ("enabled_criteria_count", pa.int32()), ("rule_score", pa.float64()),
-    ("if_score", pa.float64()), ("combined_score", pa.float64()),
     ("eligibility_status", pa.string()), ("explanation_ru", pa.string()),
     ("window_start", pa.date32()), ("window_end", pa.date32()), ("source_coverage", pa.float64()),
     ("model_version", pa.string()), ("data_mode", pa.string()), ("ranking_mode", pa.string()),
@@ -64,23 +61,10 @@ def rank_scores(scores, run_id):
     eligible = sorted((r for r in scores if r["eligibility_status"] == "eligible"),
                       key=lambda r: (-r["matched_criteria_count"], -r["rule_score"], r["profile_id"]))
     ranks = {r["profile_id"]: i + 1 for i, r in enumerate(eligible)}
-    rows = [dict(r, rank=ranks.get(r["profile_id"]), if_score=None, combined_score=None,
+    rows = [dict(r, rank=ranks.get(r["profile_id"]),
                  data_mode="synthetic_demo", ranking_mode="criteria_count", run_id=run_id) for r in scores]
     rows.sort(key=lambda r: (r["rank"] is None, r["rank"] or 0, r["profile_id"]))
     return rows, [r for r in rows if r["rank"] is not None and r["rank"] <= 50]
-
-
-def midrank_percentiles(reference, values):
-    """Frozen-reference empirical mid-CDF; ties share a percentile."""
-    if not reference:
-        raise ValueError("Пустая калибровочная выборка")
-    def valid(value):
-        return all(valid(v) for v in value) and bool(value) if isinstance(value, tuple) else type(value) in {int, float} and math.isfinite(value)
-    if (not all(valid(v) for v in [*reference, *values]) or
-            any(isinstance(v, tuple) != isinstance(reference[0], tuple) for v in [*reference, *values])):
-        raise ValueError("Калибровочные значения должны быть конечными числами или сопоставимыми числовыми ключами")
-    ordered = sorted(reference)
-    return [(bisect_left(ordered, v) + bisect_right(ordered, v)) / (2 * len(ordered)) for v in values]
 
 
 def _runtime():

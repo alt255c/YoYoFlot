@@ -118,9 +118,7 @@ def main():
         "dependent_conflicts_not_double_counted": settings["evidence_deduplication"]["document_and_ticket_same_conflict_cap"] == 2.0,
         "no_show_unavailable_instead_of_inferred": criteria["B01"]["status"] == "unavailable_on_current_dataset"
             and criteria["B01"]["missing_boarding_record_is_no_show"] is False,
-        "forest_kept_separate": settings["forest"]["enabled"] is True
-            and settings["forest"]["role"] == "experimental_only"
-            and settings["forest"]["adds_ranking_vote"] is False,
+        "rules_only": "forest" not in settings,
     }
     if not all(value for key, value in weight_checks.items() if type(value) is bool):
         raise ValueError("Baseline/strong/weak weight specification is inconsistent")

@@ -1,7 +1,7 @@
 """Independent fixed-template holdout family, not the training generator.
 
-Only fictional rows are returned. Benchmark annotations live in evaluation,
-outside the forest inputs. Censoring is an explicit replayable intervention.
+Historical fixture generator, used only by the explicitly selected legacy demo.
+The source-dataset pipeline never imports or calls this module.
 """
 import random
 from datetime import date, timedelta

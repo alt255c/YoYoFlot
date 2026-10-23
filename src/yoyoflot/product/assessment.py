@@ -17,7 +17,7 @@ import yaml
 
 from ..provenance import fingerprint
 
-VERSION = 'source-assessment:3.0'
+VERSION = 'source-assessment:4.0'
 TABLES = ('source_links', 'segment_source_links', 'profile_identifiers',
           'document_conflicts', 'conflict_members', 'marker_evidence',
           'marker_coverage', 'profile_assessments', 'marker_dependencies',
@@ -41,11 +41,11 @@ def query_rows(db, sql, params=None):
 def verify(root, product_manifest_sha256):
     root = Path(root).resolve()
     manifest = read_json(root / 'assessment_manifest.json')
-    if (manifest.get('version') not in {'source-assessment:1.0','source-assessment:2.0', VERSION} or manifest.get('status') != 'complete_with_limitations'
+    if (manifest.get('version') not in {'source-assessment:1.0','source-assessment:2.0','source-assessment:3.0', VERSION} or manifest.get('status') != 'complete_with_limitations'
             or manifest.get('run_id') != 'assessment-' + digest(manifest.get('request'))[:20]
             or manifest['request']['product_manifest_sha256'] != product_manifest_sha256):
         raise ValueError('Source assessment does not belong to this product')
-    required_tables = TABLES if manifest['version']==VERSION else TABLES[:9] if manifest['version']=='source-assessment:2.0' else TABLES[:8]
+    required_tables = TABLES if manifest['version'] in {VERSION,'source-assessment:3.0'} else TABLES[:9] if manifest['version']=='source-assessment:2.0' else TABLES[:8]
     if set(manifest.get('files', {})) != {n + '.parquet' for n in required_tables} | {'assessment_report.json'}:
         raise ValueError('Incomplete source assessment')
     for name, expected in manifest['files'].items():
@@ -74,8 +74,10 @@ def _inputs(product, canonical, archive, raw_dir, repo):
         if fingerprint(path) != cm['files'][path.name]:
             raise ValueError('Canonical checksum mismatch: ' + path.name)
         files.append(path)
-    for name in ('persons', 'segments', 'rankings', 'explanations'):
+    for name in ('persons', 'segments', 'rankings', 'explanations', 'person_links', 'segment_links'):
         path = product / 'tables' / (name + '.parquet')
+        if not path.is_file() or 'tables/' + path.name not in pm['files']:
+            raise ValueError('Complete source links are required; rebuild from original raw data: ' + name)
         if fingerprint(path) != pm['files']['tables/' + path.name]:
             raise ValueError('Product checksum mismatch: ' + path.name)
         files.append(path)
@@ -138,16 +140,18 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
     with tempfile.TemporaryDirectory(prefix='assessment-', suffix='.partial', dir=output.parent) as tmp:
         stage = Path(tmp) / 'snapshot'
         stage.mkdir()
-        with duckdb.connect() as db:
+        # Persist intermediate relations outside the published snapshot. Large
+        # name-pair tables must be evictable while later joins are executing.
+        with duckdb.connect(str(Path(tmp) / 'work.duckdb')) as db:
             db.execute('SET threads=2')
             db.execute('SET memory_limit=?', [memory_limit])
             db.execute('SET preserve_insertion_order=false')
             db.execute('SET temp_directory=?', [str(Path(tmp) / 'spill')])
             for name in ('observations', 'identifiers', 'travel_observations'):
                 db.read_parquet(str(canonical / (name + '.parquet'))).create_view(name)
-            for name in ('persons', 'segments', 'rankings', 'explanations'):
+            for name in ('persons', 'segments', 'rankings', 'explanations', 'person_links', 'segment_links'):
                 db.read_parquet(str(product / 'tables' / (name + '.parquet'))).create_view(name)
-            progress('Восстановление точных якорных связей')
+            progress('Чтение полных проверенных связей исходных записей')
             db.execute('''CREATE TABLE observation_aliases AS SELECT observation_id,
                 observation_id published_id,'exact_id' alias_method FROM observations''')
             db.execute('''CREATE TABLE travel_aliases AS SELECT travel_id,
@@ -170,12 +174,10 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
                     db.execute(f'''INSERT INTO {alias_table} SELECT {key},sha256(?||locator||?),
                         'verified_source_version' FROM {table} WHERE source_id=?''', [prefix, suffix, source])
             db.execute('''CREATE TABLE link_seeds AS
-                SELECT p.person_id,a.observation_id,'person_anchor:'||a.alias_method alias_method
-                FROM persons p JOIN observation_aliases a ON a.published_id=p.anchor_observation_id
-                UNION ALL
-                SELECT s.person_id,t.observation_id,'segment_anchor:'||a.alias_method alias_method
-                FROM segments s JOIN travel_aliases a ON a.published_id=s.anchor_travel_id
-                JOIN travel_observations t USING(travel_id)''')
+                SELECT p.person_id,a.observation_id,'person_link:'||a.alias_method alias_method
+                FROM person_links p JOIN observation_aliases a ON a.published_id=p.observation_id''')
+            if db.execute('SELECT (SELECT count(*) FROM person_links)-(SELECT count(*) FROM link_seeds)').fetchone()[0]:
+                raise ValueError('Some published person links cannot be resolved against canonical records')
             if db.execute('''SELECT count(*) FROM (SELECT observation_id FROM link_seeds
                 GROUP BY observation_id HAVING count(DISTINCT person_id)>1)''').fetchone()[0]:
                 raise ValueError('Exact anchors disagree about observation ownership')
@@ -185,10 +187,11 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
                 FROM link_seeds l JOIN observations o USING(observation_id) JOIN persons p USING(person_id)
                 GROUP BY ALL''')
             db.execute('''CREATE TABLE segment_source_links AS SELECT s.person_id,s.segment_id,
-                s.anchor_travel_id published_travel_id,t.travel_id,t.observation_id,t.source_id,
+                l.travel_id published_travel_id,t.travel_id,t.observation_id,t.source_id,
                 t.source_record_id,t.locator,a.alias_method link_method
-                FROM segments s JOIN travel_aliases a ON a.published_id=s.anchor_travel_id
-                JOIN travel_observations t USING(travel_id)''')
+                FROM segment_links l JOIN segments s USING(person_id,segment_id)
+                JOIN travel_aliases a ON a.published_id=l.travel_id
+                JOIN travel_observations t ON t.travel_id=a.travel_id''')
             db.execute('''CREATE TABLE profile_identifiers AS SELECT l.person_id,i.source_id,
                 i.source_record_id,i.locator,i.identifier_id,i.observation_id,i.kind,i.programme,i.value,
                 i.identifier_namespace,i.value_normalized,l.link_method
@@ -301,7 +304,8 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
             checks = {}
             checks['person_anchors_unresolved'] = db.execute('''SELECT count(*) FROM persons p ANTI JOIN observation_aliases a
                 ON a.published_id=p.anchor_observation_id''').fetchone()[0]
-            checks['segment_anchors_unresolved'] = db.execute('SELECT (SELECT count(*) FROM segments)-(SELECT count(*) FROM segment_source_links)').fetchone()[0]
+            checks['segment_anchors_unresolved'] = db.execute('SELECT (SELECT count(*) FROM segment_links)-(SELECT count(*) FROM segment_source_links)').fetchone()[0]
+            checks['incomplete_profile_links'] = db.execute('SELECT count(*) FROM profile_assessments WHERE NOT source_links_complete').fetchone()[0]
             checks['associations_exceed_frozen_observation_count'] = db.execute('''SELECT count(*) FROM profile_assessments
                 WHERE linked_observations>expected_observations''').fetchone()[0]
             checks['duplicate_profile_assessments'] = db.execute('SELECT count(*)-count(DISTINCT person_id) FROM profile_assessments').fetchone()[0]
@@ -349,13 +353,13 @@ def build(product, canonical, archive, raw_dir, output, memory_limit='1GB', prog
                       'pending_source_markers': [],
                       'field_audit':field_audit,
                       'limitations': [
-                          'Exact anchors recover source associations, not all T13 component members; completeness is measured per profile.',
+                          'All published person_links and segment_links are resolved and completeness is checked per profile.',
                           'Ambiguous identity remains ambiguous. Source checks apply to linked records, not a proven unique physical person.',
                           'Not matched means no match in the observed linked records; completeness of external passenger lists is unknown.',
                           'PNR is scoped to source, local departure, flight and resolved route; unrelated code reuse does not create a shared booking.',
                           'New source markers are evaluated separately and do not change baseline ranks, weights or scores in this step.',
                           'No passenger no-show status exists; B01 is unavailable.',
-                          'The canonical PDF report is incomplete; this supplement does not consume or repair historical timetable data.',
+                          'Timetable records do not prove passenger movement and are not used as passenger confirmations.',
                       ]}
         if any(fingerprint(Path(path)) != expected for path, expected in request['inputs'].items()):
             raise ValueError('Inputs changed during source assessment build')

@@ -126,7 +126,7 @@ def _unchanged(files):
 def _environment():
     versions = {}
     for name in ("duckdb", "pyarrow", "ijson", "lxml", "openpyxl", "pymupdf",
-                 "pyyaml", "scikit-learn", "tzdata"):
+                 "pyyaml", "tzdata"):
         try:
             versions[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:

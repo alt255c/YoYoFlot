@@ -6,7 +6,6 @@ source-data rewrite, inferred boarding, or guessed coordinates is used.
 from __future__ import annotations
 
 import hashlib
-from bisect import bisect_left, bisect_right
 import json
 import os
 import platform
@@ -16,12 +15,7 @@ import time
 from pathlib import Path
 
 import duckdb
-import numpy as np
 import pyarrow as pa
-import pyarrow.parquet as pq
-import sklearn
-from sklearn.ensemble import IsolationForest
-import joblib
 
 from ..normalize.airports import AirportReference
 from ..normalize.locking import OutputLock
@@ -29,7 +23,7 @@ from ..provenance import fingerprint
 from .config import TITLES, load
 from .input import verify
 
-VERSION = '1.1'
+VERSION = '2.0'
 FEATURES = ['trip_rate_30_days', 'quick_return_share', 'repeated_route_share']
 
 
@@ -166,7 +160,7 @@ def _features(db, cfg, window):
     db.execute('ALTER TABLE explanations ADD COLUMN threshold_method VARCHAR')
     db.execute('UPDATE explanations SET threshold_method=?',[cfg['calibration']['mode']])
     if cfg['calibration']['mode']=='empirical_quantile':
-        # The same deterministic calibration split as IF; no generated reference
+        # Deterministic calibration on supplied profiles; no generated reference
         # population and no test labels. Reference values are persisted per rule.
         db.execute('''CREATE TABLE rule_reference AS SELECT criterion_id,count(*) reference_size,
             quantile_cont(value,?) reference_value FROM explanations
@@ -224,60 +218,7 @@ def _graph(db):
             'limitation': 'Repeated observed co-occurrence; not calibrated significance. M07 does not add a ranking vote.'}
 
 
-def _forest(db, cfg, folder):
-    if not cfg['enabled']:
-        return {'status': 'disabled'}
-    cols = ','.join(FEATURES)
-    qualified_cols = ','.join('f.'+c for c in FEATURES)
-    db.execute(f'''CREATE TABLE forest_input AS SELECT person_id,{cols},
-        cast('0x'||substr(sha256(person_id),1,8) AS UBIGINT)%10 split
-        FROM rankings WHERE available_criteria_count=3''')
-    # Fixed SHA split is stable across Python/DuckDB versions and input order.
-    training = db.execute(f'SELECT person_id,{cols} FROM forest_input WHERE split<6 ORDER BY sha256(person_id),person_id LIMIT ?', [cfg['max_training_rows']]).fetchnumpy()
-    training_ids = set(training['person_id'])
-    matrix = np.column_stack([training[c] for c in FEATURES]).astype(np.float32)
-    calibration = db.execute(f'SELECT {cols} FROM forest_input WHERE split IN (6,7) ORDER BY person_id').fetchnumpy()
-    cal = np.column_stack([calibration[c] for c in FEATURES]).astype(np.float32)
-    if len(matrix)<32 or len(cal)<24 or len(np.unique(matrix, axis=0))<4:
-        return {'status': 'unavailable', 'reason': 'Need >=32 training rows, >=24 calibration rows and >=4 distinct vectors',
-                'training_rows': len(matrix), 'calibration_rows': len(cal)}
-    model = IsolationForest(n_estimators=cfg['n_estimators'], max_samples=min(cfg['max_samples'], len(matrix)),
-                            random_state=cfg['random_state'], n_jobs=2, contamination='auto')
-    model.fit(matrix)
-    reference = np.sort(-model.score_samples(cal))
-    joblib.dump(model, folder / 'isolation_forest.joblib')
-    # Validate persisted model on calibration, with no pickle supplied by users.
-    restored = joblib.load(folder / 'isolation_forest.joblib')
-    if not np.array_equal(model.score_samples(cal), restored.score_samples(cal)):
-        raise RuntimeError('Persisted forest predictions differ')
-    rules_reference = db.execute('''SELECT r.matched_criteria_count,r.rule_score FROM rankings r
-        JOIN forest_input f USING(person_id) WHERE f.split IN (6,7) ORDER BY r.matched_criteria_count,r.rule_score''').fetchall()
-    schema = pa.schema([('person_id',pa.string()), ('if_score',pa.float64()), ('if_percentile',pa.float64()),
-                        ('rules_percentile',pa.float64()), ('combined_score',pa.float64()), ('role',pa.string())])
-    path = folder / 'if_scores.parquet'
-    cursor = db.execute(f'SELECT f.person_id,{qualified_cols},f.split,r.matched_criteria_count,r.rule_score FROM forest_input f JOIN rankings r USING(person_id) ORDER BY f.person_id')
-    with pq.ParquetWriter(path, schema, compression='zstd') as writer:
-        reader = cursor.to_arrow_reader(65536)
-        for batch in reader:
-            x = np.column_stack([batch.column(batch.schema.get_field_index(c)).to_numpy() for c in FEATURES]).astype(np.float32)
-            scores = -model.score_samples(x)
-            percentiles = (np.searchsorted(reference,scores,side='left')+np.searchsorted(reference,scores,side='right'))/(2*len(reference))
-            ids = batch.column(0).to_pylist()
-            roles = ['train' if pid in training_ids else 'training_pool_not_fit' if split<6 else 'calibration' if split<8 else 'holdout'
-                     for pid,split in zip(ids,batch.column(batch.schema.get_field_index('split')).to_pylist())]
-            keys = zip(batch.column(batch.schema.get_field_index('matched_criteria_count')).to_pylist(),
-                       batch.column(batch.schema.get_field_index('rule_score')).to_pylist())
-            rule_pct = np.array([(bisect_left(rules_reference,k)+bisect_right(rules_reference,k))/(2*len(rules_reference)) for k in keys])
-            writer.write_table(pa.Table.from_pydict({'person_id':batch.column(0), 'if_score':scores, 'if_percentile':percentiles, 'rules_percentile':rule_pct, 'combined_score':.5*percentiles+.5*rule_pct, 'role':roles}, schema=schema))
-    db.read_parquet(str(path)).create_view('if_scores')
-    return {'status':'complete', 'training_rows':len(matrix), 'calibration_rows':len(cal), 'features':FEATURES,
-            'split':'sha256(person_id) first 32 bits mod 10: 0–5 train, 6–7 calibration, 8–9 holdout',
-            'combination':'0.5 * IF calibration percentile + 0.5 * rules calibration percentile; separate experimental score',
-            'scope':'Retrospective unsupervised anomaly detection; scoring all supplied profiles, not future prediction',
-            'versions':{'numpy':np.__version__, 'sklearn':sklearn.__version__}, 'config':cfg}
-
-
-def _evaluation(db, cfg, forest):
+def _evaluation(db, cfg):
     base = {r['person_id'] for r in _rows(db, 'SELECT person_id FROM top50')}
     population_size = db.execute("SELECT count(*) FROM rankings WHERE eligibility_status IN ('eligible','no_matches')").fetchone()[0]
     experiments = []
@@ -294,19 +235,8 @@ def _evaluation(db, cfg, forest):
             ids = {r['person_id'] for r in rows}
             experiments.append({'threshold_scale':scale,'omitted_criterion':omit, 'top_count':len(ids),
                                 'jaccard_to_primary':len(ids&base)/len(ids|base) if ids|base else None})
-    agreement = None
-    comparison_population_size = None
-    if forest['status']=='complete':
-        comparison_population_size = db.execute('SELECT count(*) FROM if_scores').fetchone()[0]
-        ids = {r['person_id'] for r in _rows(db, 'SELECT person_id FROM if_scores ORDER BY if_score DESC,person_id LIMIT 50')}
-        common_rules = {r['person_id'] for r in _rows(db, '''SELECT r.person_id FROM rankings r
-            JOIN if_scores f USING(person_id)
-            ORDER BY r.matched_criteria_count DESC,r.rule_score DESC,r.person_id LIMIT 50''')}
-        agreement = len(ids&common_rules)/len(ids|common_rules) if ids|common_rules else None
-    return {'status':'computed_without_labels', 'experiments':experiments, 'rules_if_top50_jaccard':agreement,
+    return {'status':'computed_without_labels', 'experiments':experiments,
             'population_fixed':True, 'population_size':population_size,
-            'rules_if_population_size':comparison_population_size,
-            'rules_if_comparison':'Both methods ranked on the same complete-case IF population; not a comparison against the broader primary top50.',
             'quality_metrics':None,'reason':'No supplied ground-truth labels; precision/recall and reviewer decisions are not fabricated.',
             'independent_review':'pending'}
 
@@ -322,7 +252,7 @@ def run(input_dir, output, config='configs/product.yaml', reference='data/refere
     code_hash = _digest({str(p.relative_to(Path(__file__).parents[1])):fingerprint(p)
                          for p in sorted(Path(__file__).parents[1].rglob('*.py'))})
     request = {'version':VERSION,'inputs':hashes,'origin':origin, 'code':code_hash,
-               'runtime':{'python':platform.python_version(),'duckdb':duckdb.__version__, 'pyarrow':pa.__version__, 'sklearn':sklearn.__version__, 'numpy':np.__version__}}
+               'runtime':{'python':platform.python_version(),'duckdb':duckdb.__version__, 'pyarrow':pa.__version__, 'scoring':'rules-only'}}
     run_id = 'product-' + _digest(request)[:20]
     target = Path(output).resolve()
     if target==root or root in target.parents or target in root.parents:
@@ -358,9 +288,7 @@ def run(input_dir, output, config='configs/product.yaml', reference='data/refere
                 _features(db,cfg,window)
                 log('Граф наблюдаемых совместных событий')
                 graph = _graph(db)
-                log('Isolation Forest на признаках исходных профилей')
-                forest = _forest(db,cfg['forest'],stage)
-                evaluation = _evaluation(db,cfg,forest)
+                evaluation = _evaluation(db,cfg)
                 write_json(stage/'rules.json',_rows(db,'''SELECT criterion_id,min(threshold) threshold,min(weight) weight,
                     min(reference_size) reference_size,min(reference_value) reference_value,min(threshold_method) threshold_method
                     FROM explanations GROUP BY criterion_id ORDER BY criterion_id'''))
@@ -371,6 +299,9 @@ def run(input_dir, output, config='configs/product.yaml', reference='data/refere
                            'features':'person_id', 'segments':'person_id,segment_id', 'persons':'person_id'}
                 if graph['status'] in {'complete','complete_with_limitations'}:
                     exports.update({'graph_edges':'person_a,person_b','event_members':'person_id,event_id'})
+                if 'person_links.parquet' in paths:
+                    db.read_parquet(str(paths['person_links.parquet'])).create_view('person_links')
+                    exports['person_links']='person_id,observation_id'
                 if 'segment_links.parquet' in paths:
                     db.read_parquet(str(paths['segment_links.parquet'])).create_view('segment_links')
                     exports['segment_links']='person_id,segment_id,travel_id'
@@ -398,7 +329,6 @@ def run(input_dir, output, config='configs/product.yaml', reference='data/refere
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(paths[name], destination)
             write_json(stage/'evaluation.json',evaluation)
-            write_json(stage/'forest.json',forest)
             write_json(stage/'graph.json',graph)
             if any(fingerprint(paths[n])!=h for n,h in hashes.items() if n in paths):
                 raise RuntimeError('T13 input changed while building product')
@@ -412,7 +342,7 @@ def run(input_dir, output, config='configs/product.yaml', reference='data/refere
                       'source_provenance':_source_provenance(paths, origin),
                       'limitations':limitations,'sort_order':['matched_criteria_count DESC','rule_score DESC','person_id ASC'],
                       'contribution_formula':'weight * min(3, value / threshold) for each matched independent group',
-                      'graph_status':graph['status'],'forest_status':forest['status'], 'independent_review':'pending',
+                      'graph_status':graph['status'], 'independent_review':'pending',
                       'elapsed_seconds':round(time.monotonic()-started,3)}
             write_json(stage/'run_manifest.json',manifest)
             os.rename(stage,target)

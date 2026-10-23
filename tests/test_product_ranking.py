@@ -45,31 +45,9 @@ def test_ablation_cannot_admit_profiles_outside_original_population():
             ('excluded', 'M02', 'unavailable', None, 1, 1),
             ('excluded', 'M03', 'matched', 3, 1, 1),
         ])
-        result = _evaluation(db, {}, {'status': 'disabled'})
+        result = _evaluation(db, {})
         assert result['population_fixed'] is True
         assert result['population_size'] == 1
         for experiment in result['experiments']:
             assert experiment['top_count'] == 1
             assert experiment['jaccard_to_primary'] == 1
-
-
-def test_if_agreement_compares_the_same_complete_case_population():
-    with duckdb.connect() as db:
-        db.execute('''CREATE TABLE rankings (
-            person_id VARCHAR, eligibility_status VARCHAR,
-            matched_criteria_count INTEGER, rule_score DOUBLE)''')
-        db.executemany('INSERT INTO rankings VALUES (?,?,?,?)', [
-            (f'complete_{i:02}', 'eligible', 2, 60 - i) for i in range(60)
-        ] + [('partial', 'eligible', 2, 999)])
-        db.execute('''CREATE TABLE top50 AS SELECT * FROM rankings
-            ORDER BY matched_criteria_count DESC,rule_score DESC,person_id LIMIT 50''')
-        db.execute('''CREATE TABLE if_scores AS SELECT person_id, rule_score if_score
-            FROM rankings WHERE person_id<>'partial' ''')
-        db.execute('''CREATE TABLE explanations AS SELECT r.person_id, c.criterion_id,
-            CASE WHEN r.person_id='partial' AND c.criterion_id='M02'
-                 THEN 'unavailable' ELSE 'matched' END status,
-            2.0 AS value, 1.0 AS threshold, 1.0 AS weight
-            FROM rankings r CROSS JOIN (VALUES ('M01'),('M02'),('M03')) c(criterion_id)''')
-        result = _evaluation(db, {}, {'status': 'complete'})
-        assert result['rules_if_top50_jaccard'] == 1
-        assert result['rules_if_population_size'] == 60

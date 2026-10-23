@@ -1,4 +1,4 @@
-version: product-1.1
+version: product-2.0
 calibration:
   mode: empirical_quantile
   quantile: 0.95
@@ -12,9 +12,3 @@ criteria:
 coverage:
   min_known_fraction: 0.8
   min_window_days: 60
-forest:
-  enabled: true
-  n_estimators: 200
-  max_samples: 256
-  max_training_rows: 100000
-  random_state: 1901

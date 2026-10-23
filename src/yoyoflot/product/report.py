@@ -18,7 +18,7 @@ from ..provenance import fingerprint
 from .store import ProductStore
 
 
-VERSION = "product-report-1.0"
+VERSION = "product-report-2.0"
 PAYLOAD_FILES = {
     "top50.csv", "factors.csv", "flights.csv", "profiles.json", "summary.json", "report.md",
 }
@@ -26,7 +26,7 @@ TOP_FIELDS = [
     "run_id", "rank", "person_id", "display_name", "identity_status", "eligibility_status",
     "matched_criteria_count", "available_criteria_count", "total_criteria_count", "rule_score",
     "total_segments", "dated_segments", "route_segments", "plottable_segments", "unplottable_segments",
-    "matched_factors", "unavailable_factors", "source_evidence_count", "if_score", "if_percentile", "combined_score",
+    "matched_factors", "unavailable_factors", "source_evidence_count",
 ]
 FACTOR_FIELDS = [
     "run_id", "rank", "person_id", "display_name", "criterion_id", "title_ru", "status", "value",
@@ -91,25 +91,23 @@ def _export_rows(profiles, run_id):
         for link in profile["source_evidence"]:
             links[link["segment_id"]].append(link)
         criteria = defaultdict(list)
-        for factor in profile["factors"]:
+        all_factors = profile["factors"] + profile.get("additional_factors", [])
+        for factor in all_factors:
             for segment_id in factor["evidence_segment_ids"]:
                 criteria[segment_id].append(factor["criterion_id"])
-            source_links = [link for segment_id in factor["evidence_segment_ids"] for link in links[segment_id]]
+            source_links = factor.get('source_evidence') or [link for segment_id in factor["evidence_segment_ids"] for link in links[segment_id]]
             row = {key: factor.get(key) for key in FACTOR_FIELDS if key not in common}
             row.update(common, evidence_segment_count=len(factor["evidence_segment_ids"]),
                        evidence_segment_ids_json=_json(factor["evidence_segment_ids"]),
                        source_evidence_count=len(source_links), source_evidence_json=_json(source_links))
             factors.append(row)
-        forest = profile["forest"] or {}
         row = {key: person.get(key) for key in TOP_FIELDS if key not in common}
-        row.update(common, total_criteria_count=len(profile["factors"]),
+        row.update(common, total_criteria_count=len(all_factors),
                    plottable_segments=profile["route_balance"]["plottable"],
                    unplottable_segments=profile["route_balance"]["unplottable"],
-                   matched_factors="; ".join(f["criterion_id"] + " " + f["title_ru"] for f in profile["factors"] if f["status"] == "matched"),
-                   unavailable_factors="; ".join(f["criterion_id"] + ": " + (f["availability_reason"] or "") for f in profile["factors"] if f["status"] == "unavailable"),
-                   source_evidence_count=len(profile["source_evidence"]),
-                   if_score=forest.get("if_score"), if_percentile=forest.get("if_percentile"),
-                   combined_score=forest.get("combined_score"))
+                   matched_factors="; ".join(f["criterion_id"] + " " + f["title_ru"] for f in all_factors if f["status"] == "matched"),
+                   unavailable_factors="; ".join(f["criterion_id"] + ": " + (f["availability_reason"] or "") for f in all_factors if f["status"] == "unavailable"),
+                   source_evidence_count=len(profile["source_evidence"]))
         top.append(row)
         for segment in profile["segments"]:
             row = {key: segment.get(key) for key in SEGMENT_FIELDS}
@@ -158,7 +156,7 @@ def _summary(store, metadata, profiles, top, factors, flights, request, report_i
                       "segments_without_source_links": len(flights) - source_linked},
         },
         "methodology": {"sort_order": metadata["sort_order"], "contribution_formula": metadata["contribution_formula"],
-                        "rules": metadata["rules"], "forest": metadata["forest"], "graph": metadata["graph"],
+                        "rules": metadata["rules"], "graph": metadata["graph"],
                         "ranking_source": "Frozen tables/top50.parquet via ProductStore; scores are not recalculated"},
         "evaluation": metadata["evaluation"], "limitations": metadata["limitations"],
         "independent_review": metadata["independent_review"],
@@ -218,7 +216,7 @@ def _human_report(summary):
         "Без подтверждённых меток нельзя заявлять precision/recall или доказанную точность выявления. "
         "Пороги и веса требуют предметной проверки; независимая разметка не подменяется расчётом.",
         f"Статус независимой проверки: {_md(summary['independent_review'])}. "
-        f"Isolation Forest: {_md(summary['methodology']['forest']['status'])}; "
+        "Скоринг по проверенным факторам; "
         f"граф: {_md(summary['methodology']['graph']['status'])}.",
         "Полные ограничения происхождения, доступность факторов по всей популяции и результаты "
         "анализа чувствительности сохранены в summary.json.", "",

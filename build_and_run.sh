@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reproducible backend build on the original teacher dataset; no UI is started.
+# Complete build and export on the original teacher dataset. Start the site with start_web.sh.
 set -euo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,9 +8,12 @@ DATA_DIR="$ROOT/data/raw"
 OUTPUT="$ROOT/artifacts/source-product"
 WORK_DIR="$ROOT/data/work/source-product"
 REPORT_OUTPUT=""
+SCORING="$ROOT/configs/scoring.yaml"
+BUILD_ONLY=false
 ARCHIVE=""
 CORE_SNAPSHOT=""
 MEMORY_LIMIT="1GB"
+ASSESSMENT_MEMORY_LIMIT=""
 PYTHON_BIN="${YOYOFLOT_PYTHON:-}"
 
 usage() {
@@ -21,13 +24,16 @@ Create/reuse .venv, install requirements, verify/download the original dataset,
 run all seven sources through the complete backend, verify and export results.
 Python 3.12 is preferred; Python 3.10+ is supported by the dependency markers.
 
+  --build-only          Build and export without starting the website
   --archive PATH        Use an original local Airlines-All.zip (offline data)
   --core-snapshot PATH  Reuse a verified raw T16 core matching all current inputs
   --data-dir PATH       Raw source directory (default: <repo>/data/raw)
   --output PATH         Product snapshot (default: <repo>/artifacts/source-product)
   --work-dir PATH       Resumable ETL work (default: <repo>/data/work/source-product)
   --report-output PATH  CSV/JSON/Markdown reports (default: <output>-report)
+  --scoring PATH        Scoring weights (default: configs/scoring.yaml)
   --memory-limit SIZE   DuckDB limit, not total process RAM (default: 1GB)
+  --assessment-memory-limit SIZE  Override only source-factor calculation memory
   --python COMMAND     Interpreter for a new .venv (or YOYOFLOT_PYTHON)
   -h, --help            Show this help
 
@@ -49,7 +55,8 @@ absolute_path() {
 while (($#)); do
     case "$1" in
         -h|--help) usage; exit 0 ;;
-        --archive|--core-snapshot|--data-dir|--output|--work-dir|--report-output|--memory-limit|--python)
+        --build-only) BUILD_ONLY=true; shift ;;
+        --archive|--core-snapshot|--data-dir|--output|--work-dir|--report-output|--scoring|--memory-limit|--assessment-memory-limit|--python)
             (($# >= 2)) && [[ -n "$2" && "$2" != --* ]] || fail "Missing value for $1"
             case "$1" in
                 --archive) ARCHIVE="$(absolute_path "$2")" ;;
@@ -58,7 +65,9 @@ while (($#)); do
                 --output) OUTPUT="$(absolute_path "$2")" ;;
                 --work-dir) WORK_DIR="$(absolute_path "$2")" ;;
                 --report-output) REPORT_OUTPUT="$(absolute_path "$2")" ;;
+                --scoring) SCORING="$(absolute_path "$2")" ;;
                 --memory-limit) MEMORY_LIMIT="$2" ;;
+                --assessment-memory-limit) ASSESSMENT_MEMORY_LIMIT="$2" ;;
                 --python) PYTHON_BIN="$2" ;;
             esac
             shift 2 ;;
@@ -94,29 +103,22 @@ printf '\nInstalling pinned dependencies and the backend...\n'
 "$PYTHON" -m pip install --disable-pip-version-check --no-deps -e "$ROOT"
 "$PYTHON" -m pip check
 
-download_args=(--data-dir "$DATA_DIR")
-[[ -z "$ARCHIVE" ]] || download_args+=(--archive "$ARCHIVE")
-"$PYTHON" "$ROOT/scripts/download_dataset.py" "${download_args[@]}"
+# Exercise the same DuckDB API used by resolution before any lengthy ETL.
+"$PYTHON" - <<'PY'
+import duckdb
+with duckdb.connect() as db:
+    db.create_function('_dependency_check', lambda value: value,
+                       ['VARCHAR'], 'VARCHAR', null_handling='special')
+    assert db.execute("SELECT _dependency_check('ready'), _dependency_check(NULL)").fetchone() == ('ready', None)
+PY
 
-core_args=()
-if [[ -n "$CORE_SNAPSHOT" ]]; then
-    core_args+=(--core-snapshot "$CORE_SNAPSHOT")
-    printf '\nVerifying the raw core against all seven original sources, then building the product...\n'
-else
-    printf '\nRunning the complete backend on all seven original sources...\n'
+args=(--data-dir "$DATA_DIR" --work-dir "$WORK_DIR" --output "$OUTPUT"
+      --report-output "$REPORT_OUTPUT" --scoring "$SCORING" --memory-limit "$MEMORY_LIMIT")
+[[ -z "$ARCHIVE" ]] || args+=(--archive "$ARCHIVE")
+[[ -z "$CORE_SNAPSHOT" ]] || args+=(--core-snapshot "$CORE_SNAPSHOT")
+[[ -z "$ASSESSMENT_MEMORY_LIMIT" ]] || args+=(--assessment-memory-limit "$ASSESSMENT_MEMORY_LIMIT")
+"$PYTHON" "$ROOT/scripts/build_project.py" "${args[@]}"
+printf '\nBuild complete. Start the site with: bash %s/start_web.sh\n' "$ROOT"
+if [[ "$BUILD_ONLY" == false ]]; then
+    exec bash "$ROOT/start_web.sh" --product "$OUTPUT" --scoring "$SCORING"
 fi
-"$PYTHON" -m yoyoflot run \
-    --data-dir "$DATA_DIR" \
-    --work-dir "$WORK_DIR" \
-    --artifacts-dir "$ROOT/artifacts" \
-    --output "$OUTPUT" \
-    --memory-limit "$MEMORY_LIMIT" \
-    "${core_args[@]}" \
-    --require-all --until product
-
-printf '\nVerifying scores, factors and routes, then exporting reports...\n'
-"$PYTHON" "$ROOT/scripts/verify_source_product.py" \
-    --product "$OUTPUT" --report "${OUTPUT%/}-verification.json"
-"$PYTHON" -m yoyoflot report --product "$OUTPUT" --output "$REPORT_OUTPUT"
-printf '\nComplete. Product: %s\nReports: %s\nVerification: %s\n' \
-    "$OUTPUT" "$REPORT_OUTPUT" "${OUTPUT%/}-verification.json"

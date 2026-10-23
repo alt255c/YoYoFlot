@@ -28,13 +28,13 @@ class ProductStore:
         m = self.manifest
         self.data_mode = m.get('data_mode')
         valid_mode = self.data_mode == 'source_dataset' or (allow_demo and self.data_mode == 'demo')
-        if (m.get('schema_version') != VERSION or m.get('status') != 'complete' or not valid_mode
+        if (m.get('schema_version') not in {VERSION, '1.1'} or m.get('status') != 'complete' or not valid_mode
                 or m.get('run_id') != 'product-'+_digest(m.get('request'))[:20]):
             raise ValueError('Not a completed supported product')
         files=m.get('files',{})
         required={'tables/top50.parquet','tables/rankings.parquet','tables/explanations.parquet',
                   'tables/segments.parquet','tables/persons.parquet','tables/features.parquet',
-                  'airports.csv','reference_manifest.json','product.yaml','evaluation.json','forest.json','graph.json','rules.json','review.csv'}
+                  'airports.csv','reference_manifest.json','product.yaml','evaluation.json','graph.json','rules.json','review.csv'}
         if not isinstance(files,dict) or not required<=files.keys():
             raise ValueError('Incomplete product snapshot')
         for name,checksum in files.items():
@@ -61,10 +61,14 @@ class ProductStore:
                     if row[field] is not None and (not math.isfinite(row[field]) or abs(row[field])>(90 if field=='latitude' else 180)):
                         raise ValueError('Invalid airport coordinate')
                 self.airports[row['airport_id']]=row
-        if scoring is not None:
-            with self.connection() as db:
-                self.runtime_scores = RuntimeScores(db, scoring, fingerprint(self.path / 'run_manifest.json'),
-                    fingerprint(self.assessment_root / 'assessment_manifest.json') if self.assessment_root else None)
+        if 'scoring.json' in self.manifest['files']:
+            from .scoring import PublishedScores, load
+            self.scoring = load(self.path / 'scoring.yaml')
+            if scoring is not None and scoring.sha256 != self.scoring.sha256:
+                raise ValueError('Scoring weights changed. Run build_and_run.sh to publish a matching product.')
+            self.runtime_scores = PublishedScores(self.path, self.scoring)
+        elif scoring is not None:
+            raise ValueError('This is an intermediate product. Run build_and_run.sh to prepare the final site and exports.')
 
     def close(self):
         if self.runtime_scores is not None:
@@ -72,9 +76,11 @@ class ProductStore:
 
     def _find_assessment_root(self):
         configured = os.environ.get('YOYO_ASSESSMENT_ROOT')
-        product_hash = fingerprint(self.path / 'run_manifest.json')
+        product_hash = self.manifest.get('base_product_manifest_sha256') or fingerprint(self.path / 'run_manifest.json')
+        if 'assessment/assessment_manifest.json' in self.manifest['files']:
+            configured = str(self.path / 'assessment')
         candidates = [Path(configured).expanduser().resolve()] if configured else [
-            self.path.parent / 'source-assessment-v3',self.path.parent / 'source-assessment-v2',self.path.parent / 'source-assessment']
+            self.path.parent / 'source-assessment-v4',self.path.parent / 'source-assessment-v3',self.path.parent / 'source-assessment-v2',self.path.parent / 'source-assessment']
         for root in candidates:
             if not (root / 'assessment_manifest.json').is_file():
                 if configured:
@@ -97,7 +103,7 @@ class ProductStore:
         travels = db.execute('SELECT count(*) FROM assessment_segment_source_links WHERE person_id=?', [person_id]).fetchone()[0]
         return {'available': True, 'complete': info['source_links_complete'],
                 'expected_observations': info['expected_observations'], 'fallback_used': False,
-                'link_policy': 'exact_anchors_and_verified_source_version_aliases',
+                'link_policy': 'complete_published_links_and_verified_source_versions',
                 'observations_count': info['linked_observations'], 'travels_count': travels,
                 'identifiers': identifiers, 'documents': [r for r in identifiers if r['kind']=='document']}
 
@@ -106,6 +112,8 @@ class ProductStore:
         if self.assessment_manifest is None:
             return None
         configured=os.environ.get('YOYO_PROFILE_OBSERVATIONS')
+        if 'source_observations.parquet' in self.manifest['files']:
+            configured=str(self.path/'source_observations.parquet')
         inputs=self.assessment_manifest.get('request',{}).get('inputs',{})
         observations=[(path,checksum) for path,checksum in inputs.items()
                       if Path(path.replace('\\','/')).name=='observations.parquet']
@@ -179,8 +187,6 @@ class ProductStore:
             for p in (self.path/'tables').glob('*.parquet'):
                 if p.name in self.manifest['files'] or 'tables/'+p.name in self.manifest['files']:
                     db.read_parquet(str(p)).create_view(p.stem)
-            if 'if_scores.parquet' in self.manifest['files']:
-                db.read_parquet(str(self.path/'if_scores.parquet')).create_view('if_scores')
             if self.assessment_root is not None:
                 for name in ASSESSMENT_TABLES:
                     if name+'.parquet' in self.assessment_manifest['files']:
@@ -191,7 +197,7 @@ class ProductStore:
 
     def metadata(self):
         metadata = dict(self.manifest, data_mode=self.data_mode, evaluation=_json_file(self.path/'evaluation.json'),
-                    forest=_json_file(self.path/'forest.json'),graph=_json_file(self.path/'graph.json'),rules=_json_file(self.path/'rules.json'),
+                    graph=_json_file(self.path/'graph.json'),rules=_json_file(self.path/'rules.json'),
                     assessment=self.assessment_statistics(),
                     source_assessment=(dict(run_id=self.assessment_manifest['run_id'],
                         version=self.assessment_manifest['version'],path=str(self.assessment_root),
@@ -206,8 +212,7 @@ class ProductStore:
             metadata['snapshot'] = {key: self.manifest.get(key) for key in ('run_id','sort_order','counts','eligibility')}
             metadata['counts'] = dict(self.manifest['counts'], top50=min(statistics['with_signals'],50))
             metadata['rules'] = [dict(row, weight=self.scoring.weights[row['criterion_id']]) for row in metadata['rules']]
-            metadata['evaluation_scope'] = 'Frozen snapshot evaluation; runtime weights/ranking are not re-evaluated quality metrics.'
-            metadata['forest'] = dict(metadata['forest'], score_scope='frozen_snapshot_not_runtime_reweighted_ranking')
+            metadata['evaluation_scope'] = 'Published scoring snapshot; no supervised accuracy claims.'
         return metadata
 
     def _ranking_relation(self):
@@ -415,6 +420,10 @@ class ProductStore:
                     factor['evidence_segment_ids']=[r['segment_id'] for r in _rows(db, '''SELECT DISTINCT segment_id
                         FROM assessment_marker_evidence WHERE person_id=? AND criterion_id=? AND segment_id IS NOT NULL AND is_matched
                         ORDER BY segment_id''',[person_id,factor['criterion_id']])] if self.assessment_root else []
+                    factor['source_evidence']=_rows(db, '''SELECT * FROM assessment_marker_evidence
+                        WHERE person_id=? AND criterion_id=? AND is_matched
+                        ORDER BY source_id,locator,observation_id,evidence_group_id''',
+                        [person_id,factor['criterion_id']]) if self.assessment_root else []
                     self._annotate_marker(db,person,factor,diagnostics)
             if self.runtime_scores is not None:
                 for cid in self.runtime_scores.pending:
@@ -473,14 +482,10 @@ class ProductStore:
                 companions=_rows(db,'''SELECT CASE WHEN person_a=? THEN person_b ELSE person_a END person_id,
                     shared_events,shared_days,inverse_occupancy_support,event_ids
                     FROM graph_edges WHERE person_a=? OR person_b=? ORDER BY shared_days DESC,person_id''',[person_id]*3)
-            forest=None
-            if 'if_scores.parquet' in self.manifest['files']:
-                scores=_rows(db,'SELECT * FROM if_scores WHERE person_id=?',[person_id])
-                forest=scores[0] if scores else None
         return {'run_id':self.manifest['run_id'],
                 'scoring_run_id':self.runtime_scores.run_id if self.runtime_scores else None,
                 'person':person,'factors':factors,'segments':segments,
                 'additional_factors':additional_factors,
                 'route_balance':{'total':len(segments),'plottable':sum(s['is_plottable'] for s in segments),
                                  'unplottable':sum(not s['is_plottable'] for s in segments)},
-                'source_evidence':evidence,'companions':companions,'forest':forest}
+                'source_evidence':evidence,'companions':companions}

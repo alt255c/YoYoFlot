@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import urlopen
-from http.server import ThreadingHTTPServer
+from wsgiref.simple_server import make_server
 
 import duckdb
 import pyarrow as pa
@@ -137,7 +137,6 @@ def config(tmp_path):
     data['criteria']['M01']['threshold']=6.0
     data['criteria']['M02']['threshold']=.2
     data['coverage']['min_window_days']=1
-    data['forest']['enabled']=False
     data['criteria']['M03']['threshold']=.5
     p=tmp_path/'config.yaml'
     p.write_text(yaml.safe_dump(data))
@@ -174,7 +173,6 @@ def test_source_build_evidence_weight_and_repeatability(product):
     assert all(set(f['evidence_segment_ids'])<=all_ids for f in p['factors'])
     assert all(len(f['evidence_segment_ids'])==8 for f in p['factors'])
     assert run(source,output,cfg,ROOT/'data/reference/airports.csv')['run_id']==report['run_id']
-    assert report['forest_status']=='disabled'
     assert json.loads((output/'evaluation.json').read_text())['quality_metrics'] is None
     with pytest.raises(KeyError):store.profile('unknown')
 
@@ -258,7 +256,7 @@ def test_top50_boundaries_and_determinism(tmp_path):
 
 def test_actual_http_api_static_and_isolated_profile(product):
     store=ProductStore(product[0])
-    with ThreadingHTTPServer(('127.0.0.1',0),handler(StoreManager(store))) as server:
+    with make_server('127.0.0.1',0,handler(StoreManager(store))) as server:
         thread=threading.Thread(target=server.serve_forever,daemon=True)
         thread.start()
         try:
@@ -300,30 +298,6 @@ def test_empirical_calibration_uses_source_profiles_and_records_reference(tmp_pa
     assert next(r for r in rules if r['criterion_id']=='M01')['threshold']==30.0
     assert next(r for r in rules if r['criterion_id']=='M02')['threshold']==1.0
     assert next(r for r in rules if r['criterion_id']=='M03')['threshold']==.75
-
-
-def test_isolation_forest_roles_percentiles_combination_and_determinism(tmp_path):
-    from yoyoflot.product.build import _forest
-    # Authored numeric controls exercise the model; no test row enters the app.
-    rows=[dict(person_id=f'p{i}',trip_rate_30_days=(i%17)/5,quick_return_share=(i%7)/7,
-               repeated_route_share=(i%11)/11,matched_criteria_count=i%4,rule_score=float(i%23),
-               available_criteria_count=3) for i in range(240)]
-    cfg=load(ROOT/'configs/product.yaml')['forest']
-    predictions=[]
-    for index in range(2):
-        folder=tmp_path/str(index);folder.mkdir()
-        with duckdb.connect() as db:
-            db.register('rankings',pa.Table.from_pylist(rows if index==0 else rows[::-1]))
-            result=_forest(db,cfg,folder)
-        assert result['status']=='complete' and result['training_rows']>=32
-        table=pq.read_table(folder/'if_scores.parquet').to_pylist()
-        assert len(table)==240
-        for r in table:
-            assert 0<=r['if_percentile']<=1 and 0<=r['rules_percentile']<=1
-            assert r['combined_score']==.5*r['if_percentile']+.5*r['rules_percentile']
-        assert {r['role'] for r in table}=={'train','calibration','holdout'}
-        predictions.append(table)
-    assert predictions[0]==predictions[1]
 
 
 def test_interruption_and_concurrency_preserve_output(tmp_path,monkeypatch):
