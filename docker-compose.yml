@@ -6,13 +6,9 @@ services:
     environment:
       YOYO_HOST: 0.0.0.0
       YOYO_PORT: 8501
+      YOYO_AUTH_TOKEN: "${YOYO_AUTH_TOKEN:?Set YOYO_AUTH_TOKEN to your own random secret}"
       YOYO_PRODUCT: /app/product
       YOYO_SCORING_CONFIG: /app/configs/scoring.yaml
-      YOYO_PROFILE_OBSERVATIONS: /app/canonical/observations.parquet
     volumes:
       - "${YOYO_PRODUCT_PATH:-./artifacts/source-product}:/app/product:ro"
-      - "${YOYO_ASSESSMENT_PATH:-./artifacts/source-assessment}:/app/source-assessment:ro"
-      - "${YOYO_ASSESSMENT_V2_PATH:-./artifacts/source-assessment-v2}:/app/source-assessment-v2:ro"
-      - "${YOYO_ASSESSMENT_V3_PATH:-./artifacts/source-assessment-v3}:/app/source-assessment-v3:ro"
       - "${YOYO_SCORING_PATH:-./configs/scoring.yaml}:/app/configs/scoring.yaml:ro"
-      - "${YOYO_PROFILE_OBSERVATIONS_PATH:-./data/processed/t14_canonical_20261017/observations.parquet}:/app/canonical/observations.parquet:ro"

@@ -1,4 +1,4 @@
-"""Startup-only reweighting of verified, already evaluated marker results."""
+"""Build-time weighting of verified marker results and immutable score reading."""
 from dataclasses import dataclass
 import hashlib
 import json
@@ -12,7 +12,7 @@ import yaml
 
 from .config import UniqueLoader, TITLES as BASELINE_TITLES
 
-VERSION = 'runtime-scoring:1.2'
+VERSION = 'prepared-scoring:2.0'
 BASELINE = tuple(BASELINE_TITLES)
 SOURCE_MARKERS = ('D01', 'P01', 'B01')
 TITLES = dict(BASELINE_TITLES, D01='Конфликт паспортного документа',
@@ -57,8 +57,43 @@ def _path(path):
     return str(path).replace("'", "''")
 
 
+def select_independent(criteria, contributions, edge_keys):
+    """Exact maximum-weight selection of markers without shared evidence.
+
+    There are at most twelve criteria. Direct overlaps exclude a pair; a
+    third marker cannot collapse two otherwise independent contributions.
+    Ties use criterion IDs, so input ordering cannot change the result.
+    """
+    weights = dict(zip(criteria, contributions))
+    names = sorted(weights)
+    if len(names) > len(TITLES):
+        raise ValueError('Unexpected number of scoring criteria')
+    positions = {name: i for i, name in enumerate(names)}
+    conflicts = [0] * len(names)
+    for edge in edge_keys:
+        left, right = edge.split(':')
+        a, b = positions[left], positions[right]
+        conflicts[a] |= 1 << b
+        conflicts[b] |= 1 << a
+    from functools import lru_cache
+
+    @lru_cache(None)
+    def choose(mask):
+        if not mask:
+            return ()
+        bit = mask & -mask
+        i = bit.bit_length() - 1
+        without = choose(mask ^ bit)
+        with_current = (names[i],) + choose((mask ^ bit) & ~conflicts[i])
+        a = math.fsum(weights[name] for name in with_current)
+        b = math.fsum(weights[name] for name in without)
+        return with_current if a > b or (a == b and with_current < without) else without
+
+    return list(choose((1 << len(names)) - 1))
+
+
 class RuntimeScores:
-    """Per-process disposable cache; never modifies a source snapshot or IF."""
+    """Build-time calculation; published scores are immutable and shared by all readers."""
 
     def __init__(self, db, config, product_hash, assessment_hash=None):
         self.config = config
@@ -108,27 +143,38 @@ class RuntimeScores:
         db.execute('UPDATE runtime_factors SET nominal_contribution=contribution,scoring_group=criterion_id')
         has_dependencies = db.execute("SELECT count(*) FROM information_schema.tables WHERE table_name='assessment_marker_dependencies'").fetchone()[0]
         if has_dependencies:
-            db.execute('''CREATE TEMP TABLE runtime_components AS WITH RECURSIVE edges AS (
+            db.execute('''CREATE TEMP TABLE runtime_edges AS
                 SELECT DISTINCT a.person_id,a.criterion_id left_id,b.criterion_id right_id
                 FROM assessment_marker_dependencies a JOIN assessment_marker_dependencies b
                 USING(person_id,dependency_key)
                 JOIN runtime_factors x ON x.person_id=a.person_id AND x.criterion_id=a.criterion_id
                 JOIN runtime_factors y ON y.person_id=b.person_id AND y.criterion_id=b.criterion_id
-                WHERE x.status='matched' AND y.status='matched' AND x.included_in_ranking AND y.included_in_ranking),
-                reachable(person_id,node,root) AS (
-                    SELECT person_id,criterion_id,criterion_id FROM runtime_factors
-                    WHERE status='matched' AND included_in_ranking AND criterion_id NOT IN ('M01','M02','M03')
-                    UNION SELECT r.person_id,e.right_id,r.root FROM reachable r JOIN edges e
-                    ON e.person_id=r.person_id AND e.left_id=r.node)
-                SELECT person_id,node criterion_id,min(root) scoring_group FROM reachable GROUP BY person_id,node''')
-            db.execute('''CREATE TEMP TABLE runtime_allocations AS SELECT c.*,
-                first_value(c.criterion_id) OVER w winner,row_number() OVER w priority
-                FROM runtime_components c JOIN runtime_factors f USING(person_id,criterion_id)
-                WINDOW w AS(PARTITION BY c.person_id,c.scoring_group ORDER BY f.contribution DESC,c.criterion_id)''')
-            db.execute('''UPDATE runtime_factors f SET scoring_group=a.scoring_group,
-                contribution=CASE WHEN a.priority=1 THEN f.contribution ELSE 0.0 END,
-                dependent_on_criterion_id=CASE WHEN a.priority>1 THEN a.winner END
-                FROM runtime_allocations a WHERE a.person_id=f.person_id AND a.criterion_id=f.criterion_id''')
+                WHERE a.criterion_id<b.criterion_id AND x.status='matched' AND y.status='matched'
+                  AND x.included_in_ranking AND y.included_in_ranking''')
+            db.create_function('select_independent_markers', select_independent, return_type='VARCHAR[]')
+            db.execute('''CREATE TEMP TABLE runtime_selection AS WITH candidates AS (
+                SELECT person_id,list(criterion_id ORDER BY criterion_id) ids,
+                    list(contribution ORDER BY criterion_id) weights
+                FROM runtime_factors WHERE status='matched' AND included_in_ranking
+                  AND criterion_id NOT IN ('M01','M02','M03')
+                  AND person_id IN (SELECT person_id FROM runtime_edges) GROUP BY person_id), edges AS (
+                SELECT person_id,list(left_id||':'||right_id ORDER BY left_id,right_id) edges
+                FROM runtime_edges GROUP BY person_id)
+                SELECT person_id,select_independent_markers(ids,weights,edges) selected
+                FROM candidates JOIN edges USING(person_id)''')
+            db.execute('''CREATE TEMP TABLE runtime_blockers AS WITH edges AS (
+                SELECT person_id,left_id criterion_id,right_id blocker FROM runtime_edges
+                UNION ALL SELECT person_id,right_id,left_id FROM runtime_edges)
+                SELECT e.person_id,e.criterion_id,
+                    string_agg(e.blocker,', ' ORDER BY e.blocker) blockers
+                FROM edges e JOIN runtime_selection s USING(person_id)
+                WHERE list_contains(s.selected,e.blocker) GROUP BY e.person_id,e.criterion_id''')
+            db.execute('''UPDATE runtime_factors f SET contribution=0.0,
+                dependent_on_criterion_id=b.blockers
+                FROM runtime_selection s JOIN runtime_blockers b USING(person_id)
+                WHERE f.person_id=s.person_id AND f.criterion_id=b.criterion_id
+                  AND f.criterion_id NOT IN ('M01','M02','M03') AND f.status='matched'
+                  AND f.included_in_ranking AND NOT list_contains(s.selected,f.criterion_id)''')
         self.prepared = [r[0] for r in db.execute('SELECT DISTINCT criterion_id FROM runtime_factors ORDER BY criterion_id').fetchall()]
         self.pending = sorted(set(TITLES) - set(self.prepared))
         db.execute('''CREATE TEMP TABLE runtime_totals AS SELECT person_id,sum(contribution) rule_score,
@@ -197,9 +243,10 @@ class RuntimeScores:
             prepared_markers=self.prepared, pending_markers=self.pending,
             marker_count=len(TITLES), zero_weight_policy='no_points_or_ranking_signal; observed_status_retained',
             marker_statistics=marker_statistics,
-            dependent_evidence_policy='maximum points per connected group of verified underlying facts',
+            dependent_evidence_policy='maximum total contribution from markers with no shared evidence; deterministic exact selection',
             calculation_scope='Already prepared factor results only; pending markers are not evaluated.',
-            cache='temporary_per_process; source_parquet_unchanged', forest_retrained=False)
+            statistics=self.statistics,
+            cache='build_time_only; published in product tables')
         (self.root / 'scoring.json').write_text(json.dumps(self.info, ensure_ascii=False, indent=2), encoding='utf-8')
 
     def attach(self, db):
@@ -208,3 +255,23 @@ class RuntimeScores:
 
     def close(self):
         self._temporary.cleanup()
+
+
+class PublishedScores:
+    """Metadata for scores already stored in the verified product tables."""
+
+    def __init__(self, root, config):
+        self.info = json.loads((root / 'scoring.json').read_text(encoding='utf-8'))
+        if self.info.get('version') != VERSION or self.info.get('config_sha256') != config.sha256:
+            raise ValueError('Published scoring configuration/version mismatch')
+        self.run_id = self.info['run_id']
+        self.statistics = self.info['statistics']
+        self.prepared = self.info['prepared_markers']
+        self.pending = self.info['pending_markers']
+
+    def attach(self, db):
+        # ProductStore has already attached the immutable, checksummed tables.
+        pass
+
+    def close(self):
+        pass

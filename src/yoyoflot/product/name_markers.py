@@ -1,6 +1,33 @@
 """Global name comparisons with explicit, non-scoring unconfirmed candidates."""
 
 
+def _related_profiles(db):
+    """Join source details once, then stream both directions without a wide DISTINCT.
+
+    name_pair_display has one row per pair_id, and name_rows has one row per
+    (person_id, observation_id). Different name keys distinguish the two
+    directions even when both observations belong to the same person.
+    """
+    db.execute('''CREATE TABLE name_pair_details AS SELECT d.*,
+        a.name_raw,b.name_raw other_name_raw,a.source_id,b.source_id other_source_id,
+        a.locator,b.locator other_locator
+        FROM name_pair_display d
+        JOIN name_rows a ON a.person_id=d.person_a AND a.observation_id=d.observation_a
+        JOIN name_rows b ON b.person_id=d.person_b AND b.observation_id=d.observation_b''')
+    db.execute('''CREATE TABLE marker_related_profiles AS
+        SELECT person_a person_id,person_b other_person_id,name_a name_key,name_b other_name_key,
+            observation_a observation_id,observation_b other_observation_id,pair_id,link_status,
+            identifier_kind,identifier_value,evidence_group_id,'N01' criterion_id,
+            name_raw,other_name_raw,source_id,other_source_id,locator,other_locator
+        FROM name_pair_details
+        UNION ALL
+        SELECT person_b,person_a,name_b,name_a,observation_b,observation_a,pair_id,link_status,
+            identifier_kind,identifier_value,evidence_group_id,'N01',
+            other_name_raw,name_raw,other_source_id,source_id,other_locator,locator
+        FROM name_pair_details''')
+    db.execute('DROP TABLE name_pair_details')
+
+
 def prepare_names(db, progress):
     progress('N01: именные записи всех профилей, без требования предварительного accepted')
     db.execute('''CREATE TABLE name_rows AS SELECT p.person_id,p.observation_id,p.source_id,
@@ -49,8 +76,9 @@ def prepare_names(db, progress):
         WHERE p.translit_a<>p.translit_b
           AND levenshtein(p.name_a,p.name_b)=1''')
     progress('N01: варианты транслитерации исключены')
-    db.execute('DROP TABLE word_deletions')
-    db.execute('DROP TABLE name_parts')
+    for table in ('word_deletions','name_parts','unique_names','name_words',
+                  'word_neighbors','indexed_name_changes','candidate_name_pairs'):
+        db.execute('DROP TABLE '+table)
     db.execute('''CREATE TABLE profile_name_reps AS WITH g AS (
         SELECT person_id,name_key,min(observation_id) observation_id,min(birth_date) first_birth,
             max(birth_date) last_birth FROM name_rows GROUP BY 1,2)
@@ -62,6 +90,7 @@ def prepare_names(db, progress):
         sha256(to_json([a.person_id,b.person_id,a.name_key,b.name_key])) pair_id
         FROM name_neighbors n JOIN profile_name_reps a ON a.name_key=n.name_a
         JOIN profile_name_reps b ON b.name_key=n.name_b''')
+    db.execute('DROP TABLE profile_name_reps')
     progress('N01: проверка общих документов/карт и противоречий даты рождения')
     db.execute('''CREATE TABLE named_identifiers AS SELECT n.*,i.kind,i.identifier_namespace,i.value_normalized,
         'identity_'||sha256(to_json([i.identifier_namespace,i.value_normalized])) fact_key
@@ -75,6 +104,7 @@ def prepare_names(db, progress):
         JOIN named_identifiers b ON b.person_id=p.person_b AND b.name_key=p.name_b
             AND a.identifier_namespace=b.identifier_namespace AND a.value_normalized=b.value_normalized
         WHERE a.observation_id<>b.observation_id''')
+    db.execute('DROP TABLE named_identifiers')
     db.execute('''CREATE TABLE name_pair_status AS SELECT p.pair_id,
         CASE WHEN count(l.pair_id)=0 THEN 'unconfirmed'
              WHEN bool_and(l.birth_conflict) THEN 'birth_date_conflict'
@@ -89,17 +119,9 @@ def prepare_names(db, progress):
         FROM name_profile_pairs p JOIN name_pair_status s USING(pair_id)
         LEFT JOIN name_pair_links l ON l.pair_id=p.pair_id AND NOT l.birth_conflict
         QUALIFY row_number() OVER(PARTITION BY p.pair_id ORDER BY l.kind,l.fact_key,l.observation_a,l.observation_b)=1''')
-    db.execute('''CREATE TABLE marker_related_profiles AS WITH directed AS (
-        SELECT person_a person_id,person_b other_person_id,name_a name_key,name_b other_name_key,
-            observation_a observation_id,observation_b other_observation_id,pair_id,link_status,
-            identifier_kind,identifier_value,evidence_group_id FROM name_pair_display
-        UNION ALL
-        SELECT person_b,person_a,name_b,name_a,observation_b,observation_a,pair_id,link_status,
-            identifier_kind,identifier_value,evidence_group_id FROM name_pair_display)
-        SELECT DISTINCT d.*,'N01' criterion_id,a.name_raw,b.name_raw other_name_raw,
-            a.source_id,b.source_id other_source_id,a.locator,b.locator other_locator
-        FROM directed d JOIN name_rows a ON a.person_id=d.person_id AND a.observation_id=d.observation_id
-        JOIN name_rows b ON b.person_id=d.other_person_id AND b.observation_id=d.other_observation_id''')
+    progress('N01: сохранение связанных профилей без повторной группировки полных строк')
+    _related_profiles(db)
+    db.execute('DROP TABLE name_pair_display')
     db.execute('''INSERT INTO marker_evidence SELECT person_id,'N01',observation_id,NULL,NULL,
         source_id,source_record_id,locator,name_raw,'name_'||sha256(name_key),false FROM name_rows''')
     db.execute('''INSERT INTO marker_evidence WITH directed AS (

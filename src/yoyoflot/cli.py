@@ -108,7 +108,7 @@ def parser():
     pipeline.add_argument("--require-all", action="store_true", help="Require all seven logical sources")
     pipeline.add_argument("--allow-source-errors", action="store_true", help="Keep documented parser/PDF limitations; never bypass structural blockers")
     pipeline.add_argument("-q", "--quiet", action="store_true")
-    for command in ["train", "train-if"]:
+    for command in ["train"]:
         product = sub.add_parser(command, help="Build the complete product from supplied T13/T16 tables; no generators")
         product.add_argument("--input", type=Path, help="Verified T13 directory, or T16 snapshot")
         product.add_argument("--output", type=Path, default=Path("artifacts/source-product"))
@@ -155,7 +155,7 @@ def main(argv=None):
             if not args.quiet:
                 print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0
-        if args.command in {"train", "train-if"}:
+        if args.command in {"train"}:
             if args.input is None:
                 print("Укажите --input: исходные таблицы T13 или снимок T16. Генерация данных отсутствует.", file=sys.stderr)
                 return 2
@@ -164,7 +164,7 @@ def main(argv=None):
             report = run(directory, args.output, args.config, args.reference, args.memory_limit,
                          progress=None if args.quiet else lambda message: print(message, flush=True))
             if not args.quiet:
-                print(json.dumps({k:report[k] for k in ["run_id", "counts", "eligibility", "forest_status", "graph_status"]}, ensure_ascii=False, indent=2))
+                print(json.dumps({k:report[k] for k in ["run_id", "counts", "eligibility", "graph_status"]}, ensure_ascii=False, indent=2))
             return 0
         if args.command == "run":
             if args.core_snapshot is not None:

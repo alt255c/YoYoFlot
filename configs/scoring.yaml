@@ -1,4 +1,4 @@
-# Edit weights, then restart the backend and refresh the browser.
+# Edit weights, then run build_and_run.sh to publish a consistent site and exports.
 # This file changes scoring only: conditions, thresholds and evidence stay frozen.
 # 0 disables a factor's points; unavailable evidence never receives points.
 version: scoring-1.0

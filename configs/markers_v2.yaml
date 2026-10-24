@@ -1,12 +1,12 @@
-# Specification for T32. Not consumed by the product-1.1 runtime loader.
+# Source marker conditions consumed during the complete product build.
 version: markers-2.1-approved-policy
 approval_date: '2026-10-20'
-implementation_status: specification_only_runtime_migration_pending
-runtime_enabled: false
+implementation_status: prepared_source_factors
+runtime_enabled: true
 score_purpose: existing_behavioral_ranking_with_document_conflicts_and_weak_signals
 ground_truth_labels_available: false
 weight_method: preserve_baseline_and_accumulating_secondary_review_signals
-group_aggregation: max
+group_aggregation: maximum_weight_independent_markers
 strong_total_contribution_cap: 6.0
 baseline_total_contribution_cap: 10.5
 weak_total_contribution_cap: 6.2
@@ -16,7 +16,7 @@ score_normalization_by_available_count: false
 evidence_deduplication:
   unit: verified_underlying_fact
   duplicate_source_rows_add_points: false
-  dependent_marker_contributions: max
+  dependent_marker_contributions: maximum_total_without_shared_evidence
   independent_marker_contributions: sum_up_to_criterion_caps
   document_and_ticket_same_conflict_cap: 2.0
   repeated_weak_and_baseline_markers: forbidden
@@ -33,7 +33,7 @@ criteria:
     group_id: document_identity_conflict
     role: strong
     enabled: true
-    status: source_assessment_prepared_runtime_migration_pending
+    status: prepared_in_published_scoring
     weight: 2.0
     value_type: binary
     threshold: 1
@@ -46,7 +46,7 @@ criteria:
     cross_source_independence_assumed: false
     infer_document_type_or_issuer: false
     multiply_by_record_or_source_count: false
-    person_link_policy: verified_person_links_or_exact_anchors_only
+    person_link_policy: all_verified_person_links_required
     ambiguous_identity_policy: retain_separate_conflict_members_without_person_merge
   D03:
     title_ru: Конфликт владельца билета
@@ -136,7 +136,7 @@ criteria:
     group_id: shared_booking
     role: weak
     enabled: true
-    status: source_assessment_prepared_runtime_migration_pending
+    status: prepared_in_published_scoring
     weight: 0.8
     value_type: binary
     threshold: 1
@@ -207,12 +207,3 @@ disabled_criteria:
   M04: {weight: 0.0, reason: Всплеск активности не включён в согласованный список}
   M05: {weight: 0.0, reason: Замкнутые цепочки не включены в согласованный список}
   M06: {weight: 0.0, reason: Редкость маршрута не включена в согласованный список}
-forest:
-  enabled: true
-  role: experimental_only
-  input_features: [trip_rate_30_days, quick_return_share, repeated_route_share]
-  requires_full_available_features: true
-  include_document_conflict_feature: false
-  adds_ranking_vote: false
-  retrain_required: true
-  reason: Отдельная экспериментальная оценка на трёх сохранённых поведенческих признаках
