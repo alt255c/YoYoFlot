@@ -1,0 +1,11 @@
+version: "1.0"
+features:
+  - trip_count
+  - active_months
+  - trips_per_active_month
+  - unique_routes
+  - unique_airports
+  - repeated_route_share
+  - median_gap_days
+  - return_trip_count
+  - short_stay_count

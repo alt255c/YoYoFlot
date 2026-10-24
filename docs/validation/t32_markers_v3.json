@@ -1,0 +1,365 @@
+{
+  "all_inputs_unchanged": true,
+  "assessment_manifest_sha256": "42d02dc1d75ac669d5176564af04a2efbcb910ca6ba7738b259fb4878fccaf4c",
+  "assessment_run_id": "assessment-1a209ee684adfd0aefd6",
+  "assessment_version": "source-assessment:3.0",
+  "build_checks": {
+    "associations_exceed_frozen_observation_count": 0,
+    "baseline_rows_changed": 0,
+    "duplicate_marker_diagnostics": 0,
+    "duplicate_profile_assessments": 0,
+    "inferred_no_shows": 0,
+    "person_anchors_unresolved": 0,
+    "segment_anchors_unresolved": 0,
+    "unconfirmed_name_points": 0
+  },
+  "cases": [
+    {
+      "M07": {
+        "availability_reason": "Для проверки повторных совместных перелётов нужно больше дат или направлений посадочных записей",
+        "contribution": 0.0,
+        "criterion_id": "M07",
+        "diagnostics": {
+          "events": 1,
+          "observed_dates": 1,
+          "required_dates": 3,
+          "required_routes": 2,
+          "routes": 1
+        },
+        "evaluation_scope": "linked_source_records",
+        "evidence_segment_ids": [],
+        "explanation_ru": "Пригодных посадочных событий: 1, разных дат: 1, направлений: 1. Для проверки нужны минимум 3 даты и 2 направления.",
+        "included_in_ranking": false,
+        "person_id": "person_07861f092c7047a66338a71cc6865c022f9c26aa4c2c74e8a0ed25e1c79788b1",
+        "preview_contribution": 0.0,
+        "status": "unavailable",
+        "threshold": 1.0,
+        "title_ru": "Повторные совместные перелёты",
+        "used_observations": 0,
+        "value": null,
+        "weight": 1.8
+      },
+      "contribution": 0.0,
+      "criterion_id": "N01",
+      "diagnostics": {
+        "normalized_names": 1,
+        "observations": 1,
+        "related_profiles": 7,
+        "unconfirmed_pairs": 7,
+        "verified_pairs": 0
+      },
+      "display_name": "ELENA RODIONOVA",
+      "expected_other_profile_on_first_page": true,
+      "explanation_ru": "Поиск по всем профилям выполнен. Именных исходных записей: 1; нормализованных написаний: 1. Других профилей с однобуквенным отличием: 7. Пар с подтверждающим идентификатором: 0. Есть похожие имена без подтверждённой связи. Они показаны ниже и сами по себе не добавляют баллы. Перестановка имени и фамилии, инициалы и известные варианты транслитерации не считаются ошибкой в букве.  Баллы при срабатывании: 0.7; прибавлено: 0.",
+      "has_unconfirmed_candidates": true,
+      "pair": [
+        {
+          "adds_signal": false,
+          "criterion_id": "N01",
+          "evidence_group_id": null,
+          "identifier_kind": null,
+          "identifier_value": null,
+          "link_status": "unconfirmed",
+          "locator": "YourBoardingPassDotAero.zip/YourBoardingPassDotAero-2017-07-11.xlsx/Sheet923/row:3",
+          "name_key": "elena rodionova",
+          "name_raw": "ELENA RODIONOVA",
+          "observation_id": "2bebb0708e887a6929b7cb311dadab13d8fcce6b94c8c33ab206f32ab6c7f64c",
+          "other_locator": "YourBoardingPassDotAero.zip/YourBoardingPassDotAero-2017-05-30.xlsx/Sheet63/row:3",
+          "other_name_key": "elina rodionova",
+          "other_name_raw": "RODIONOVA ELINA",
+          "other_observation_id": "0554419ad4f68d1870cb8d445dab667fe4dc40a5b6e9767a8156db06f2168d74",
+          "other_person_id": "person_38b13e9d9addce528aa0d071ca362e2e6d49f480c01ad373693140ca9f910aeb",
+          "other_source_id": "boardingpass_xlsx",
+          "pair_id": "15eca5c0364fecdb540083496fb9d275dbafbfd81e9e383761d6a53bd0f16e01",
+          "person_id": "person_07861f092c7047a66338a71cc6865c022f9c26aa4c2c74e8a0ed25e1c79788b1",
+          "reason_ru": "Однобуквенное отличие найдено. Общий документ или карта не установлены; это может быть другой человек. Баллы не начисляются.",
+          "source_id": "boardingpass_xlsx"
+        }
+      ],
+      "person_id": "person_07861f092c7047a66338a71cc6865c022f9c26aa4c2c74e8a0ed25e1c79788b1",
+      "profile_markers_count": 12,
+      "status": "not_matched",
+      "used_observations": 1
+    },
+    {
+      "M07": {
+        "availability_reason": "Для проверки повторных совместных перелётов нужно больше дат или направлений посадочных записей",
+        "contribution": 0.0,
+        "criterion_id": "M07",
+        "diagnostics": {
+          "events": 1,
+          "observed_dates": 1,
+          "required_dates": 3,
+          "required_routes": 2,
+          "routes": 1
+        },
+        "evaluation_scope": "linked_source_records",
+        "evidence_segment_ids": [],
+        "explanation_ru": "Пригодных посадочных событий: 1, разных дат: 1, направлений: 1. Для проверки нужны минимум 3 даты и 2 направления.",
+        "included_in_ranking": false,
+        "person_id": "person_38b13e9d9addce528aa0d071ca362e2e6d49f480c01ad373693140ca9f910aeb",
+        "preview_contribution": 0.0,
+        "status": "unavailable",
+        "threshold": 1.0,
+        "title_ru": "Повторные совместные перелёты",
+        "used_observations": 0,
+        "value": null,
+        "weight": 1.8
+      },
+      "contribution": 0.0,
+      "criterion_id": "N01",
+      "diagnostics": {
+        "normalized_names": 1,
+        "observations": 2,
+        "related_profiles": 27,
+        "unconfirmed_pairs": 27,
+        "verified_pairs": 0
+      },
+      "display_name": "RODIONOVA ELINA",
+      "expected_other_profile_on_first_page": true,
+      "explanation_ru": "Поиск по всем профилям выполнен. Именных исходных записей: 2; нормализованных написаний: 1. Других профилей с однобуквенным отличием: 27. Пар с подтверждающим идентификатором: 0. Есть похожие имена без подтверждённой связи. Они показаны ниже и сами по себе не добавляют баллы. Перестановка имени и фамилии, инициалы и известные варианты транслитерации не считаются ошибкой в букве.  Баллы при срабатывании: 0.7; прибавлено: 0.",
+      "has_unconfirmed_candidates": true,
+      "pair": [
+        {
+          "adds_signal": false,
+          "criterion_id": "N01",
+          "evidence_group_id": null,
+          "identifier_kind": null,
+          "identifier_value": null,
+          "link_status": "unconfirmed",
+          "locator": "YourBoardingPassDotAero.zip/YourBoardingPassDotAero-2017-05-30.xlsx/Sheet63/row:3",
+          "name_key": "elina rodionova",
+          "name_raw": "RODIONOVA ELINA",
+          "observation_id": "0554419ad4f68d1870cb8d445dab667fe4dc40a5b6e9767a8156db06f2168d74",
+          "other_locator": "YourBoardingPassDotAero.zip/YourBoardingPassDotAero-2017-07-11.xlsx/Sheet923/row:3",
+          "other_name_key": "elena rodionova",
+          "other_name_raw": "ELENA RODIONOVA",
+          "other_observation_id": "2bebb0708e887a6929b7cb311dadab13d8fcce6b94c8c33ab206f32ab6c7f64c",
+          "other_person_id": "person_07861f092c7047a66338a71cc6865c022f9c26aa4c2c74e8a0ed25e1c79788b1",
+          "other_source_id": "boardingpass_xlsx",
+          "pair_id": "15eca5c0364fecdb540083496fb9d275dbafbfd81e9e383761d6a53bd0f16e01",
+          "person_id": "person_38b13e9d9addce528aa0d071ca362e2e6d49f480c01ad373693140ca9f910aeb",
+          "reason_ru": "Однобуквенное отличие найдено. Общий документ или карта не установлены; это может быть другой человек. Баллы не начисляются.",
+          "source_id": "boardingpass_xlsx"
+        }
+      ],
+      "person_id": "person_38b13e9d9addce528aa0d071ca362e2e6d49f480c01ad373693140ca9f910aeb",
+      "profile_markers_count": 12,
+      "status": "not_matched",
+      "used_observations": 2
+    }
+  ],
+  "http_observation": {
+    "N01": {
+      "availability_reason": null,
+      "comparison_names": [
+        {
+          "locator": "/PointzAggregatorUsers/user[30531]",
+          "name_raw": "ALBINA SOBOLEVA",
+          "observation_id": "46c44b78ed28948673bce3aee6f49142042cf153cff65de95ea26a9817719181",
+          "source_id": "pointz_xml"
+        }
+      ],
+      "contribution": 0.0,
+      "criterion_id": "N01",
+      "dependent_on_criterion_id": null,
+      "diagnostics": {
+        "normalized_names": 1,
+        "observations": 1,
+        "related_profiles": 0,
+        "unconfirmed_pairs": 0,
+        "verified_pairs": 0
+      },
+      "evidence_segment_ids": [],
+      "explanation_ru": "Поиск по всем профилям выполнен. Именных исходных записей: 1; нормализованных написаний: 1. Других профилей с однобуквенным отличием: 0. Пар с подтверждающим идентификатором: 0. Перестановка имени и фамилии, инициалы и известные варианты транслитерации не считаются ошибкой в букве.  Баллы при срабатывании: 0.7; прибавлено: 0.",
+      "has_unconfirmed_candidates": false,
+      "included_in_ranking": true,
+      "nominal_contribution": 0.0,
+      "person_id": "person_699ba1f0a440d770f226271696f32497cbf25e70c598d7ea30822dec24cd0e49",
+      "reference_size": null,
+      "reference_value": null,
+      "related_profiles": {
+        "items": [],
+        "pagination": {
+          "has_next": false,
+          "limit": 10,
+          "offset": 0,
+          "total": 0
+        }
+      },
+      "scoring_group": "N01",
+      "source_contribution": 0.0,
+      "source_weight": 0.7,
+      "status": "not_matched",
+      "threshold": 1.0,
+      "threshold_method": null,
+      "title_ru": "Отличие имени на одну букву",
+      "used_observations": 1,
+      "value": 0.0,
+      "weight": 0.7
+    },
+    "N01_has_diagnostics": true,
+    "data_mode": "demo_subset",
+    "markers_count": 12,
+    "person_id": "person_699ba1f0a440d770f226271696f32497cbf25e70c598d7ea30822dec24cd0e49"
+  },
+  "identity_accepted_before_after": [
+    75415,
+    75415
+  ],
+  "marker_states": [
+    {
+      "criterion_id": "B01",
+      "profiles": 840606,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "D01",
+      "profiles": 6,
+      "status": "matched"
+    },
+    {
+      "criterion_id": "D01",
+      "profiles": 151872,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "D01",
+      "profiles": 688728,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "D02",
+      "profiles": 28410,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "D02",
+      "profiles": 812196,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "D03",
+      "profiles": 840606,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "L01",
+      "profiles": 2,
+      "status": "matched"
+    },
+    {
+      "criterion_id": "L01",
+      "profiles": 138707,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "L01",
+      "profiles": 701897,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "M01",
+      "profiles": 1841,
+      "status": "matched"
+    },
+    {
+      "criterion_id": "M01",
+      "profiles": 26681,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "M01",
+      "profiles": 812084,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "M02",
+      "profiles": 1566,
+      "status": "matched"
+    },
+    {
+      "criterion_id": "M02",
+      "profiles": 24783,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "M02",
+      "profiles": 814257,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "M03",
+      "profiles": 2346,
+      "status": "matched"
+    },
+    {
+      "criterion_id": "M03",
+      "profiles": 39807,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "M03",
+      "profiles": 798453,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "M07",
+      "profiles": 1325,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "M07",
+      "profiles": 839281,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "N01",
+      "profiles": 822889,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "N01",
+      "profiles": 17717,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "P01",
+      "profiles": 628218,
+      "status": "not_matched"
+    },
+    {
+      "criterion_id": "P01",
+      "profiles": 212388,
+      "status": "unavailable"
+    },
+    {
+      "criterion_id": "T01",
+      "profiles": 840606,
+      "status": "unavailable"
+    }
+  ],
+  "name_comparisons": {
+    "neighbor_name_pairs": 14512,
+    "normalized_names": 189106,
+    "profile_pairs": 959899,
+    "verified_profile_pairs": 0
+  },
+  "rejected_draft": {
+    "groups_retained_after_alias_review": 1,
+    "path": "artifacts/source-assessment-v3-rejected-transliteration",
+    "reason": "Known yo/e spellings plus patronymics are not different owners.",
+    "shared_card_groups": 349
+  },
+  "runtime_scoring_run_id": "scoring-a979dd3166b06414f1d2",
+  "source": "Existing repository dataset; direct ProductStore queries for the two profiles, actual running HTTP API for the current user-selected demo subset. No generated passenger data.",
+  "statistics": {
+    "assessed": 829356,
+    "identity_accepted": 75415,
+    "profiles": 840606,
+    "source_links_complete": 752103,
+    "unavailable": 11250,
+    "with_signals": 5354,
+    "without_signals": 824002
+  }
+}

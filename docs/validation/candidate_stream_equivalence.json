@@ -1,0 +1,68 @@
+{
+  "duckdb": "1.5.6",
+  "memory_limit": "1GB",
+  "threads": 2,
+  "prefix_rows": 50000,
+  "source_counts": {
+    "nodes": 2746977,
+    "candidates": 2805429
+  },
+  "priority_counts": [
+    [
+      1,
+      2266280
+    ],
+    [
+      2,
+      298690
+    ],
+    [
+      3,
+      240459
+    ]
+  ],
+  "lookup_plan": {
+    "ids": 1024,
+    "index_scan": true,
+    "evidence": "EXPLAIN ANALYZE of an indexed node lookup for 1024 IDs reported Type: Index Scan."
+  },
+  "legacy_subset": {
+    "seconds": 3.9364262420003797,
+    "peak_spill_bytes": 0,
+    "rows": 50000,
+    "scope": "Legacy wide join/sort on the preselected exact first 50,000 candidate subset."
+  },
+  "optimized_4000": {
+    "seconds": 24.500236354000663,
+    "peak_spill_bytes": 0,
+    "rows": 50000,
+    "first_row_seconds": 2.3268164709988923,
+    "batch_size": 4000,
+    "scope": "Sort all 2,805,429 original candidates; expand and compare only the first 50,000 results.",
+    "exact_yield_triples_equal": true
+  },
+  "optimized_777": {
+    "seconds": 29.870626111000092,
+    "peak_spill_bytes": 0,
+    "rows": 50000,
+    "first_row_seconds": 0.7020953850005753,
+    "batch_size": 777,
+    "scope": "Sort all 2,805,429 original candidates; expand and compare only the first 50,000 results.",
+    "exact_yield_triples_equal": true
+  },
+  "expected_ordered_sha256": "e7fb5d625646c1ef6e4c3265e3cd643b54e8b767dcda20d9a3574c94da294be5",
+  "database_closed": true,
+  "comparison": {
+    "unit": "Ordered yield triples: full combined candidate row, full left observation dictionary, full right observation dictionary.",
+    "includes_full_evidence": true,
+    "full_resolution_equivalence_tested": false,
+    "overall_speedup_claimed": false,
+    "timing_limitation": "Legacy timings sort only the preselected 50,000 candidates; optimized timings sort all 2,805,429 candidates and expand only the first 50,000. These timings are not comparable full-run measurements."
+  },
+  "prior_full_query_observation": {
+    "scope": "Legacy full wide join/sort in the full pipeline, separate from this bounded comparison.",
+    "status": "stopped_before_completion",
+    "observed_spill_bytes": 10241146880,
+    "limitation": "An interrupted run, not a completed paired benchmark; no full-run speedup is inferred."
+  }
+}

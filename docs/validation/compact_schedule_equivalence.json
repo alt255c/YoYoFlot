@@ -1,0 +1,326 @@
+{
+  "input": {
+    "selection": "Original physical rows 160000..179999 (five consecutive forum row groups), plus first 2000 rows from physical groups 0,367,477,516,938 (five other sources)",
+    "period_invariant": {
+      "candidate_relevant_records": 1519241,
+      "distinct_period_offset_combinations": 3704,
+      "periods_known": true,
+      "unknown_records": 0,
+      "unknown_combinations": [],
+      "period_start": "2018-11-01",
+      "period_end": "2019-01-31",
+      "min_arrival_offset": -1,
+      "max_arrival_offset": 2,
+      "seconds": 7.463227700000061,
+      "predicate": "parse_status=ok and both airport IDs not NULL; exact ScheduleIndex.add relevant rows"
+    },
+    "index_access": "read-only schedules attachment; no rebuild",
+    "baseline": "Dense exact matcher, periods_known=False disables only shortcut; route cache retained"
+  },
+  "timing_scope": "enrich_travel only; excludes input selection, reconstruction, hashing and comparisons",
+  "chunks": [
+    {
+      "chunk": "forum_sequential_40",
+      "rows": 4000,
+      "dense_seconds": 2.3387306250187976,
+      "compact_seconds": 1.9861997670122946,
+      "cache_delta": {
+        "reference_hits": 551,
+        "reference_misses": 3076,
+        "candidate_hits": 0,
+        "candidate_misses": 3076,
+        "decoded_rows": 86767
+      },
+      "cache_after": {
+        "reference_hits": 551,
+        "reference_misses": 3076,
+        "candidate_hits": 0,
+        "candidate_misses": 3076,
+        "decoded_rows": 86767,
+        "reference_entries": 3076,
+        "reference_bytes": 2857125,
+        "candidate_bytes": 25163610,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "forum_sequential_41",
+      "rows": 4000,
+      "dense_seconds": 2.6647116839758382,
+      "compact_seconds": 1.8661093209884712,
+      "cache_delta": {
+        "reference_hits": 1133,
+        "reference_misses": 2518,
+        "candidate_hits": 0,
+        "candidate_misses": 2518,
+        "decoded_rows": 73829
+      },
+      "cache_after": {
+        "reference_hits": 1684,
+        "reference_misses": 5594,
+        "candidate_hits": 0,
+        "candidate_misses": 5594,
+        "decoded_rows": 160596,
+        "reference_entries": 5594,
+        "reference_bytes": 5196632,
+        "candidate_bytes": 25162345,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "forum_sequential_42",
+      "rows": 4000,
+      "dense_seconds": 2.7833217630432046,
+      "compact_seconds": 1.7067687670896703,
+      "cache_delta": {
+        "reference_hits": 1487,
+        "reference_misses": 2173,
+        "candidate_hits": 0,
+        "candidate_misses": 2173,
+        "decoded_rows": 61022
+      },
+      "cache_after": {
+        "reference_hits": 3171,
+        "reference_misses": 7767,
+        "candidate_hits": 0,
+        "candidate_misses": 7767,
+        "decoded_rows": 221618,
+        "reference_entries": 7767,
+        "reference_bytes": 7213711,
+        "candidate_bytes": 25124124,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "forum_sequential_43",
+      "rows": 4000,
+      "dense_seconds": 2.693863057051203,
+      "compact_seconds": 1.4633279899881018,
+      "cache_delta": {
+        "reference_hits": 1799,
+        "reference_misses": 1871,
+        "candidate_hits": 0,
+        "candidate_misses": 1871,
+        "decoded_rows": 53203
+      },
+      "cache_after": {
+        "reference_hits": 4970,
+        "reference_misses": 9638,
+        "candidate_hits": 0,
+        "candidate_misses": 9638,
+        "decoded_rows": 274821,
+        "reference_entries": 9638,
+        "reference_bytes": 8950153,
+        "candidate_bytes": 25148366,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "forum_sequential_44",
+      "rows": 4000,
+      "dense_seconds": 2.8566749930487276,
+      "compact_seconds": 1.4911988239200582,
+      "cache_delta": {
+        "reference_hits": 2009,
+        "reference_misses": 1712,
+        "candidate_hits": 0,
+        "candidate_misses": 1712,
+        "decoded_rows": 48867
+      },
+      "cache_after": {
+        "reference_hits": 6979,
+        "reference_misses": 11350,
+        "candidate_hits": 0,
+        "candidate_misses": 11350,
+        "decoded_rows": 323688,
+        "reference_entries": 11350,
+        "reference_bytes": 10539476,
+        "candidate_bytes": 25152303,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "mixed_source_0",
+      "rows": 2000,
+      "dense_seconds": 0.6339092070520564,
+      "compact_seconds": 0.297202990965161,
+      "cache_delta": {
+        "reference_hits": 1564,
+        "reference_misses": 317,
+        "candidate_hits": 0,
+        "candidate_misses": 317,
+        "decoded_rows": 7535
+      },
+      "cache_after": {
+        "reference_hits": 8543,
+        "reference_misses": 11667,
+        "candidate_hits": 0,
+        "candidate_misses": 11667,
+        "decoded_rows": 331223,
+        "reference_entries": 11667,
+        "reference_bytes": 10879393,
+        "candidate_bytes": 25156043,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "mixed_source_367",
+      "rows": 2000,
+      "dense_seconds": 1.5036595180208678,
+      "compact_seconds": 0.6564455009956873,
+      "cache_delta": {
+        "reference_hits": 1161,
+        "reference_misses": 805,
+        "candidate_hits": 0,
+        "candidate_misses": 805,
+        "decoded_rows": 20383
+      },
+      "cache_after": {
+        "reference_hits": 9704,
+        "reference_misses": 12472,
+        "candidate_hits": 0,
+        "candidate_misses": 12472,
+        "decoded_rows": 351606,
+        "reference_entries": 12472,
+        "reference_bytes": 11621894,
+        "candidate_bytes": 25149002,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "mixed_source_477",
+      "rows": 2000,
+      "dense_seconds": 0.8194021399394842,
+      "compact_seconds": 0.39981411099870456,
+      "cache_delta": {
+        "reference_hits": 1638,
+        "reference_misses": 341,
+        "candidate_hits": 1,
+        "candidate_misses": 340,
+        "decoded_rows": 8049
+      },
+      "cache_after": {
+        "reference_hits": 11342,
+        "reference_misses": 12813,
+        "candidate_hits": 1,
+        "candidate_misses": 12812,
+        "decoded_rows": 359655,
+        "reference_entries": 12813,
+        "reference_bytes": 11966454,
+        "candidate_bytes": 25155357,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "mixed_source_516",
+      "rows": 2000,
+      "dense_seconds": 0.5072728419982013,
+      "compact_seconds": 0.08349816506233765,
+      "cache_delta": {
+        "reference_hits": 1995,
+        "reference_misses": 5,
+        "candidate_hits": 2,
+        "candidate_misses": 3,
+        "decoded_rows": 0
+      },
+      "cache_after": {
+        "reference_hits": 13337,
+        "reference_misses": 12818,
+        "candidate_hits": 3,
+        "candidate_misses": 12815,
+        "decoded_rows": 359655,
+        "reference_entries": 12818,
+        "reference_bytes": 11970856,
+        "candidate_bytes": 25155917,
+        "compatibility_bytes": 0
+      }
+    },
+    {
+      "chunk": "mixed_source_938",
+      "rows": 2000,
+      "dense_seconds": 1.0678934909810778,
+      "compact_seconds": 0.7905313600294903,
+      "cache_delta": {
+        "reference_hits": 832,
+        "reference_misses": 1138,
+        "candidate_hits": 293,
+        "candidate_misses": 845,
+        "decoded_rows": 23187
+      },
+      "cache_after": {
+        "reference_hits": 14169,
+        "reference_misses": 13956,
+        "candidate_hits": 296,
+        "candidate_misses": 13660,
+        "decoded_rows": 382842,
+        "reference_entries": 13956,
+        "reference_bytes": 13062974,
+        "candidate_bytes": 25141366,
+        "compatibility_bytes": 0
+      }
+    }
+  ],
+  "exact_equivalence": {
+    "trips": 30000,
+    "logical_links": 720872,
+    "sources": {
+      "forum_json": 20000,
+      "boarding_csv": 2000,
+      "pointz_xml": 2000,
+      "sirena_fixed": 2000,
+      "skyteam_yaml": 2000,
+      "boardingpass_xlsx": 2000
+    },
+    "original_enriched_fields_equal": true,
+    "all_reconstructed_link_dictionaries_equal": true,
+    "evidence_json_equal": true,
+    "ordered_expected_sha256": "3b478ef3c27f21cc9bafdc01cc0583d316f6947287626ba37c1ac68bb915d173"
+  },
+  "compact_storage": {
+    "groups": 12161,
+    "members": 354702
+  },
+  "compact_cache": {
+    "reference_hits": 14169,
+    "reference_misses": 13956,
+    "candidate_hits": 296,
+    "candidate_misses": 13660,
+    "decoded_rows": 382842,
+    "reference_entries": 13956,
+    "reference_bytes": 13062974,
+    "candidate_bytes": 25141366,
+    "compatibility_bytes": 0,
+    "budget": 33554432
+  },
+  "full_sequence_replay": {
+    "rows": 30000,
+    "seconds": 0.9910623150008178,
+    "logical_links": 720872,
+    "cache_delta": {
+      "reference_hits": 28125,
+      "reference_misses": 0,
+      "candidate_hits": 0,
+      "candidate_misses": 0,
+      "decoded_rows": 0
+    }
+  },
+  "forum_1000_cold_profile": {
+    "seconds": 1.1755810940012452,
+    "cache": {
+      "reference_hits": 49,
+      "reference_misses": 863,
+      "candidate_hits": 0,
+      "candidate_misses": 863,
+      "decoded_rows": 27817,
+      "reference_entries": 863,
+      "reference_bytes": 802631,
+      "candidate_bytes": 18202469,
+      "compatibility_bytes": 0
+    }
+  },
+  "all_original_index_connections_closed": true,
+  "timing_totals": {
+    "dense_seconds": 17.86943932012946,
+    "compact_seconds": 10.741096797049977
+  }
+}

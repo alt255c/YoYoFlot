@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "task": "T18",
+  "date": "2026-10-17",
+  "package_version": "0.9.0",
+  "branch": "reape/T18",
+  "base_branch": "reape/T17",
+  "base_commit": "8dc05c593529b7a83709b260e7d684f931554616",
+  "scope": "independent_fictional_coflight_graph",
+  "environment": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "pyarrow": "26.0.0",
+    "runtime": {
+      "code_sha256": "b43fb8a99de63027147ac2df2cac64d6b85d6a97d0507e8acca0267b7ba3a781",
+      "package_version": "0.9.0",
+      "pyarrow": "26.0.0",
+      "python": "3.12.14",
+      "pyyaml": "6.0.3"
+    }
+  },
+  "test_suite": {
+    "command": "python -m pytest -q",
+    "exit_code": 0,
+    "passed": 413,
+    "t18_new_tests": 65,
+    "elapsed_seconds": 56.38
+  },
+  "dependency_lock": {
+    "command": "uv lock --check --offline",
+    "exit_code": 0,
+    "change": "Align project version and add already-required tzdata==2026.5; no other locked versions changed."
+  },
+  "checks": [
+    "rational_exhaustive_bernoulli_oracle",
+    "exhaustive_seat_permutation_oracle",
+    "monte_carlo_preserves_daily_route_degrees_and_event_sizes",
+    "full_pair_family_bonferroni_and_unobserved_opportunities",
+    "popular_flight_expected_equals_observed",
+    "negative_repeated_companion_excess_preserved",
+    "underflow_retains_log_probability",
+    "duplicates_and_codeshare_one_membership",
+    "ambiguous_reported_schedule_and_incomplete_witnesses_excluded",
+    "conflicts_no_first_wins",
+    "different_services_same_number_date_route_not_merged",
+    "same_day_multiple_events_not_repeat_days",
+    "as_of_prefix_invariance",
+    "inadequate_coverage_null",
+    "t17_snapshot_compatibility_and_unchanged_rankings",
+    "real_and_forged_relabelled_input_rejected",
+    "frozen_full_history_not_filtered_for_map",
+    "immutable_outputs_hashes_versions_locks_interruptions_and_resource_failure",
+    "cli_script_other_cwd_quiet_help",
+    "witness_ids_follow_input_and_event_versions",
+    "rational_all_pair_expectations_from_persisted_events",
+    "rational_planted_tail_product_from_persisted_events"
+  ],
+  "timing_scope": "wall_seconds includes input generation, graph calculation and snapshot validation after imports; Python startup/import time is excluded. Independent persisted-table audit is timed separately.",
+  "smoke_runs": [
+    {
+      "report": {
+        "schema_version": "1.0",
+        "run_id": "graph-78996d920fe0762e36c3",
+        "status": "complete_demo",
+        "data_mode": "synthetic_demo",
+        "profiles": 120,
+        "segments": 1728,
+        "observations": 2019,
+        "table_rows": {
+          "graph_events.parquet": 474,
+          "graph_memberships.parquet": 1080,
+          "graph_links.parquet": 2019,
+          "coflight_edges.parquet": 383,
+          "graph_features.parquet": 120
+        },
+        "available_profiles": 72,
+        "repeated_edges": 148,
+        "excluded_observations": {
+          "incomplete_event_key": 324,
+          "profile_not_comparable": 353,
+          "participation_not_confirmed": 116,
+          "ambiguous_identity_or_resolution": 47
+        },
+        "null_model": {
+          "strata": 179,
+          "opportunity_pairs": 1261,
+          "family_size": 2556,
+          "simulations": 199,
+          "seed": 1801,
+          "version": "daily-route-partition-1.0"
+        },
+        "as_of": "2026-03-31",
+        "m07_status": "disabled",
+        "training_performed": false,
+        "ui_ready": false,
+        "acceptance": "pending_T20_review",
+        "elapsed_seconds": 0.664
+      },
+      "wall_seconds": 0.946,
+      "peak_rss_kib": 200988,
+      "snapshot": "artifacts/t18-final/120/graph-78996d920fe0762e36c3",
+      "run_manifest_sha256": "6fae0e7c3fb74631afa53f9bfc8c4986edec027c1a2a15beac91f00cb4583b97",
+      "persisted_tables_audit": "passed",
+      "rational_background_audit": "passed",
+      "audit_seconds": 0.088,
+      "planted_pair": [
+        "demo_profile_000012",
+        "demo_profile_000022"
+      ],
+      "demonstration_edge": {
+        "coflight_events": 18,
+        "distinct_days": 18,
+        "expected_days": 3.3091682826976947,
+        "excess_days": 14.690831717302306,
+        "p_exact": 1.508469327324782e-14,
+        "p_bonferroni": 3.8556476006421353e-11,
+        "mc_mean_days": 3.437185929648241,
+        "mc_mean_standard_error": 0.11652080595938817
+      }
+    },
+    {
+      "report": {
+        "schema_version": "1.0",
+        "run_id": "graph-187597eb750caa538a33",
+        "status": "complete_demo",
+        "data_mode": "synthetic_demo",
+        "profiles": 500,
+        "segments": 7200,
+        "observations": 8407,
+        "table_rows": {
+          "graph_events.parquet": 1854,
+          "graph_memberships.parquet": 4500,
+          "graph_links.parquet": 8407,
+          "coflight_edges.parquet": 2701,
+          "graph_features.parquet": 500
+        },
+        "available_profiles": 300,
+        "repeated_edges": 738,
+        "excluded_observations": {
+          "incomplete_event_key": 1350,
+          "profile_not_comparable": 1471,
+          "participation_not_confirmed": 482,
+          "ambiguous_identity_or_resolution": 195
+        },
+        "null_model": {
+          "strata": 179,
+          "opportunity_pairs": 21338,
+          "family_size": 44850,
+          "simulations": 199,
+          "seed": 1801,
+          "version": "daily-route-partition-1.0"
+        },
+        "as_of": "2026-03-31",
+        "m07_status": "disabled",
+        "training_performed": false,
+        "ui_ready": false,
+        "acceptance": "pending_T20_review",
+        "elapsed_seconds": 1.839
+      },
+      "wall_seconds": 2.32,
+      "peak_rss_kib": 274652,
+      "snapshot": "artifacts/t18-final/500/graph-187597eb750caa538a33",
+      "run_manifest_sha256": "5c78300a1d645d979b76e255a33a4a130df9eeee6e7fe84393fe6084254e0837",
+      "persisted_tables_audit": "passed",
+      "rational_background_audit": "passed",
+      "audit_seconds": 1.112,
+      "planted_pair": [
+        "demo_profile_000032",
+        "demo_profile_000042"
+      ],
+      "demonstration_edge": {
+        "coflight_events": 18,
+        "distinct_days": 18,
+        "expected_days": 0.609944454399074,
+        "excess_days": 17.390055545600926,
+        "p_exact": 2.0171425202600522e-27,
+        "p_bonferroni": 9.046884203366312e-23,
+        "mc_mean_days": 0.5778894472361809,
+        "mc_mean_standard_error": 0.052485725413778245
+      }
+    }
+  ],
+  "reference_links": [
+    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.permutation_test.html",
+    "https://www.statsmodels.org/stable/_modules/statsmodels/stats/multitest.html"
+  ],
+  "limitations": [
+    "Synthetic scenario arithmetic checks are not predictive validation on independent cases.",
+    "Conditional null assumes independent uniform allocation within daily route strata; multiple flights per profile within one stratum are unsupported and block publication.",
+    "Only observed eligible rosters define popularity; not aircraft capacity or complete real-world attendance.",
+    "M07 disabled, thresholds and sensitivity pending T20 and independent human review.",
+    "No real-person graph, no ML training, no interface; T19 must validate input/window/feature/missing-value contracts.",
+    "Peak RSS measured in Linux, not a Windows or real multi-million-record benchmark."
+  ],
+  "acceptance": "pending_T20_review",
+  "training_performed": false,
+  "m07_status": "disabled",
+  "ui_ready": false
+}

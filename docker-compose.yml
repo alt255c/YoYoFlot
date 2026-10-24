@@ -1,0 +1,14 @@
+services:
+  yoyoflot:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      YOYO_HOST: 0.0.0.0
+      YOYO_PORT: 8501
+      YOYO_AUTH_TOKEN: "${YOYO_AUTH_TOKEN:?Set YOYO_AUTH_TOKEN to your own random secret}"
+      YOYO_PRODUCT: /app/product
+      YOYO_SCORING_CONFIG: /app/configs/scoring.yaml
+    volumes:
+      - "${YOYO_PRODUCT_PATH:-./artifacts/source-product}:/app/product:ro"
+      - "${YOYO_SCORING_PATH:-./configs/scoring.yaml}:/app/configs/scoring.yaml:ro"

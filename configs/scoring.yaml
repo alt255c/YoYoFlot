@@ -1,0 +1,17 @@
+# Edit weights, then run build_and_run.sh to publish a consistent site and exports.
+# This file changes scoring only: conditions, thresholds and evidence stay frozen.
+# 0 disables a factor's points; unavailable evidence never receives points.
+version: scoring-1.0
+weights:
+  M01: 1.0  # Частота перелётов; максимум 3 × вес
+  M02: 1.5  # Быстрые возвраты; максимум 3 × вес
+  M03: 1.0  # Повторяемость маршрутов; максимум 3 × вес
+  D01: 2.0  # Конфликт документа
+  D03: 2.0  # Конфликт владельца билета; недоступен без подтверждённого эмитента
+  T01: 2.0  # Несовместимые перемещения; нет подтверждённых времён перемещений
+  L01: 0.8  # Общая карта лояльности
+  P01: 0.8  # Общий PNR
+  M07: 1.8  # Повторные совместные перелёты
+  D02: 0.9  # Несколько документов
+  N01: 0.7  # Отличие имени
+  B01: 1.2  # Повторные неявки; нет пассажирского статуса неявки

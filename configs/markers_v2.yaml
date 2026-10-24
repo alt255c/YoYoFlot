@@ -1,0 +1,209 @@
+# Source marker conditions consumed during the complete product build.
+version: markers-2.1-approved-policy
+approval_date: '2026-10-20'
+implementation_status: prepared_source_factors
+runtime_enabled: true
+score_purpose: existing_behavioral_ranking_with_document_conflicts_and_weak_signals
+ground_truth_labels_available: false
+weight_method: preserve_baseline_and_accumulating_secondary_review_signals
+group_aggregation: maximum_weight_independent_markers
+strong_total_contribution_cap: 6.0
+baseline_total_contribution_cap: 10.5
+weak_total_contribution_cap: 6.2
+weak_cap_without_unavailable_no_show: 5.0
+maximum_single_main_contribution: 4.5
+score_normalization_by_available_count: false
+evidence_deduplication:
+  unit: verified_underlying_fact
+  duplicate_source_rows_add_points: false
+  dependent_marker_contributions: maximum_total_without_shared_evidence
+  independent_marker_contributions: sum_up_to_criterion_caps
+  document_and_ticket_same_conflict_cap: 2.0
+  repeated_weak_and_baseline_markers: forbidden
+ranking_order:
+  - rule_score DESC
+  - person_id ASC
+duplicate_list_items:
+  frequent_flights: M01
+  quick_returns: M02
+  repeated_route: M03
+criteria:
+  D01:
+    title_ru: Конфликт паспортного документа
+    group_id: document_identity_conflict
+    role: strong
+    enabled: true
+    status: prepared_in_published_scoring
+    weight: 2.0
+    value_type: binary
+    threshold: 1
+    contribution_cap: 2.0
+    required:
+      - exact_document_value_within_same_namespace
+      - at_least_two_distinct_valid_birth_dates
+      - incompatible_surname_and_given_name
+      - original_record_locators
+    cross_source_independence_assumed: false
+    infer_document_type_or_issuer: false
+    multiply_by_record_or_source_count: false
+    person_link_policy: all_verified_person_links_required
+    ambiguous_identity_policy: retain_separate_conflict_members_without_person_merge
+  D03:
+    title_ru: Конфликт владельца билета
+    group_id: ticket_owner_conflict
+    role: strong
+    enabled: true
+    status: unavailable_on_current_dataset_missing_confirmed_ticket_issuer
+    weight: 2.0
+    value_type: binary
+    threshold: 1
+    contribution_cap: 2.0
+    required:
+      - exact_ticket_within_verified_issuer_namespace
+      - same_resolved_flight_event_and_ticket_segment
+      - distinct_document_values
+      - incompatible_names_and_birth_dates
+      - verified_profile_links_and_original_record_locators
+    shared_pnr_is_ticket_conflict: false
+    dependent_document_conflict_policy: max_2_points_per_underlying_conflict
+  T01:
+    title_ru: Несовместимые подтверждённые перемещения
+    group_id: incompatible_confirmed_movements
+    role: strong
+    enabled: true
+    status: unavailable_on_current_dataset_missing_confirmed_movement_times
+    weight: 2.0
+    value_type: binary
+    threshold: 1
+    contribution_cap: 2.0
+    required:
+      - verified_same_person_identity
+      - explicit_passenger_confirmation_of_both_movements
+      - precise_confirmed_departure_and_arrival_utc
+      - distinct_physical_flights_after_codeshare_and_duplicate_deduplication
+      - incompatible_time_intervals_and_airports
+      - original_record_locators
+    reservation_proves_movement: false
+    schedule_proves_passenger_movement: false
+    infer_missing_times_or_minimum_transfer_time: false
+    missing_required_evidence_policy: unavailable
+  M01:
+    title_ru: Частота перелётов
+    group_id: activity
+    role: baseline
+    enabled: true
+    status: existing_rule_preserved
+    weight: 1.0
+    feature: trip_rate_30_days
+    threshold_policy: retain_verified_M01_calibration_and_availability
+    contribution_formula: weight * min(3, value / threshold) when matched
+    contribution_cap: 3.0
+  M02:
+    title_ru: Быстрые возвраты
+    group_id: quick_return
+    role: baseline
+    enabled: true
+    status: existing_rule_preserved
+    weight: 1.5
+    feature: quick_return_share
+    threshold_policy: retain_verified_M02_calibration_and_availability
+    contribution_formula: weight * min(3, value / threshold) when matched
+    contribution_cap: 4.5
+  M03:
+    title_ru: Повторяемость маршрутов
+    group_id: repetition
+    role: baseline
+    enabled: true
+    status: existing_rule_preserved
+    weight: 1.0
+    feature: repeated_route_share
+    threshold_policy: retain_verified_M03_calibration_and_availability
+    contribution_formula: weight * min(3, value / threshold) when matched
+    contribution_cap: 3.0
+  L01:
+    title_ru: Общая карта лояльности
+    group_id: shared_loyalty_card
+    role: weak
+    enabled: true
+    status: source_assessment_prepared
+    weight: 0.8
+    value_type: binary
+    threshold: 1
+    contribution_cap: 0.8
+    required: [same_verified_programme_and_card, distinct_source_profiles, original_record_locators]
+  P01:
+    title_ru: Общий PNR
+    group_id: shared_booking
+    role: weak
+    enabled: true
+    status: prepared_in_published_scoring
+    weight: 0.8
+    value_type: binary
+    threshold: 1
+    contribution_cap: 0.8
+    required: [same_scoped_pnr, distinct_passenger_records, same_resolved_flight_event]
+    unrelated_pnr_reuse_policy: retain_as_data_quality_candidate_without_group_link
+  M07:
+    title_ru: Повторные совместные перелёты
+    group_id: coflight
+    role: weak
+    enabled: true
+    status: source_assessment_prepared
+    weight: 1.8
+    value_type: binary
+    threshold: 1
+    contribution_cap: 1.8
+    min_distinct_dates: 3
+    min_distinct_directed_routes: 2
+    required: [distinct_verified_profile_links, same_resolved_flight_event, original_segment_ids]
+    date_and_flight_number_alone_sufficient: false
+    infer_boarding_from_reservation: false
+  D02:
+    title_ru: Несколько документов у связанного профиля
+    group_id: multiple_documents
+    role: weak
+    enabled: true
+    status: source_assessment_prepared
+    weight: 0.9
+    value_type: binary
+    threshold: 1
+    contribution_cap: 0.9
+    required: [at_least_two_exact_document_values, verified_identity_link, comparable_name, no_known_birth_date_contradiction]
+    name_match_alone_merges_people: false
+    ambiguous_owner_policy: retain_candidate_without_person_attribution
+  N01:
+    title_ru: Ошибка в одной букве имени
+    group_id: single_letter_name_difference
+    role: weak
+    enabled: true
+    status: source_assessment_prepared
+    weight: 0.7
+    value_type: binary
+    threshold: 1
+    contribution_cap: 0.7
+    required: [exactly_one_letter_edit_after_normalization, verified_identity_link, no_known_birth_date_contradiction]
+    exclude_initials_token_order_and_transliteration: true
+    name_similarity_alone_attaches_document: false
+    search_scope: all_linked_profiles_without_accepted_gate
+    unconfirmed_candidates: show_related_profiles_without_points_or_merge
+    availability: comparable_full_name_and_completed_global_search
+    scored_match_requires: exact_scoped_document_or_loyalty_card_and_no_known_birth_date_conflict
+  B01:
+    title_ru: Повторные неявки на посадку
+    group_id: passenger_no_show
+    role: weak
+    enabled: true
+    status: unavailable_on_current_dataset
+    weight: 1.2
+    value_type: binary
+    threshold: 1
+    contribution_cap: 1.2
+    min_distinct_events: 3
+    required: [verified_person_event_link, explicit_passenger_no_show_status]
+    missing_boarding_record_is_no_show: false
+    flight_landed_status_is_passenger_status: false
+    unavailable_reason: В текущих источниках нет пассажирского статуса фактической неявки
+disabled_criteria:
+  M04: {weight: 0.0, reason: Всплеск активности не включён в согласованный список}
+  M05: {weight: 0.0, reason: Замкнутые цепочки не включены в согласованный список}
+  M06: {weight: 0.0, reason: Редкость маршрута не включена в согласованный список}

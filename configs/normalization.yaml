@@ -1,0 +1,24 @@
+version: '1.0'
+null_tokens: ['', 'None', 'Not presented', 'N/A']
+null_tokens_casefold: true
+unicode_form: NFKC
+transliteration: ru_ascii_v1
+# Source-specific formats: never swap month/day to make an invalid date fit.
+date_formats:
+  default:
+    birth_date: ['%d.%m.%Y', '%d/%m/%Y', '%Y/%m/%d']
+    departure: ['%d.%m.%Y %H:%M', '%d/%m/%Y %H:%M', '%Y/%m/%d %H:%M', '%d.%m.%Y', '%d/%m/%Y', '%Y/%m/%d']
+    arrival: ['%d.%m.%Y %H:%M', '%d/%m/%Y %H:%M', '%Y/%m/%d %H:%M', '%d.%m.%Y', '%d/%m/%Y', '%Y/%m/%d']
+  boarding_csv:
+    birth_date: ['%m/%d/%Y']
+    departure: []
+    arrival: []
+identifier_rules:
+  document: {strip_outer: true, case: preserve, namespace: source}
+  ticket: {strip_outer: true, case: preserve, namespace: source}
+  loyalty_card: {strip_outer: true, case: preserve, namespace: programme}
+# Explicit shared document types/issuers can be configured after verification.
+namespace_overrides: []
+# rule_id, source_id, entity_table, entity_id, field, original, replacement,
+# reason and evidence are required. Only supported normalized fields may change.
+manual_corrections: []

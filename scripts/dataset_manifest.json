@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "source_folder": "https://drive.google.com/drive/folders/19bCT5pKF-QnfW05FW0Eb2dUsMrrnbUSD?usp=sharing",
+  "archive": {
+    "name": "Airlines-All.zip",
+    "url": "https://drive.google.com/uc?id=1LkvceJHziGFI9abUb2qe8uErI4oudkbb&export=download",
+    "bytes": 477710849,
+    "sha256": "ce8aac0806d8c001fe1a4253176ad826ebf3f1487e54b8c6bcf46fa5848bcc1b"
+  },
+  "files": {
+    "BoardingData.csv": {"bytes": 19178467, "sha256": "9ba2c4be763f5c51b38f99e84e86b68737ba3dc0cfab00b498a9d3de029b053f"},
+    "Sirena-export-fixed.tab": {"bytes": 56128294, "sha256": "45c56c0f0c1f146468006788b7727dfd77d7222d9b34b3ad15fec208720cb261"},
+    "PointzAggregator-AirlinesData.xml": {"bytes": 146242307, "sha256": "71559a60837468731f8baa71c1ab9680a2248930ce9f476b6bf13aae6ad9a880"},
+    "Skyteam_Timetable.pdf": {"bytes": 311801125, "sha256": "b7b3848d320e788518c315fd2d7655106dd172692238bb34e02c9e8cd4daf34d"},
+    "SkyTeam-Exchange.yaml": {"bytes": 163560839, "sha256": "ce4e47a2ba6f3db6fca0e86f603de032d0b32e5e20f613b638dafee11b6ad2a9"},
+    "FrequentFlyerForum-Profiles.json": {"bytes": 567508577, "sha256": "3370f67664dfb2bf790ec343e971ffac95e42c0dd175c1b27037bac5868b1e8c"},
+    "YourBoardingPassDotAero.zip": {"bytes": 277220766, "sha256": "b8cdb37f8575538b07ed03a17cb740282c9682dfcaad3ff4e81c11eb8d4d35f6"}
+  }
+}

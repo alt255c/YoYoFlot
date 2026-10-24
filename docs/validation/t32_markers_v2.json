@@ -1,0 +1,545 @@
+{
+  "active_api": {
+    "assessment": {
+      "assessed": 789751,
+      "identity_accepted": 75415,
+      "profiles": 840606,
+      "ranked_with_signals": 5354,
+      "source_assessment_available": true,
+      "source_links_complete": 752103,
+      "unavailable": 50855,
+      "with_signals": 5354,
+      "without_signals": 784397
+    },
+    "eligible_users": 5354,
+    "loyalty_example": {
+      "display_name": "ROMAN MASLENNIKOV",
+      "factor_count": 12,
+      "person_id": "person_765aec187b937d428195688f9ae7038b88f7e7024cd1e5980d63d7cdd1014a70",
+      "score": 0.8,
+      "source_factor_results": [
+        {
+          "contribution": 0.0,
+          "criterion_id": "B01",
+          "dependent_on_criterion_id": null,
+          "status": "unavailable"
+        },
+        {
+          "contribution": 0.0,
+          "criterion_id": "D01",
+          "dependent_on_criterion_id": null,
+          "status": "unavailable"
+        },
+        {
+          "contribution": 0.0,
+          "criterion_id": "D02",
+          "dependent_on_criterion_id": null,
+          "status": "unavailable"
+        },
+        {
+          "contribution": 0.0,
+          "criterion_id": "D03",
+          "dependent_on_criterion_id": null,
+          "status": "unavailable"
+        },
+        {
+          "contribution": 0.8,
+          "criterion_id": "L01",
+          "dependent_on_criterion_id": null,
+          "status": "matched"
+        },
+        {
+          "contribution": 0.0,
+          "criterion_id": "M07",
+          "dependent_on_criterion_id": null,
+          "status": "unavailable"
+        },
+        {
+          "contribution": 0.0,
+          "criterion_id": "N01",
+          "dependent_on_criterion_id": null,
+          "status": "unavailable"
+        },
+        {
+          "contribution": 0.0,
+          "criterion_id": "P01",
+          "dependent_on_criterion_id": null,
+          "status": "unavailable"
+        },
+        {
+          "contribution": 0.0,
+          "criterion_id": "T01",
+          "dependent_on_criterion_id": null,
+          "status": "unavailable"
+        }
+      ]
+    },
+    "scoring": {
+      "assessment_manifest_sha256": "6a93aa8eed328b6a7e4f2507e7611cb9c739ca6fa4013e380ce8b1e93a34affe",
+      "cache": "temporary_per_process; source_parquet_unchanged",
+      "calculation_scope": "Already prepared factor results only; pending markers are not evaluated.",
+      "config_path": "C:\\Users\\dv-te\\Desktop\\DS\\yoyoflot\\configs\\scoring.yaml",
+      "config_sha256": "6a7c11bbd018467fa17399530ba79cda9d3f3a27e45214bc64cf0c0500a2189b",
+      "dependent_evidence_policy": "maximum points per connected group of verified underlying facts",
+      "forest_retrained": false,
+      "marker_count": 12,
+      "marker_statistics": [
+        {
+          "credited": 0,
+          "criterion_id": "B01",
+          "dependent": 0,
+          "evaluated": 0,
+          "matched": 0,
+          "sample_person_id": null,
+          "title_ru": "Повторные неявки на посадку",
+          "unavailable": 840606,
+          "weight": 1.2
+        },
+        {
+          "credited": 6,
+          "criterion_id": "D01",
+          "dependent": 0,
+          "evaluated": 151878,
+          "matched": 6,
+          "sample_person_id": "person_085934b191ca30c2d2f088dde1c9e4663db661dabc5565546d5395716c79a7a0",
+          "title_ru": "Конфликт паспортного документа",
+          "unavailable": 688728,
+          "weight": 2.0
+        },
+        {
+          "credited": 0,
+          "criterion_id": "D02",
+          "dependent": 0,
+          "evaluated": 15690,
+          "matched": 0,
+          "sample_person_id": null,
+          "title_ru": "Несколько документов у связанного профиля",
+          "unavailable": 824916,
+          "weight": 0.9
+        },
+        {
+          "credited": 0,
+          "criterion_id": "D03",
+          "dependent": 0,
+          "evaluated": 0,
+          "matched": 0,
+          "sample_person_id": null,
+          "title_ru": "Конфликт владельца билета",
+          "unavailable": 840606,
+          "weight": 2.0
+        },
+        {
+          "credited": 2,
+          "criterion_id": "L01",
+          "dependent": 0,
+          "evaluated": 138709,
+          "matched": 2,
+          "sample_person_id": "person_765aec187b937d428195688f9ae7038b88f7e7024cd1e5980d63d7cdd1014a70",
+          "title_ru": "Общая карта лояльности",
+          "unavailable": 701897,
+          "weight": 0.8
+        },
+        {
+          "credited": 1841,
+          "criterion_id": "M01",
+          "dependent": 0,
+          "evaluated": 28522,
+          "matched": 1841,
+          "sample_person_id": "person_000ef1438a70f71b3f738021039dd2719d9515aa91635ef5250ed55872371855",
+          "title_ru": "Частота перелётов",
+          "unavailable": 812084,
+          "weight": 1.0
+        },
+        {
+          "credited": 1566,
+          "criterion_id": "M02",
+          "dependent": 0,
+          "evaluated": 26349,
+          "matched": 1566,
+          "sample_person_id": "person_00036114a9460fa872022285a706ff63e774a24bbf76c05239b48d96e0a5ac8a",
+          "title_ru": "Быстрые возвраты",
+          "unavailable": 814257,
+          "weight": 1.5
+        },
+        {
+          "credited": 2346,
+          "criterion_id": "M03",
+          "dependent": 0,
+          "evaluated": 42153,
+          "matched": 2346,
+          "sample_person_id": "person_0017ab88ea47bd7a24833eeb0ecbe2516eb2db75084ed70d429dfcf99e73261b",
+          "title_ru": "Повторяемость маршрутов",
+          "unavailable": 798453,
+          "weight": 1.0
+        },
+        {
+          "credited": 0,
+          "criterion_id": "M07",
+          "dependent": 0,
+          "evaluated": 507854,
+          "matched": 0,
+          "sample_person_id": null,
+          "title_ru": "Повторные совместные перелёты",
+          "unavailable": 332752,
+          "weight": 1.8
+        },
+        {
+          "credited": 0,
+          "criterion_id": "N01",
+          "dependent": 0,
+          "evaluated": 16601,
+          "matched": 0,
+          "sample_person_id": null,
+          "title_ru": "Отличие имени на одну букву",
+          "unavailable": 824005,
+          "weight": 0.7
+        },
+        {
+          "credited": 0,
+          "criterion_id": "P01",
+          "dependent": 0,
+          "evaluated": 628218,
+          "matched": 0,
+          "sample_person_id": null,
+          "title_ru": "Общий PNR",
+          "unavailable": 212388,
+          "weight": 0.8
+        },
+        {
+          "credited": 0,
+          "criterion_id": "T01",
+          "dependent": 0,
+          "evaluated": 0,
+          "matched": 0,
+          "sample_person_id": null,
+          "title_ru": "Несовместимые подтверждённые перемещения",
+          "unavailable": 840606,
+          "weight": 2.0
+        }
+      ],
+      "pending_markers": [],
+      "prepared_markers": [
+        "B01",
+        "D01",
+        "D02",
+        "D03",
+        "L01",
+        "M01",
+        "M02",
+        "M03",
+        "M07",
+        "N01",
+        "P01",
+        "T01"
+      ],
+      "product_manifest_sha256": "5e5e8046fb63ef35574da83f26f859be7195a418cd3858a9966f9f8fcad5cb44",
+      "run_id": "scoring-79f45b6b5d3e70b29aec",
+      "sort_order": [
+        "rule_score DESC",
+        "person_id ASC"
+      ],
+      "version": "runtime-scoring:1.1",
+      "weights": {
+        "B01": 1.2,
+        "D01": 2.0,
+        "D02": 0.9,
+        "D03": 2.0,
+        "L01": 0.8,
+        "M01": 1.0,
+        "M02": 1.5,
+        "M03": 1.0,
+        "M07": 1.8,
+        "N01": 0.7,
+        "P01": 0.8,
+        "T01": 2.0
+      },
+      "zero_weight_policy": "no_points_or_ranking_signal; observed_status_retained"
+    },
+    "source_assessment": {
+      "path": "C:\\Users\\dv-te\\Desktop\\DS\\yoyoflot\\artifacts\\source-assessment-v2",
+      "pending_source_markers": [],
+      "prepared_source_markers": [
+        "B01",
+        "D01",
+        "D02",
+        "D03",
+        "L01",
+        "M07",
+        "N01",
+        "P01",
+        "T01"
+      ],
+      "run_id": "assessment-b0703ebd98d53cc3e7a8",
+      "unavailable_reasons": {
+        "B01": "В источниках нет явного пассажирского статуса неявки; отсутствие строки не считается неявкой",
+        "D03": "Нет подтверждённого пространства имён эмитента билета; один источник или номер рейса не устанавливает эмитента",
+        "T01": "Нет двух подтверждённых перемещений с точными временами вылета и прибытия: прибытия есть только у броней Sirena"
+      },
+      "version": "source-assessment:2.0"
+    }
+  },
+  "assessment_manifest_sha256": "6a93aa8eed328b6a7e4f2507e7611cb9c739ca6fa4013e380ce8b1e93a34affe",
+  "assessment_run_id": "assessment-b0703ebd98d53cc3e7a8",
+  "build_report": {
+    "all_inputs_unchanged": true,
+    "canonical_status": "complete_with_errors",
+    "checks": {
+      "associations_exceed_frozen_observation_count": 0,
+      "baseline_rows_changed": 0,
+      "duplicate_profile_assessments": 0,
+      "inferred_no_shows": 0,
+      "person_anchors_unresolved": 0,
+      "segment_anchors_unresolved": 0
+    },
+    "counts": {
+      "conflict_members": 6,
+      "document_conflicts": 2,
+      "marker_coverage": 10087272,
+      "marker_dependencies": 8,
+      "marker_evidence": 1676494,
+      "profile_assessments": 840606,
+      "profile_identifiers": 2476051,
+      "segment_source_links": 2979166,
+      "source_links": 2101112
+    },
+    "field_audit": {
+      "name_comparison_policy": "ASCII names after known canonical transliteration; token order and initials excluded; common Latin variants suppressed; no identity assignment by name",
+      "oversized_coflight_events_excluded": 0,
+      "oversized_loyalty_blocks_excluded": 0,
+      "repeated_companion_pairs": 0,
+      "shared_loyalty_cards": 1,
+      "single_letter_pairs": 0,
+      "travel_fields": [
+        {
+          "arrival_times": 0,
+          "event_kind": "boarding_record",
+          "explicit_no_shows": 0,
+          "records": 155147,
+          "source_id": "boarding_csv"
+        },
+        {
+          "arrival_times": 0,
+          "event_kind": "boarding_pass_record",
+          "explicit_no_shows": 0,
+          "records": 615771,
+          "source_id": "boardingpass_xlsx"
+        },
+        {
+          "arrival_times": 0,
+          "event_kind": "registered_flight",
+          "explicit_no_shows": 0,
+          "records": 1308987,
+          "source_id": "forum_json"
+        },
+        {
+          "arrival_times": 0,
+          "event_kind": "loyalty_activity",
+          "explicit_no_shows": 0,
+          "records": 436090,
+          "source_id": "pointz_xml"
+        },
+        {
+          "arrival_times": 155757,
+          "event_kind": "reservation_record",
+          "explicit_no_shows": 0,
+          "records": 155757,
+          "source_id": "sirena_fixed"
+        },
+        {
+          "arrival_times": 0,
+          "event_kind": "exchange_record",
+          "explicit_no_shows": 0,
+          "records": 1687053,
+          "source_id": "skyteam_yaml"
+        }
+      ],
+      "unavailable_reasons": {
+        "B01": "В источниках нет явного пассажирского статуса неявки; отсутствие строки не считается неявкой",
+        "D03": "Нет подтверждённого пространства имён эмитента билета; один источник или номер рейса не устанавливает эмитента",
+        "T01": "Нет двух подтверждённых перемещений с точными временами вылета и прибытия: прибытия есть только у броней Sirena"
+      }
+    },
+    "limitations": [
+      "Exact anchors recover source associations, not all T13 component members; completeness is measured per profile.",
+      "Ambiguous identity remains ambiguous. Source checks apply to linked records, not a proven unique physical person.",
+      "Not matched means no match in the observed linked records; completeness of external passenger lists is unknown.",
+      "PNR is scoped to source, local departure, flight and resolved route; unrelated code reuse does not create a shared booking.",
+      "New source markers are evaluated separately and do not change baseline ranks, weights or scores in this step.",
+      "No passenger no-show status exists; B01 is unavailable.",
+      "The canonical PDF report is incomplete; this supplement does not consume or repair historical timetable data."
+    ],
+    "marker_states": [
+      {
+        "criterion_id": "B01",
+        "profiles": 840606,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "D01",
+        "profiles": 6,
+        "status": "matched"
+      },
+      {
+        "criterion_id": "D01",
+        "profiles": 151872,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "D01",
+        "profiles": 688728,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "D02",
+        "profiles": 15690,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "D02",
+        "profiles": 824916,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "D03",
+        "profiles": 840606,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "L01",
+        "profiles": 2,
+        "status": "matched"
+      },
+      {
+        "criterion_id": "L01",
+        "profiles": 138707,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "L01",
+        "profiles": 701897,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "M01",
+        "profiles": 1841,
+        "status": "matched"
+      },
+      {
+        "criterion_id": "M01",
+        "profiles": 26681,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "M01",
+        "profiles": 812084,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "M02",
+        "profiles": 1566,
+        "status": "matched"
+      },
+      {
+        "criterion_id": "M02",
+        "profiles": 24783,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "M02",
+        "profiles": 814257,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "M03",
+        "profiles": 2346,
+        "status": "matched"
+      },
+      {
+        "criterion_id": "M03",
+        "profiles": 39807,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "M03",
+        "profiles": 798453,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "M07",
+        "profiles": 507854,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "M07",
+        "profiles": 332752,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "N01",
+        "profiles": 16601,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "N01",
+        "profiles": 824005,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "P01",
+        "profiles": 628218,
+        "status": "not_matched"
+      },
+      {
+        "criterion_id": "P01",
+        "profiles": 212388,
+        "status": "unavailable"
+      },
+      {
+        "criterion_id": "T01",
+        "profiles": 840606,
+        "status": "unavailable"
+      }
+    ],
+    "pending_source_markers": [],
+    "prepared_source_markers": [
+      "B01",
+      "D01",
+      "D02",
+      "D03",
+      "L01",
+      "M07",
+      "N01",
+      "P01",
+      "T01"
+    ],
+    "product_run_id": "product-41e7bf659768cc4510d2",
+    "restored_version_anchors": {
+      "person_anchors": 115796,
+      "segment_anchors": 144586
+    },
+    "source_version_bridges": [
+      {
+        "canonical_sha256": "df4820d3e6a80971be2d9ff96a0b6a5638bcf93e6cdfa0bcc819b44385c83b66",
+        "original_sha256": "45c56c0f0c1f146468006788b7727dfd77d7222d9b34b3ad15fec208720cb261",
+        "proof": "whole_file_CRLF_to_LF_equality",
+        "source_id": "sirena_fixed"
+      }
+    ],
+    "statistics": {
+      "assessed": 789751,
+      "identity_accepted": 75415,
+      "profiles": 840606,
+      "source_links_complete": 752103,
+      "unavailable": 50855,
+      "with_signals": 5354,
+      "without_signals": 784397
+    },
+    "version": "source-assessment:2.0"
+  },
+  "rejected_preliminary_result": {
+    "active": false,
+    "reason": "Manual source inspection found Latin spelling variants (MAIOROV/MAYOROV, ALEXEY/ALEKSEY) incorrectly counted as different owners/name errors; excluded before activation.",
+    "with_signals": 8466
+  },
+  "scope": "Real existing repository dataset; no generated passengers or detection-accuracy claims."
+}

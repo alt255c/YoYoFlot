@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "scope": "independent_fictional_holdout; labels_are_designed_cases_not_person_traits",
+  "recipe": {
+    "generator": "yoyoflot-independent-holdout-v1",
+    "seed": 303,
+    "profiles": 120,
+    "window_start": "2026-01-01",
+    "window_end": "2026-03-31"
+  },
+  "expected": {
+    "profiles": 120,
+    "comparable_profiles": 80,
+    "insufficient_profiles": 40,
+    "stress_labels": 42,
+    "control_labels": 38,
+    "unknown_labels": 40,
+    "coflight_pair": ["holdout_profile_0000012f_000012", "holdout_profile_0000012f_000024"]
+  },
+  "controls": ["sparse_control", "business_control", "holiday_control", "shared_schedule"],
+  "stress_cases": ["activity_stress", "reversal_stress", "cycle_stress", "slow_repeat_stress", "coflight_stress"],
+  "unavailable_cases": ["unknown_dates", "unknown_routes", "low_coverage", "empty_history"]
+}

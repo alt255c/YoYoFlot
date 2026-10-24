@@ -1,50 +1,53 @@
-# Данные
-/data/
-
-# Виртуальные окружения Python
+# Python environments and generated package files
+.venv
+.venv-*/
 venv/
-.venv/
 env/
 ENV/
-
-# Бинарные и скомпилированные файлы
-*so
-*bin
-*exe
-*out
-
-# Кэш Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.pyo
-*.pyd
-
-# Пакеты и сборки
-build/
-dist/
 *.egg-info/
-.eggs/
+/build/
+/dist/
 
-# Jupyter Notebook
-.ipynb_checkpoints/
-
-# Логи и временные файлы
-*.log
-*.tmp
-*.temp
+# Local settings and credentials; keep configuration templates
+.env
+.env.*
+!.env.example
+!.env.*.example
+.idea/
+.vscode/
 .DS_Store
 Thumbs.db
 
-# IDE / редакторы
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Tests, coverage, notebooks and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.tox/
+.nox/
+.ipynb_checkpoints/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.log
 
-# Переменные окружения и секреты
-.env
-.env.local
-*.key
-*.pem
+# Original downloads and reproducible pipeline outputs
+# Reference data, source configuration and test fixtures remain versioned.
+/data/raw/
+/data/downloads/
+/data/work/
+/data/interim/
+/data/processed/
+/artifacts/
+/outputs/
+/logs/
+/tmp/
+
+# Source archives exported into the repository root
+/*.zip
+/*.tar
+/*.tar.gz
+/*.tgz

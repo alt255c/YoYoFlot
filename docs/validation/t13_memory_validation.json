@@ -1,0 +1,146 @@
+{
+  "date": "2026-10-17",
+  "package": "0.6.1",
+  "resolution_contract": "1.0",
+  "resolution_rules": "resolution:1.0",
+  "scope": "synthetic_fixtures_synthetic_real_row_count_preparation_and_installed_wheel",
+  "python": "3.12.14",
+  "tests": {
+    "tests": 279,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_seconds": 52.852,
+  "original_and_T11_T12_regressions": 226,
+  "t13_cases": 53,
+  "default_settings": {
+    "memory_limit": "1GB",
+    "duckdb_threads": 1,
+    "aggregation_batch_groups": 16384
+  },
+  "preparation_benchmark": {
+    "scope": "synthetic_preparation_and_blocking_only",
+    "observations": 2746977,
+    "identifiers": 3207435,
+    "measurements": {
+      "unbounded_control": {
+        "mode": "unbounded_control",
+        "scope": "synthetic_preparation_and_blocking_only",
+        "resolution_version": "resolution:1.0",
+        "memory_limit": "512MB",
+        "threads": 2,
+        "status": "out_of_memory",
+        "exception_type": "OutOfMemoryException",
+        "message": "Out of Memory Error: failed to allocate data of size 16.0 MiB (479.1 MiB/488.2 MiB used)\n\nPossible solutions:\n* Reducing the number of threads (SET threads=X)\n* Disabling insertion-order preservation (SET preserve_insertion_order=false)\n* Increasing the memory limit (SET memory_limit='...GB')\n\nSee also https://duckdb.org/docs/stable/guides/performance/how_to_tune_workloads",
+        "last_phase": "привязка идентификаторов к наблюдениям",
+        "seconds": 22.995,
+        "peak_rss_mib": 895.66
+      },
+      "fixed": {
+        "mode": "fixed",
+        "scope": "synthetic_preparation_and_blocking_only",
+        "resolution_version": "resolution:1.0",
+        "memory_limit": "512MB",
+        "threads": 1,
+        "status": "complete",
+        "observations": 2746977,
+        "identifiers": 3207435,
+        "distinct_document_values": 686745,
+        "candidate_pairs": 686744,
+        "candidate_upper_bound": 686744,
+        "balances_verified": true,
+        "last_phase": "сборка свидетельств пар по порциям",
+        "seconds": 187.598,
+        "peak_rss_mib": 847.12
+      }
+    },
+    "limitations": "Same row counts are not the same real payloads, candidate distribution, full run or identity accuracy."
+  },
+  "compatibility": {
+    "scope": "same_synthetic_40000_observation_snapshot_before_after_fix",
+    "package": "0.6.1",
+    "installed_wheel": true,
+    "memory_limit": "512MB",
+    "duckdb_threads": 1,
+    "aggregation_batch_groups": 16384,
+    "counts": {
+      "persons": {
+        "rows": 20000,
+        "changed_rows": 0
+      },
+      "person_links": {
+        "rows": 40000,
+        "changed_rows": 0
+      },
+      "person_pairs": {
+        "rows": 20000,
+        "changed_rows": 0
+      },
+      "segments": {
+        "rows": 20000,
+        "changed_rows": 0
+      },
+      "segment_links": {
+        "rows": 60000,
+        "changed_rows": 0
+      },
+      "conflicts": {
+        "rows": 0,
+        "changed_rows": 0
+      },
+      "blocking_issues": {
+        "rows": 0,
+        "changed_rows": 0
+      }
+    },
+    "all_rows_semantically_identical": true,
+    "quiet_stdout_empty": true,
+    "quiet_stderr_empty": true,
+    "resolution_seconds": 10.715,
+    "fresh_process_peak_rss_mib": 439.45
+  },
+  "installed_smoke": {
+    "package": "0.6.1",
+    "imported_from": "/workspace/scratch/45cb65ef93ca/t13_memory_installed/yoyoflot/__init__.py",
+    "personal_sources": 6,
+    "counts": {
+      "persons": 6,
+      "person_links": 9,
+      "person_pairs": 5,
+      "segments": 9,
+      "segment_links": 9,
+      "conflicts": 0,
+      "blocking_issues": 0
+    },
+    "memory_limit": "1GB",
+    "duckdb_threads": 1,
+    "aggregation_batch_groups": 16384,
+    "quiet_stdout_empty": true,
+    "quiet_stderr_empty": true,
+    "normal_summary_matches_file": true,
+    "audit_does_not_rebuild": true,
+    "real_data_run": false
+  },
+  "wheel_sha256": "a8f302dd0e72f66146ee715b2bf60de9e1943d3127cad1b683a8f8db2c1fcf0f",
+  "user_real_run": {
+    "package": "0.6.0",
+    "status": "failed",
+    "exception_type": "OutOfMemoryException",
+    "memory_limit": "512MB",
+    "phase": "подготовка наблюдений и свидетельств",
+    "source": "user supplied terminal log",
+    "exact_sql_statement": "not present in supplied log"
+  },
+  "real_data_run": "0.6.1 pending; full canonical and geography tables not supplied",
+  "native_windows_tested": false,
+  "independent_real_100_pair_review": "pending; not fabricated",
+  "limitations": [
+    "The preparation benchmark uses synthetic values and only the same row counts as the supplied T12 report.",
+    "The large benchmark covers preparation and blocking, not matching all people or full event deduplication.",
+    "The 40000-profile before/after comparison covers the complete pipeline on an existing synthetic snapshot.",
+    "DuckDB memory_limit does not cap Python, Arrow or total process RSS.",
+    "The unbounded control may fail before list aggregation; last_phase records the actual failing stage.",
+    "No real T13 completion or global identity accuracy is claimed."
+  ]
+}

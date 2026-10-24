@@ -1,0 +1,6 @@
+2017-01-01:
+  AB001:
+    FROM: AAA
+    TO: BBB
+    STATUS: UNKNOWN
+    FF: {AA: 0012, BB: 0012}

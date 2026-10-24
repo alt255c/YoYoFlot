@@ -1,0 +1,38 @@
+{
+  "scope": "synthetic_only",
+  "tables": {
+    "boarding_csv": {
+      "person_observations": 1,
+      "identifiers": 2,
+      "travel_observations": 1
+    },
+    "forum_json": {
+      "person_observations": 2,
+      "identifiers": 4,
+      "travel_observations": 3
+    },
+    "pointz_xml": {
+      "person_observations": 2,
+      "identifiers": 2,
+      "travel_observations": 1
+    },
+    "sirena_fixed": {
+      "person_observations": 1,
+      "identifiers": 2,
+      "travel_observations": 1
+    },
+    "skyteam_yaml": {
+      "person_observations": 2,
+      "identifiers": 2,
+      "travel_observations": 2
+    },
+    "boardingpass_xlsx": {
+      "person_observations": 1,
+      "identifiers": 1,
+      "travel_observations": 1
+    },
+    "timetable_pdf": {
+      "schedules": 5
+    }
+  }
+}

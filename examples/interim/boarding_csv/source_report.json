@@ -1,0 +1,26 @@
+{
+  "source_id": "boarding_csv",
+  "input_path": "/workspace/scratch/45cb65ef93ca/YoYoFlot/tests/fixtures/boarding.csv",
+  "sha256": "30f34db51a5180b218f8395788f26a6163b02ceef86af77fabc15c4d3ee78dbd",
+  "contract_version": "1.0",
+  "reader_version": "1.0",
+  "options": {
+    "batch_size": 2,
+    "encoding": "utf-8-sig"
+  },
+  "status": "complete",
+  "counts": {
+    "provenance": 4,
+    "identifiers": 2,
+    "person_observations": 1,
+    "travel_observations": 1,
+    "schedules": 0,
+    "errors": 0
+  },
+  "input_counts": {
+    "input_rows": 1
+  },
+  "error_severities": {},
+  "seconds": 0.009600933000911027,
+  "process_peak_rss_mib": 70.13671875
+}

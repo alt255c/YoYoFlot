@@ -1,0 +1,26 @@
+{
+  "source_id": "skyteam_yaml",
+  "input_path": "/workspace/scratch/45cb65ef93ca/YoYoFlot/tests/fixtures/skyteam.yaml",
+  "sha256": "a6e32e07d68a15db1f810651bc175c52c3e425b7f927b0367363a1a3d8e129a6",
+  "contract_version": "1.0",
+  "reader_version": "1.0",
+  "options": {
+    "batch_size": 2
+  },
+  "status": "complete",
+  "counts": {
+    "provenance": 6,
+    "person_observations": 2,
+    "identifiers": 2,
+    "travel_observations": 2,
+    "schedules": 0,
+    "errors": 0
+  },
+  "input_counts": {
+    "flights": 1,
+    "cards": 2
+  },
+  "error_severities": {},
+  "seconds": 0.010463834001711803,
+  "process_peak_rss_mib": 89.796875
+}

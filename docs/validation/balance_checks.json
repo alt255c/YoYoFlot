@@ -1,0 +1,56 @@
+{
+  "boarding_csv": {
+    "status": "passed",
+    "expected_counts": {
+      "people": 155147,
+      "identifiers": null,
+      "travels": 155147
+    },
+    "input_sha256_match": true
+  },
+  "forum_json": {
+    "status": "passed",
+    "expected_counts": {
+      "people": 66592,
+      "identifiers": 88827,
+      "travels": 1308987
+    },
+    "input_sha256_match": true
+  },
+  "pointz_xml": {
+    "status": "passed",
+    "expected_counts": {
+      "people": 66657,
+      "identifiers": 88818,
+      "travels": 436090
+    },
+    "input_sha256_match": true
+  },
+  "sirena_fixed": {
+    "status": "passed",
+    "expected_counts": {
+      "people": 155757,
+      "identifiers": null,
+      "travels": 155757
+    },
+    "input_sha256_match": true
+  },
+  "skyteam_yaml": {
+    "status": "passed",
+    "expected_counts": {
+      "people": 1687053,
+      "identifiers": 1687053,
+      "travels": 1687053
+    },
+    "input_sha256_match": true
+  },
+  "boardingpass_xlsx": {
+    "status": "passed",
+    "expected_counts": {
+      "people": 615771,
+      "identifiers": null,
+      "travels": 615771
+    },
+    "input_sha256_match": true
+  }
+}

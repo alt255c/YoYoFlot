@@ -1,0 +1,31 @@
+{
+  "pages": 101,
+  "rows": 8000,
+  "before": {
+    "seconds": 5.856136185000651,
+    "rows": 8000,
+    "counts": {
+      "schedules": 8000,
+      "provenance": 8000,
+      "person_observations": 0,
+      "identifiers": 0,
+      "travel_observations": 0,
+      "errors": 0
+    }
+  },
+  "after": {
+    "seconds": 1.7468488980011898,
+    "rows": 8000,
+    "counts": {
+      "schedules": 8000,
+      "provenance": 8000,
+      "person_observations": 0,
+      "identifiers": 0,
+      "travel_observations": 0,
+      "errors": 0
+    }
+  },
+  "cached_seconds": 0.006353351000143448,
+  "all_six_tables_identical_except_text_archive_reference": true,
+  "measurement": "Linux Python 3.12; synthetic PDF; cProfile enabled for before/after; real Windows PDF not available"
+}

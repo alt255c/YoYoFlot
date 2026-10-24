@@ -1,0 +1,194 @@
+{
+  "boarding_csv": {
+    "person_observations": {
+      "rows": 155147,
+      "nonnull": {
+        "name_raw": 155147,
+        "birth_date": 155147,
+        "sex": 155147,
+        "nickname": 0,
+        "external_id": 0
+      }
+    },
+    "travel_observations": {
+      "rows": 155147,
+      "nonnull": {
+        "flight_number": 155147,
+        "origin_raw": 0,
+        "destination_raw": 155147,
+        "departure_local": 155147,
+        "arrival_local": 0,
+        "codeshare": 155147,
+        "ticket_number": 77347,
+        "loyalty_identifier_id": 0
+      }
+    },
+    "departure_precision": {
+      "minute": 155147
+    },
+    "departure_range": [
+      "2017-01-01T00:00",
+      "2018-01-01T22:50"
+    ]
+  },
+  "forum_json": {
+    "person_observations": {
+      "rows": 66592,
+      "nonnull": {
+        "name_raw": 33460,
+        "birth_date": 0,
+        "sex": 50155,
+        "nickname": 66592,
+        "external_id": 0
+      }
+    },
+    "travel_observations": {
+      "rows": 1308987,
+      "nonnull": {
+        "flight_number": 1308987,
+        "origin_raw": 1308987,
+        "destination_raw": 1308987,
+        "departure_local": 1308987,
+        "arrival_local": 0,
+        "codeshare": 1308987,
+        "ticket_number": 0,
+        "loyalty_identifier_id": 0
+      }
+    },
+    "departure_precision": {
+      "date": 1308987
+    },
+    "departure_range": [
+      "2017-01-01",
+      "2018-01-01"
+    ]
+  },
+  "pointz_xml": {
+    "person_observations": {
+      "rows": 66657,
+      "nonnull": {
+        "name_raw": 66657,
+        "birth_date": 0,
+        "sex": 0,
+        "nickname": 0,
+        "external_id": 66657
+      }
+    },
+    "travel_observations": {
+      "rows": 436090,
+      "nonnull": {
+        "flight_number": 436090,
+        "origin_raw": 436090,
+        "destination_raw": 436090,
+        "departure_local": 436090,
+        "arrival_local": 0,
+        "codeshare": 0,
+        "ticket_number": 0,
+        "loyalty_identifier_id": 436090
+      }
+    },
+    "departure_precision": {
+      "date": 436090
+    },
+    "departure_range": [
+      "2017-01-01",
+      "2018-01-01"
+    ]
+  },
+  "sirena_fixed": {
+    "person_observations": {
+      "rows": 155757,
+      "nonnull": {
+        "name_raw": 155757,
+        "birth_date": 77703,
+        "sex": 0,
+        "nickname": 0,
+        "external_id": 0
+      }
+    },
+    "travel_observations": {
+      "rows": 155757,
+      "nonnull": {
+        "flight_number": 155757,
+        "origin_raw": 155757,
+        "destination_raw": 155757,
+        "departure_local": 155757,
+        "arrival_local": 155757,
+        "codeshare": 155757,
+        "ticket_number": 155757,
+        "loyalty_identifier_id": 51917
+      }
+    },
+    "departure_precision": {
+      "minute": 155757
+    },
+    "departure_range": [
+      "2017-01-01T00:00",
+      "2018-01-01T23:10"
+    ]
+  },
+  "skyteam_yaml": {
+    "person_observations": {
+      "rows": 1687053,
+      "nonnull": {
+        "name_raw": 0,
+        "birth_date": 0,
+        "sex": 0,
+        "nickname": 0,
+        "external_id": 0
+      }
+    },
+    "travel_observations": {
+      "rows": 1687053,
+      "nonnull": {
+        "flight_number": 1687053,
+        "origin_raw": 1687053,
+        "destination_raw": 1687053,
+        "departure_local": 1687053,
+        "arrival_local": 0,
+        "codeshare": 0,
+        "ticket_number": 0,
+        "loyalty_identifier_id": 1687053
+      }
+    },
+    "departure_precision": {
+      "date": 1687053
+    },
+    "departure_range": [
+      "2017-01-01",
+      "2018-01-01"
+    ]
+  },
+  "boardingpass_xlsx": {
+    "person_observations": {
+      "rows": 615771,
+      "nonnull": {
+        "name_raw": 615771,
+        "birth_date": 0,
+        "sex": 0,
+        "nickname": 0,
+        "external_id": 0
+      }
+    },
+    "travel_observations": {
+      "rows": 615771,
+      "nonnull": {
+        "flight_number": 615771,
+        "origin_raw": 615771,
+        "destination_raw": 615771,
+        "departure_local": 615771,
+        "arrival_local": 0,
+        "codeshare": 0,
+        "ticket_number": 615771,
+        "loyalty_identifier_id": 131041
+      }
+    },
+    "departure_precision": {
+      "minute": 615771
+    },
+    "departure_range": [
+      "2017-01-01T00:00",
+      "2018-01-01T23:55"
+    ]
+  }
+}

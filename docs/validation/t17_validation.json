@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "task": "T17",
+  "date": "2026-10-17",
+  "package_version": "0.8.0",
+  "branch": "reape/T17",
+  "base_branch": "reape/T16",
+  "base_commit": "0f3c311448db83ae5e9251f2431d866bc44c3530",
+  "scope": "independent_fictional_teaching_profiles_only",
+  "environment": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "pyarrow": "26.0.0",
+    "model_runtime": {
+      "code_sha256": "79d8485874672f1b0471bf2bd3d8817f535e8991eb529de067a75b49c4b954ad",
+      "package_version": "0.8.0",
+      "pyarrow": "26.0.0",
+      "python": "3.12.14",
+      "pyyaml": "6.0.3"
+    }
+  },
+  "test_suite": {
+    "command": "python -m pytest -q",
+    "exit_code": 0,
+    "passed": 348,
+    "t17_new_tests": 48,
+    "elapsed_seconds": 57.3
+  },
+  "checks": [
+    "independent_generator_replay",
+    "relabelled_and_checksum_forged_real_rows_rejected",
+    "three_groups_above_two_regardless_of_weights",
+    "correlated_group_cap",
+    "top50_boundaries_0_1_49_50_60",
+    "stable_ties_and_shuffled_rows",
+    "duplicate_evidence_deduplication",
+    "missing_values_and_inadequate_coverage_unranked",
+    "day_ties_and_unknown_dates_no_invented_order",
+    "known_route_denominator_and_explicit_window",
+    "russian_reasons_values_thresholds_window_and_owned_evidence",
+    "strict_config_validation_and_disabled_future_criteria",
+    "immutable_snapshot_hashes_versions_and_replay",
+    "concurrent_writer_and_keyboard_interrupt_cleanup",
+    "cli_quiet_help_and_script_from_other_cwd"
+  ],
+  "smoke_runs": [
+    {
+      "report": {
+        "schema_version": "1.0",
+        "run_id": "rules-964a5e57e7f9cdf5a660",
+        "data_mode": "synthetic_demo",
+        "status": "complete_demo",
+        "profiles": 120,
+        "segments": 1728,
+        "top50": 50,
+        "eligibility": {
+          "eligible": 60,
+          "no_matches": 12,
+          "insufficient_data": 48
+        },
+        "matched_groups": {
+          "0": 48,
+          "1": 48,
+          "2": 12,
+          "3": 12
+        },
+        "criteria_rows": 840,
+        "elapsed_seconds": 0.032,
+        "threshold_status": "illustrative_unvalidated",
+        "acceptance": "pending_T20_review",
+        "ui_ready": false,
+        "limitation_ru": "Независимый вымышленный учебный набор. Баллы не являются вероятностью или выводом о человеке."
+      },
+      "wall_seconds": 0.272,
+      "peak_rss_kib": 134840,
+      "snapshot": "artifacts/t17-validation/120/rules-964a5e57e7f9cdf5a660",
+      "run_manifest_sha256": "d3a67a133d4bcbf50716a8676568709c1b2334291acf8cdc6274d0616ebfd495",
+      "persisted_tables_audit": "passed"
+    },
+    {
+      "report": {
+        "schema_version": "1.0",
+        "run_id": "rules-d068ec6bfb2e76b517ac",
+        "data_mode": "synthetic_demo",
+        "status": "complete_demo",
+        "profiles": 500,
+        "segments": 7200,
+        "top50": 50,
+        "eligibility": {
+          "eligible": 250,
+          "no_matches": 50,
+          "insufficient_data": 200
+        },
+        "matched_groups": {
+          "0": 200,
+          "1": 200,
+          "2": 50,
+          "3": 50
+        },
+        "criteria_rows": 3500,
+        "elapsed_seconds": 0.091,
+        "threshold_status": "illustrative_unvalidated",
+        "acceptance": "pending_T20_review",
+        "ui_ready": false,
+        "limitation_ru": "Независимый вымышленный учебный набор. Баллы не являются вероятностью или выводом о человеке."
+      },
+      "wall_seconds": 0.408,
+      "peak_rss_kib": 188388,
+      "snapshot": "artifacts/t17-validation/500/rules-d068ec6bfb2e76b517ac",
+      "run_manifest_sha256": "f6a8fb2c8ec75fd5d9fab471279b8817828b896cf375c62187664cdb27de11a9",
+      "persisted_tables_audit": "passed"
+    }
+  ],
+  "limitations": [
+    "Demonstration scenarios test arithmetic, not predictive accuracy.",
+    "Thresholds illustrative_unvalidated; T20 and independent review pending.",
+    "No real-person scoring, no T15/T16 imports, no graph, IF, combined model or map/UI.",
+    "Peak RSS is measured in this Linux Python environment, not Windows or full real-data performance.",
+    "T16 real-data acceptance and source limitations remain unchanged."
+  ],
+  "acceptance": "pending_T20_review",
+  "ui_ready": false
+}

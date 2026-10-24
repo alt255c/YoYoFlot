@@ -1,0 +1,20 @@
+{
+  "status": "complete",
+  "feature_version": "1.0",
+  "persons": 840606,
+  "features": [
+    "active_months",
+    "median_gap_days",
+    "repeated_route_share",
+    "return_trip_count",
+    "short_stay_count",
+    "trip_count",
+    "trips_per_active_month",
+    "unique_airports",
+    "unique_routes"
+  ],
+  "inputs": {
+    "persons": "data\\processed\\persons.parquet",
+    "segments": "data\\processed\\segments.parquet"
+  }
+}

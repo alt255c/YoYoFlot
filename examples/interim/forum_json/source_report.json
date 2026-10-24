@@ -1,0 +1,29 @@
+{
+  "source_id": "forum_json",
+  "input_path": "/workspace/scratch/45cb65ef93ca/YoYoFlot/tests/fixtures/forum.json",
+  "sha256": "40a94cb314d2160e1e6f0947c7a88cf95d9bc6845931db78c48fb334d298f8a6",
+  "contract_version": "1.0",
+  "reader_version": "1.0",
+  "options": {
+    "batch_size": 2
+  },
+  "status": "complete",
+  "counts": {
+    "provenance": 9,
+    "identifiers": 4,
+    "travel_observations": 3,
+    "person_observations": 2,
+    "schedules": 0,
+    "errors": 0
+  },
+  "input_counts": {
+    "profiles": 2,
+    "documents": 2,
+    "document_containers": 1,
+    "cards": 2,
+    "flights": 3
+  },
+  "error_severities": {},
+  "seconds": 0.01360400799967465,
+  "process_peak_rss_mib": 87.3984375
+}
